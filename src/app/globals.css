@@ -1,26 +1,693 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ============================================
+   🌙 DARK MODE FIRST — Modern SaaS Palette
+   Base: Deep Slate  Primary: Indigo  Accent: Cyan
+   ============================================ */
+:root {
+  --background: oklch(0.10 0.015 260);
+  --foreground: oklch(0.93 0.010 260);
+
+  --card: oklch(0.14 0.018 260);
+  --card-foreground: oklch(0.93 0.010 260);
+
+  --popover: oklch(0.14 0.018 260);
+  --popover-foreground: oklch(0.93 0.010 260);
+
+  /* Primary: vivid indigo */
+  --primary: oklch(0.65 0.25 275);
+  --primary-foreground: oklch(0.99 0.005 275);
+
+  --secondary: oklch(0.20 0.025 260);
+  --secondary-foreground: oklch(0.85 0.015 260);
+
+  --muted: oklch(0.18 0.018 260);
+  --muted-foreground: oklch(0.56 0.035 260);
+
+  /* Accent: vivid cyan */
+  --accent: oklch(0.72 0.18 200);
+  --accent-foreground: oklch(0.10 0.015 260);
+
+  --destructive: oklch(0.65 0.24 27);
+
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.65 0.25 275);
+
+  --chart-1: oklch(0.65 0.25 275);
+  --chart-2: oklch(0.72 0.18 200);
+  --chart-3: oklch(0.68 0.20 160);
+  --chart-4: oklch(0.70 0.22 300);
+  --chart-5: oklch(0.68 0.22 35);
+
+  --radius: 0.75rem;
+
+  --sidebar: oklch(0.12 0.018 260);
+  --sidebar-foreground: oklch(0.93 0.010 260);
+  --sidebar-primary: oklch(0.65 0.25 275);
+  --sidebar-primary-foreground: oklch(0.99 0.005 275);
+  --sidebar-accent: oklch(0.72 0.18 200);
+  --sidebar-accent-foreground: oklch(0.10 0.015 260);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.65 0.25 275);
+}
+
+/* ============================================
+   🎨 Base Styles
+   ============================================ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  html {
+    @apply font-sans scroll-smooth;
+  }
+
+  /* Custom text selection */
+  ::selection {
+    background-color: oklch(0.65 0.25 275 / 30%);
+    color: oklch(0.95 0.01 275);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================
+   🌌 PREMIUM DARK PAGE BACKGROUND
+   Deep space mesh with indigo/cyan orbs
+   ============================================ */
+.page-bg {
+  background-color: oklch(0.10 0.015 260);
+  background-image:
+    radial-gradient(ellipse 80% 55% at 15% -10%, oklch(0.50 0.22 275 / 18%) 0%, transparent 65%),
+    radial-gradient(ellipse 65% 45% at 88% 105%, oklch(0.65 0.18 200 / 12%) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, oklch(0.45 0.15 280 / 8%) 0%, transparent 70%);
+}
+
+/* ============================================
+   🧊 Glassmorphism Card Utilities
+   ============================================ */
+.glass-card {
+  background: oklch(0.16 0.018 260 / 80%);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid oklch(1 0 0 / 8%);
+  box-shadow:
+    0 0 0 1px oklch(1 0 0 / 4%) inset,
+    0 8px 32px oklch(0 0 0 / 35%),
+    0 2px 8px oklch(0 0 0 / 20%);
+}
+
+.glass-card-elevated {
+  background: oklch(0.18 0.020 260 / 85%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid oklch(1 0 0 / 10%);
+  box-shadow:
+    0 0 0 1px oklch(1 0 0 / 5%) inset,
+    0 16px 48px oklch(0 0 0 / 40%),
+    0 4px 16px oklch(0 0 0 / 25%);
+}
+
+/* ============================================
+   🎨 Gradient Utilities
+   ============================================ */
+.gradient-header {
+  background: linear-gradient(135deg,
+    oklch(0.30 0.12 275) 0%,
+    oklch(0.22 0.10 265) 50%,
+    oklch(0.18 0.08 255) 100%);
+  border-bottom: 1px solid oklch(1 0 0 / 8%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg,
+    oklch(0.75 0.20 275),
+    oklch(0.72 0.18 200));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-green {
+  background: linear-gradient(135deg,
+    oklch(0.75 0.20 275),
+    oklch(0.72 0.18 200));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   ✨ Button Glow — Indigo Primary
+   ============================================ */
+.btn-glow {
+  position: relative;
+  background: linear-gradient(135deg,
+    oklch(0.58 0.26 278),
+    oklch(0.52 0.24 268));
+  color: oklch(0.98 0.005 275);
+  border: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 0 0 1px oklch(1 0 0 / 10%) inset,
+    0 4px 16px oklch(0.58 0.26 278 / 30%);
+}
+
+.btn-glow:hover {
+  background: linear-gradient(135deg,
+    oklch(0.62 0.27 278),
+    oklch(0.56 0.25 268));
+  box-shadow:
+    0 0 0 1px oklch(1 0 0 / 15%) inset,
+    0 6px 24px oklch(0.58 0.26 278 / 45%),
+    0 0 48px oklch(0.58 0.26 278 / 15%);
+  transform: translateY(-1px);
+}
+
+.btn-glow:active {
+  transform: translateY(0px);
+  box-shadow:
+    0 0 0 1px oklch(1 0 0 / 10%) inset,
+    0 2px 8px oklch(0.58 0.26 278 / 35%);
+}
+
+/* ============================================
+   🃏 Card Hover Lift
+   ============================================ */
+.card-hover {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px oklch(0.65 0.25 275 / 20%),
+    0 20px 48px oklch(0 0 0 / 40%),
+    0 6px 16px oklch(0 0 0 / 25%);
+}
+
+/* ============================================
+   📊 Modern Stat Card
+   ============================================ */
+.stat-card {
+  background: oklch(0.14 0.018 260);
+  border: 1px solid oklch(1 0 0 / 8%);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 12%), transparent);
+}
+
+.stat-card:hover {
+  border-color: oklch(1 0 0 / 14%);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 48px oklch(0 0 0 / 35%);
+}
+
+.stat-card-indigo { border-top: 2px solid oklch(0.65 0.25 275); }
+.stat-card-cyan   { border-top: 2px solid oklch(0.72 0.18 200); }
+.stat-card-amber  { border-top: 2px solid oklch(0.78 0.18 80);  }
+.stat-card-rose   { border-top: 2px solid oklch(0.65 0.24 27);  }
+.stat-card-emerald{ border-top: 2px solid oklch(0.70 0.19 162); }
+
+/* ============================================
+   📋 Modern Table Styles
+   ============================================ */
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.data-table thead tr {
+  background: oklch(0.16 0.018 260);
+}
+
+.data-table thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.70rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: oklch(0.56 0.035 260);
+  border-bottom: 1px solid oklch(1 0 0 / 8%);
+  white-space: nowrap;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid oklch(1 0 0 / 5%);
+  transition: background-color 0.15s ease;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: oklch(0.13 0.016 260 / 50%);
+}
+
+.data-table tbody tr:hover {
+  background: oklch(0.65 0.25 275 / 7%) !important;
+}
+
+.data-table tbody td {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+/* ============================================
+   🏷️ Modern Badge Styles
+   ============================================ */
+.badge-indigo {
+  background: oklch(0.65 0.25 275 / 15%);
+  color: oklch(0.75 0.20 275);
+  border: 1px solid oklch(0.65 0.25 275 / 25%);
+  border-radius: 9999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.badge-cyan {
+  background: oklch(0.72 0.18 200 / 12%);
+  color: oklch(0.72 0.18 200);
+  border: 1px solid oklch(0.72 0.18 200 / 22%);
+  border-radius: 9999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.badge-emerald {
+  background: oklch(0.70 0.19 162 / 12%);
+  color: oklch(0.72 0.17 162);
+  border: 1px solid oklch(0.70 0.19 162 / 22%);
+  border-radius: 9999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.badge-rose {
+  background: oklch(0.65 0.24 27 / 12%);
+  color: oklch(0.70 0.22 27);
+  border: 1px solid oklch(0.65 0.24 27 / 22%);
+  border-radius: 9999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.badge-amber {
+  background: oklch(0.78 0.18 80 / 12%);
+  color: oklch(0.78 0.18 80);
+  border: 1px solid oklch(0.78 0.18 80 / 22%);
+  border-radius: 9999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.badge-violet {
+  background: oklch(0.65 0.25 275 / 15%);
+  color: oklch(0.75 0.20 275);
+  border: 1px solid oklch(0.65 0.25 275 / 25%);
+}
+
+.badge-teal {
+  background: oklch(0.72 0.18 200 / 12%);
+  color: oklch(0.72 0.18 200);
+  border: 1px solid oklch(0.72 0.18 200 / 22%);
+}
+
+/* ============================================
+   🗂️ Tab Navigation
+   ============================================ */
+.tab-nav {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: oklch(0.14 0.018 260);
+  border: 1px solid oklch(1 0 0 / 8%);
+  border-radius: 0.875rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   🔲 Section Panel
+   ============================================ */
+.section-panel {
+  background: oklch(0.13 0.016 260);
+  border: 1px solid oklch(1 0 0 / 7%);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.section-panel-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid oklch(1 0 0 / 7%);
+  background: oklch(0.15 0.018 260);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* ============================================
+   📱 Responsive Table Wrapper
+   ============================================ */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: oklch(0.65 0.25 275 / 30%);
+  border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0.25 275 / 55%);
+}
+
+/* ============================================
+   🌊 Animations
+   ============================================ */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 oklch(0.65 0.25 275 / 40%); }
+  70%  { box-shadow: 0 0 0 10px oklch(0.65 0.25 275 / 0%); }
+  100% { box-shadow: 0 0 0 0 oklch(0.65 0.25 275 / 0%); }
+}
+
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float  { animation: float 3s ease-in-out infinite; }
+.animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite; }
+.animate-slide-in-up { animation: slide-in-up 0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    oklch(0.65 0.25 275) 0%,
+    oklch(0.72 0.18 200) 40%,
+    oklch(0.75 0.20 275) 80%,
+    oklch(0.65 0.25 275) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ============================================
+   🎭 Transitions
+   ============================================ */
+.transition-smooth {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   🔵 Input Focus Glow
+   ============================================ */
+.input-glow:focus {
+  border-color: oklch(0.65 0.25 275 / 70%) !important;
+  box-shadow: 0 0 0 3px oklch(0.65 0.25 275 / 15%) !important;
+  outline: none !important;
+}
+
+/* ============================================
+   ⚡ Divider with gradient
+   ============================================ */
+.divider-gradient {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 10%), transparent);
+}
+
+/* ============================================
+   🌟 Tab active state override for violet theme
+   ============================================ */
+[data-state=active].tab-violet {
+  background: linear-gradient(135deg,
+    oklch(0.58 0.26 278),
+    oklch(0.52 0.24 268)) !important;
+  color: oklch(0.98 0.005 275) !important;
+  box-shadow:
+    0 4px 16px oklch(0.58 0.26 278 / 35%),
+    0 0 0 1px oklch(1 0 0 / 10%) inset !important;
+}
+
+/* Active state for new pill tab triggers (data-[state=active]) */
+.tab-nav [data-state=active] {
+  background: linear-gradient(135deg,
+    oklch(0.55 0.26 278),
+    oklch(0.50 0.22 268)) !important;
+  color: white !important;
+  box-shadow:
+    0 4px 14px oklch(0.55 0.26 278 / 40%),
+    0 0 0 1px oklch(1 0 0 / 12%) inset !important;
+}
+
+/* ============================================
+   Scrollbar global dark
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: oklch(0.12 0.015 260);
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.30 0.04 260);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0.25 275 / 50%);
+}
+
+/* ============================================
+   📦 Section Panel (dark glass card)
+   ============================================ */
+.section-panel {
+  background: oklch(0.15 0.018 260);
+  border: 1px solid oklch(1 0 0 / 8%);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.section-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid oklch(1 0 0 / 6%);
+  background: oklch(0.17 0.02 260);
+}
+
+/* ============================================
+   📊 Data Table (dark)
+   ============================================ */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.data-table thead tr {
+  background: oklch(0.17 0.02 260);
+  border-bottom: 1px solid oklch(1 0 0 / 8%);
+}
+
+.data-table thead th {
+  padding: 0.625rem 0.875rem;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: oklch(0.55 0.04 260);
+  white-space: nowrap;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid oklch(1 0 0 / 5%);
+  transition: background 0.15s;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: oklch(0.14 0.016 260);
+}
+
+.data-table tbody tr:hover {
+  background: oklch(0.65 0.25 275 / 7%);
+}
+
+.data-table tbody td {
+  padding: 0.625rem 0.875rem;
+  color: oklch(0.75 0.03 260);
+  vertical-align: middle;
+}
+
+/* ============================================
+   🏷 Badge utility classes
+   ============================================ */
+.badge-emerald {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: oklch(0.55 0.18 162 / 18%);
+  color: oklch(0.72 0.19 162);
+  border: 1px solid oklch(0.55 0.18 162 / 30%);
+}
+
+.badge-indigo {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: oklch(0.65 0.25 275 / 15%);
+  color: oklch(0.75 0.20 275);
+  border: 1px solid oklch(0.65 0.25 275 / 25%);
+}
+
+.badge-cyan {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: oklch(0.65 0.20 200 / 15%);
+  color: oklch(0.72 0.18 200);
+  border: 1px solid oklch(0.65 0.20 200 / 25%);
+}
+
+.badge-amber {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: oklch(0.78 0.18 70 / 15%);
+  color: oklch(0.78 0.17 70);
+  border: 1px solid oklch(0.78 0.18 70 / 28%);
+}
+
+.badge-rose {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: oklch(0.60 0.24 15 / 15%);
+  color: oklch(0.68 0.22 15);
+  border: 1px solid oklch(0.60 0.24 15 / 28%);
+}
+
+/* ============================================
+   🎞 Slide-in animation for tab content
+   ============================================ */
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.25s ease-out both;
 }

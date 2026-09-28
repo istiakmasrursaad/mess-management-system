@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          String    @default("MEMBER") // SUPER_ADMIN, ADMIN, MEMBER
+  status        String    @default("ACTIVE") // ACTIVE, LOCKED, INACTIVE
+  
+  // Relations
+  member        Member?
+  deposits      Deposit[] @relation("recordedBy")
+}
+
+model Member {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  phone        String?
+  roomNo       String?
+  defaultMeal  Float     @default(2.5) 
+  status       String    @default("ACTIVE")
+  serial       Int       @default(0)
+  
+  // Relations
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyMeals   DailyMeal[]
+  bills        Bill[]
+  deposits     Deposit[]
+  monthlyAccounts MonthlyAccount[]
+  specificBills SpecificBill[]
+}
+
+model MessSettings {
+  id                       String   @id @default(cuid())
+  defaultDailyMealThreshold Float    @default(2.5)
+  needX2MealLimit          Int      @default(7)
+  defaultMarketFine        Float    @default(130.0)
+  extraMarketRate          Float    @default(130.0)
+  mealCutoffTime           String   @default("22:00") // Time stored as HH:mm
+  applyDefaultBills        Boolean  @default(false) // Toggle to apply default bills or not
+  defaultKhalaBill         Float    @default(300.0)
+  defaultManagerBill       Float    @default(100.0)
+  defaultGasBill           Float    @default(200.0)
+  defaultPaperBill         Float    @default(20.0)
+  defaultCurrentBill       Float    @default(150.0)
+  defaultFestivalBill      Float    @default(0.0)
+}
+
+model DailyMeal {
+  id           String    @id @default(cuid())
+  memberId     String
+  date         DateTime
+  monthYear    String    @default("08-2026") // "MM-YYYY" format
+  breakfast    Float     @default(0)
+  lunchDinner  Float     @default(0)
+  totalMeal    Float     @default(0)
+  
+  // Relations
+  member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+model Market {
+  id           String    @id @default(cuid())
+  date         DateTime
+  monthYear    String    @default("08-2026") // "MM-YYYY" format
+  marketerId   String
+  amount       Float
+  receiptImg   String?
+  description  String?
+  
+  // Inventory items for this market
+  inventoryItems Inventory[]
+}
+
+model Inventory {
+  id           String    @id @default(cuid())
+  marketId     String
+  itemName     String
+  quantity     Float
+  unitPrice    Float
+  
+  // Relations
+  market       Market    @relation(fields: [marketId], references: [id], onDelete: Cascade)
+}
+
+model Bill {
+  id              String    @id @default(cuid())
+  memberId        String
+  monthYear       String    // e.g., "08-2026"
+  baseKhala       Float     @default(0)
+  manager         Float     @default(0)
+  gasBill         Float     @default(0)
+  paper           Float     @default(0)
+  current         Float     @default(0)
+  festival        Float     @default(0)
+  marketFine      Float     @default(0)
+  isFineOverridden Boolean   @default(false)
+  
+  // Relations
+  member          Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+model Deposit {
+  id           String    @id @default(cuid())
+  memberId     String
+  amount       Float
+  date         DateTime
+  monthYear    String    @default("08-2026") // "MM-YYYY" format
+  note         String?
+  recordedById String
+  
+  // Relations
+  member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  recordedBy   User      @relation("recordedBy", fields: [recordedById], references: [id])
+}
+
+model MonthlyAccount {
+  id              String    @id @default(cuid())
+  memberId        String
+  monthYear       String    // e.g., "08-2026"
+  totalExtraMeals Float     @default(0)
+  needX2          Boolean   @default(false)
+  dueAdvance      Float     @default(0) // Positive for Due, Negative for Advance
+  
+  // Relations
+  member          Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+model SpecificBill {
+  id          String   @id @default(cuid())
+  memberId    String
+  amount      Float
+  description String
+  monthYear   String   @default("08-2026") // "MM-YYYY" format
+  date        DateTime @default(now())
+  
+  // Relations
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+// --- Monthly Snapshot Models (Finalized Ledger Storage) ---
+
+model MonthlySnapshot {
+  id              String   @id @default(cuid())
+  monthYear       String   @unique // e.g., "08-2026"
+  monthLabel      String   // e.g., "August 2026"
+  finalizedAt     DateTime @default(now())
+  totalMessMeals  Float
+  totalMarketCost Float
+  liveMealRate    Float
+
+  memberSnapshots MemberMonthlySnapshot[]
+}
+
+model MemberMonthlySnapshot {
+  id                  String   @id @default(cuid())
+  snapshotId          String
+  memberId            String
+  memberName          String
+  roomNo              String?
+  totalMeals          Float
+  individualMealCost  Float
+  adjustedOverheads   Float
+  totalCost           Float
+  totalDeposits       Float
+  due                 Float
+  advance             Float
+
+  snapshot  MonthlySnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+}
+model DiningCalc {
+  id                String   @id @default(cuid())
+  monthYear         String   @unique
+  depositAmount     Float    @default(0)
+  previousRemaining Float    @default(0)
+  totalCost         Float    @default(0)
+}
