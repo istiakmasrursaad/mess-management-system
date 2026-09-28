@@ -4,16 +4,19 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 
-// ─── Super Admin Hardcoded Credentials (from .env) ───────────────────────────
-const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL ?? "";
-const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD ?? "";
-const SUPER_ADMIN_NAME = process.env.SUPER_ADMIN_NAME ?? "Super Admin";
+// ─── Super Admin Hardcoded Credentials (with default fallback) ────────────────
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "saad.superadmin@gmail.com";
+const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "SuperAdmin@2026!";
+const SUPER_ADMIN_NAME = process.env.SUPER_ADMIN_NAME || "Super Admin";
 
 // ─── Login Action ─────────────────────────────────────────────────────────────
 
 export async function loginAction(formData: FormData) {
-  const identifier = formData.get("identifier") as string;
-  const password = formData.get("password") as string;
+  const rawIdentifier = (formData.get("identifier") as string) || "";
+  const rawPassword = (formData.get("password") as string) || "";
+
+  const identifier = rawIdentifier.trim();
+  const password = rawPassword.trim();
 
   if (!identifier || !password) {
     return { success: false, error: "Please provide both Email/Phone and Password." };
