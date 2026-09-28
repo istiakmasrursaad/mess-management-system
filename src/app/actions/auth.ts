@@ -1,10 +1,8 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
-
-const prisma = new PrismaClient();
 
 // ─── Super Admin Hardcoded Credentials (from .env) ───────────────────────────
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL ?? "";
@@ -37,7 +35,7 @@ export async function loginAction(formData: FormData) {
           path: "/",
           maxAge: 60 * 60 * 24 * 7,
           sameSite: "lax",
-          secure: false,
+          secure: process.env.NODE_ENV === "production",
         }
       );
       return { success: true, redirectTo: "/admin", user: { name: SUPER_ADMIN_NAME, role: "SUPER_ADMIN" } };
@@ -72,7 +70,7 @@ export async function loginAction(formData: FormData) {
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
         sameSite: "lax",
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
       }
     );
 
