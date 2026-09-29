@@ -305,7 +305,7 @@ export default function MemberDashboard() {
                 <div className="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
                   {sortedDeposits.map((dep: any, idx: number) => {
                     const d = new Date(dep.date);
-                    const dayStr = d.toLocaleDateString("bn-BD", { day: "numeric", month: "short" });
+                    const dayStr = d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
                     const yearStr = d.getFullYear();
                     return (
                       <div key={dep.id || idx}
