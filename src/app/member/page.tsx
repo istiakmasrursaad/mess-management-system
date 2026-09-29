@@ -3,21 +3,24 @@
 import { useState, useEffect } from "react";
 import { getMessData, toggleDailyMeal } from "@/app/actions/mess";
 import { logoutAction, getSession } from "@/app/actions/auth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Utensils, AlertTriangle, Clock, DollarSign, ShieldAlert, LogOut, Leaf } from "lucide-react";
+import {
+  RefreshCw, Utensils, AlertTriangle, Clock, LogOut,
+  Leaf, TrendingUp, Wallet, CreditCard, ChevronRight,
+  CalendarDays, Flame, ShieldCheck
+} from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function MemberDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
-  
-  // Tomorrow's meal selection inputs
-  const [breakfast, setBreakfast] = useState<number | string>(0.5);
-  const [lunch, setLunch] = useState<number | string>(1);
-  const [dinner, setDinner] = useState<number | string>(1);
+  const [breakfast, setBreakfast] = useState<number | string>(0);
+  const [lunch, setLunch] = useState<number | string>(0);
+  const [dinner, setDinner] = useState<number | string>(0);
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -27,300 +30,399 @@ export default function MemberDashboard() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleSubmitMeals = async () => {
     const numBreakfast = Number(breakfast) || 0;
     const numLunch = Number(lunch) || 0;
     const numDinner = Number(dinner) || 0;
 
-    // Pick logged in member from session userId
     const memberObj = data?.members.find((m: any) => m.member.userId === sessionUserId) || data?.members[0];
     if (!memberObj) return;
 
+    setSubmitting(true);
     const formData = new FormData();
     formData.append("memberId", memberObj.member.id);
     formData.append("breakfast", numBreakfast.toString());
     formData.append("lunchDinner", (numLunch + numDinner).toString());
 
     const result = await toggleDailyMeal(formData);
+    setSubmitting(false);
+
     if (result.isPastCutoff) {
-      toast.warning("Notice: It is past 10:00 PM cutoff time. Changes will apply for the following day.");
+      toast.warning("রাত ১০টা পেরিয়ে গেছে — পরদিনের জন্য apply হবে।");
     } else {
-      toast.success("Meal options submitted successfully!");
+      toast.success("আগামীকালের meal submit হয়েছে ✓");
     }
     await fetchData();
   };
 
   if (loading || !data) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-[70vh] bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50">
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 shadow-lg shadow-emerald-500/25 mb-4 animate-float">
-          <RefreshCw className="h-8 w-8 animate-spin text-white" />
+      <div className="flex-1 flex flex-col items-center justify-center min-h-screen"
+        style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)" }}>
+        <div className="relative">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
+            style={{ background: "linear-gradient(135deg, #6d28d9, #0ea5e9)" }}>
+            <RefreshCw className="h-8 w-8 animate-spin text-white" />
+          </div>
         </div>
-        <p className="text-muted-foreground font-semibold text-lg">Loading Member Portal & Live Accounts...</p>
+        <p className="text-slate-400 font-medium text-base">Loading your portal...</p>
       </div>
     );
   }
 
-  // Find logged-in member account from session
   const currentAccount = data.members.find((m: any) => m.member.userId === sessionUserId) || data.members[0];
+  const deposits = currentAccount?.member?.deposits ?? [];
+  const sortedDeposits = [...deposits].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const extraMeals = currentAccount.totalExtraMeals?.toFixed(2) ?? "0";
+  const isX2 = currentAccount.isNeedX2;
+  const netStatus = currentAccount.due > 0
+    ? { label: "Due", amount: currentAccount.due, color: "#ef4444", bg: "rgba(239,68,68,0.1)" }
+    : { label: "Advance", amount: currentAccount.advance, color: "#10b981", bg: "rgba(16,185,129,0.1)" };
 
   return (
-    <div className="flex-1 min-h-screen">
-      <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto w-full">
-      
-        {/* Header with Violet Gradient */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-violet-700 via-indigo-600 to-teal-500 rounded-2xl p-5 md:p-6 shadow-xl shadow-violet-500/20">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm mr-1">
-                <Leaf className="h-5 w-5 text-white" />
+    <div className="flex-1 min-h-screen"
+      style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%)" }}>
+      <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto w-full pb-12">
+
+        {/* ── Header ── */}
+        <div className="relative overflow-hidden rounded-2xl p-6 md:p-7"
+          style={{
+            background: "linear-gradient(135deg, rgba(109,40,217,0.35) 0%, rgba(14,165,233,0.25) 100%)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            backdropFilter: "blur(20px)"
+          }}>
+          {/* glow */}
+          <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-20 blur-3xl pointer-events-none"
+            style={{ background: "radial-gradient(circle, #6d28d9, transparent 70%)" }} />
+
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="p-2 rounded-xl" style={{ background: "rgba(255,255,255,0.1)" }}>
+                  <Leaf className="h-5 w-5 text-violet-300" />
+                </div>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                  Member Portal
+                </h1>
+                <Badge className="text-xs px-2.5 py-0.5"
+                  style={{ background: "rgba(109,40,217,0.4)", color: "#c4b5fd", border: "1px solid rgba(109,40,217,0.5)" }}>
+                  Active
+                </Badge>
               </div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Member Portal</h1>
-              <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm hover:bg-white/30">Active Member</Badge>
+              <p className="text-slate-400 text-sm font-medium">
+                Welcome back,{" "}
+                <span className="text-white font-bold">{currentAccount.member.user.name}</span>
+                {currentAccount.member.roomNo && (
+                  <span className="text-slate-400"> · Room {currentAccount.member.roomNo}</span>
+                )}
+              </p>
             </div>
-            <p className="text-emerald-100 text-sm mt-1.5 font-medium">
-              Welcome back, <span className="font-bold text-white">{currentAccount.member.user.name}</span> (Room {currentAccount.member.roomNo})
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={fetchData}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 transition-all duration-200 hover:text-white"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                <RefreshCw className="w-3.5 h-3.5" /> Refresh
+              </button>
+              <button
+                onClick={async () => { await logoutAction(); window.location.href = "/"; }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+                style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.25)", color: "#fca5a5" }}>
+                <LogOut className="w-3.5 h-3.5" /> Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 4 Stat Cards ── */}
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+
+          {/* Total Meals */}
+          <div className="rounded-2xl p-4 md:p-5 flex flex-col gap-2"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Meals</span>
+              <div className="p-1.5 rounded-lg" style={{ background: "rgba(16,185,129,0.15)" }}>
+                <Utensils className="w-3.5 h-3.5 text-emerald-400" />
+              </div>
+            </div>
+            <div className="text-3xl font-extrabold text-white">{currentAccount.totalMeals}</div>
+            <div className="text-xs text-slate-500">এই মাসের মোট খাবার</div>
+          </div>
+
+          {/* Extra Meals */}
+          <div className="rounded-2xl p-4 md:p-5 flex flex-col gap-2"
+            style={{
+              background: isX2 ? "rgba(239,68,68,0.08)" : "rgba(255,255,255,0.04)",
+              border: isX2 ? "1px solid rgba(239,68,68,0.3)" : "1px solid rgba(255,255,255,0.08)",
+              backdropFilter: "blur(12px)"
+            }}>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Extra Meals</span>
+              <div className="p-1.5 rounded-lg" style={{ background: isX2 ? "rgba(239,68,68,0.2)" : "rgba(251,191,36,0.15)" }}>
+                <Flame className={`w-3.5 h-3.5 ${isX2 ? "text-red-400" : "text-amber-400"}`} />
+              </div>
+            </div>
+            <div className={`text-3xl font-extrabold ${isX2 ? "text-red-400" : "text-white"}`}>{extraMeals}</div>
+            {isX2 ? (
+              <div className="flex items-center gap-1 text-xs text-red-400 font-semibold">
+                <AlertTriangle className="w-3 h-3" /> Double billing active!
+              </div>
+            ) : (
+              <div className="text-xs text-slate-500">Limit: {data.settings.needX2MealLimit} meals</div>
+            )}
+          </div>
+
+          {/* Net Status */}
+          <div className="rounded-2xl p-4 md:p-5 flex flex-col gap-2"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Balance</span>
+              <div className="p-1.5 rounded-lg" style={{ background: `${netStatus.bg}` }}>
+                <Wallet className="w-3.5 h-3.5" style={{ color: netStatus.color }} />
+              </div>
+            </div>
+            <div className="text-2xl font-extrabold" style={{ color: netStatus.color }}>
+              ৳ {netStatus.amount.toFixed(0)}
+            </div>
+            <div className="text-xs font-semibold" style={{ color: netStatus.color }}>
+              {netStatus.label === "Due" ? "বাকি আছে" : "এগিয়ে আছো"}
+            </div>
+          </div>
+
+          {/* Meal Rate */}
+          <div className="rounded-2xl p-4 md:p-5 flex flex-col gap-2"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Meal Rate</span>
+              <div className="p-1.5 rounded-lg" style={{ background: "rgba(14,165,233,0.15)" }}>
+                <TrendingUp className="w-3.5 h-3.5 text-sky-400" />
+              </div>
+            </div>
+            <div className="text-2xl font-extrabold text-white">৳ {data.liveMealRate.toFixed(2)}</div>
+            <div className="text-xs text-slate-500">প্রতি meal এর rate</div>
+          </div>
+        </div>
+
+        {/* ── Main 2-col grid ── */}
+        <div className="grid gap-5 grid-cols-1 lg:grid-cols-2">
+
+          {/* ── Meal Submission Card ── */}
+          <div className="rounded-2xl overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="px-5 pt-5 pb-4 flex items-center justify-between"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <div className="p-1.5 rounded-lg" style={{ background: "linear-gradient(135deg, #059669, #0ea5e9)" }}>
+                    <Utensils className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <h2 className="text-base font-bold text-white">আগামীকালের খাবার</h2>
+                </div>
+                <p className="text-xs text-slate-500 ml-8">Submit করো কাটঅফের আগে</p>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
+                style={{ background: "rgba(16,185,129,0.1)", color: "#34d399", border: "1px solid rgba(16,185,129,0.2)" }}>
+                <Clock className="w-3 h-3" /> {data.settings.mealCutoffTime}
+              </div>
+            </div>
+
+            <div className="p-5 space-y-3">
+              {[
+                { label: "Breakfast", emoji: "🍳", value: breakfast, setter: setBreakfast },
+                { label: "Lunch", emoji: "🍱", value: lunch, setter: setLunch },
+                { label: "Dinner", emoji: "🍛", value: dinner, setter: setDinner },
+              ].map(({ label, emoji, value, setter }) => (
+                <div key={label}
+                  className="flex items-center justify-between p-3.5 rounded-xl transition-all duration-150"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <span className="font-semibold text-slate-200 text-sm flex items-center gap-2">
+                    <span className="text-base">{emoji}</span>{label}
+                  </span>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    value={value}
+                    onChange={(e) => setter(e.target.value)}
+                    className="w-20 h-9 rounded-lg px-3 text-sm font-bold text-white text-center outline-none focus:ring-2 transition-all"
+                    style={{
+                      background: "rgba(255,255,255,0.07)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      // @ts-ignore
+                      "--tw-ring-color": "#6d28d9"
+                    }}
+                  />
+                </div>
+              ))}
+
+              <button
+                onClick={handleSubmitMeals}
+                disabled={submitting}
+                className="w-full mt-2 py-3 rounded-xl font-bold text-sm text-white transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
+                style={{ background: "linear-gradient(135deg, #6d28d9, #0ea5e9)" }}>
+                {submitting ? <><RefreshCw className="w-4 h-4 animate-spin" /> Submitting...</> : <>Submit <ChevronRight className="w-4 h-4" /></>}
+              </button>
+            </div>
+          </div>
+
+          {/* ── Deposits Card ── */}
+          <div className="rounded-2xl overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="px-5 pt-5 pb-4 flex items-center justify-between"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <div className="p-1.5 rounded-lg" style={{ background: "linear-gradient(135deg, #059669, #10b981)" }}>
+                    <CreditCard className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <h2 className="text-base font-bold text-white">আমার জমা</h2>
+                </div>
+                <p className="text-xs text-slate-500 ml-8">Deposit history this month</p>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-slate-500 mb-0.5">মোট জমা</div>
+                <div className="text-lg font-extrabold text-emerald-400">
+                  ৳ {currentAccount.totalDeposits.toFixed(0)}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5">
+              {sortedDeposits.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
+                    style={{ background: "rgba(255,255,255,0.05)" }}>
+                    <CreditCard className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <p className="text-slate-500 text-sm">এই মাসে কোনো deposit নেই</p>
+                </div>
+              ) : (
+                <div className="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
+                  {sortedDeposits.map((dep: any, idx: number) => {
+                    const d = new Date(dep.date);
+                    const dayStr = d.toLocaleDateString("bn-BD", { day: "numeric", month: "short" });
+                    const yearStr = d.getFullYear();
+                    return (
+                      <div key={dep.id || idx}
+                        className="flex items-center justify-between p-3 rounded-xl"
+                        style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.12)" }}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ background: "rgba(16,185,129,0.15)" }}>
+                            <CalendarDays className="w-3.5 h-3.5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-semibold text-slate-300">{dayStr}, {yearStr}</div>
+                            {dep.note && <div className="text-xs text-slate-500 truncate max-w-[130px]">{dep.note}</div>}
+                          </div>
+                        </div>
+                        <div className="text-emerald-400 font-bold text-sm">+ ৳ {dep.amount.toFixed(0)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Financial Statement ── */}
+        <div className="rounded-2xl overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="px-6 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="flex items-center gap-2 mb-0.5">
+              <div className="p-1.5 rounded-lg" style={{ background: "linear-gradient(135deg, #6d28d9, #0ea5e9)" }}>
+                <ShieldCheck className="w-3.5 h-3.5 text-white" />
+              </div>
+              <h2 className="text-base font-bold text-white">Monthly Statement</h2>
+            </div>
+            <p className="text-xs text-slate-500 ml-8">
+              Meal rate: ৳ {data.liveMealRate.toFixed(2)} / meal
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={fetchData} className="gap-2 bg-white/20 border-white/30 text-white hover:bg-white/30 hover:text-white hover:border-white/50 backdrop-blur-sm">
-              <RefreshCw className="w-4 h-4" /> Refresh
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={async () => {
-                await logoutAction();
-                window.location.href = "/";
-              }}
-              className="bg-white/90 text-emerald-700 hover:bg-white hover:text-emerald-800 border-0"
-            >
-              <LogOut className="w-4 h-4 mr-1" /> Sign Out
-            </Button>
+          <div className="p-6 space-y-0 text-sm">
+            {/* Meal cost */}
+            <div className="flex justify-between items-center py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <span className="text-slate-400">
+                Meal Cost ({currentAccount.totalMeals} × ৳{data.liveMealRate.toFixed(2)})
+              </span>
+              <span className="font-semibold text-white">৳ {currentAccount.individualMealCost.toFixed(2)}</span>
+            </div>
+
+            {/* Overheads */}
+            <div className="py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <p className="text-slate-400 font-medium mb-2.5">Overheads</p>
+              <div className="space-y-2 pl-3">
+                {[
+                  { label: `Khala Bill${currentAccount.M_X2 > 1 ? ` (×${currentAccount.M_X2})` : ""}`, val: (currentAccount.baseKhala * currentAccount.M_X2) },
+                  { label: `Manager Bill${currentAccount.M_X2 > 1 ? ` (×${currentAccount.M_X2})` : ""}`, val: (currentAccount.baseManager * currentAccount.M_X2) },
+                  { label: `Gas Bill${currentAccount.M_X2 > 1 ? ` (×${currentAccount.M_X2})` : ""}`, val: (currentAccount.baseGas * currentAccount.M_X2) },
+                  { label: "Paper Bill", val: currentAccount.paper },
+                  { label: "Current Bill", val: currentAccount.current },
+                  { label: "Festival Bill", val: currentAccount.festival },
+                ].map(({ label, val }) => val > 0 && (
+                  <div key={label} className="flex justify-between">
+                    <span className="text-slate-500 text-xs">{label}</span>
+                    <span className="text-slate-300 text-xs font-medium">৳ {val.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Market Fine */}
+            <div className="flex justify-between items-center py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <span className="text-slate-400">Market Fine (Logged: {currentAccount.totalMarketsCount})</span>
+              <span className={`font-semibold ${currentAccount.marketFine > 0 ? "text-red-400" : "text-slate-300"}`}>
+                ৳ {currentAccount.marketFine}
+              </span>
+            </div>
+
+            {/* Total Cost */}
+            <div className="flex justify-between items-center py-3.5 -mx-6 px-6 font-bold text-base"
+              style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <span className="text-white">Total Monthly Cost</span>
+              <span className="text-white">৳ {currentAccount.totalCost.toFixed(2)}</span>
+            </div>
+
+            {/* Deposits */}
+            <div className="flex justify-between items-center py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <span className="text-emerald-400 font-semibold">Total Deposits Paid</span>
+              <span className="text-emerald-400 font-semibold">− ৳ {currentAccount.totalDeposits.toFixed(2)}</span>
+            </div>
+
+            {/* Prior balance */}
+            {(currentAccount.previousDue > 0 || currentAccount.previousAdvance > 0) && (
+              <div className="flex justify-between items-center py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                <span className="text-slate-400">
+                  {currentAccount.previousDue > 0 ? "Previous Due" : "Previous Advance"}
+                </span>
+                <span className={`font-semibold ${currentAccount.previousDue > 0 ? "text-red-400" : "text-emerald-400"}`}>
+                  {currentAccount.previousDue > 0
+                    ? `+ ৳ ${currentAccount.previousDue.toFixed(2)}`
+                    : `− ৳ ${currentAccount.previousAdvance.toFixed(2)}`}
+                </span>
+              </div>
+            )}
+
+            {/* Net result */}
+            <div className="flex justify-between items-center py-4 -mx-6 px-6 rounded-b-2xl mt-1 text-lg font-extrabold"
+              style={{ background: currentAccount.due > 0 ? "rgba(239,68,68,0.08)" : "rgba(16,185,129,0.08)" }}>
+              <span className="text-white">Net Balance</span>
+              <span style={{ color: currentAccount.due > 0 ? "#f87171" : "#34d399" }}>
+                {currentAccount.due > 0
+                  ? `DUE ৳ ${currentAccount.due.toFixed(2)}`
+                  : `ADVANCE ৳ ${currentAccount.advance.toFixed(2)}`}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Real-time Status Cards */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          
-          <Card className="shadow-md border-0 bg-white/80 backdrop-blur-sm card-hover border-l-4 border-l-emerald-500 rounded-2xl">
-            <CardHeader className="p-4 pb-2">
-              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider">My Total Meals</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="text-3xl font-extrabold text-emerald-700">{currentAccount.totalMeals}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Extra Meals: <span className="font-semibold text-foreground">{currentAccount.totalExtraMeals}</span> (Threshold: {data.settings.defaultDailyMealThreshold})
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-md border-0 bg-white/80 backdrop-blur-sm card-hover border-l-4 border-l-amber-500 rounded-2xl">
-            <CardHeader className="p-4 pb-2">
-              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Extra Billing Status</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="text-3xl font-extrabold">
-                {currentAccount.isNeedX2 ? (
-                  <span className="text-red-500 flex items-center gap-1">
-                    <AlertTriangle className="w-6 h-6" /> YES
-                  </span>
-                ) : (
-                  <span className="text-emerald-600">NO</span>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Limit: {data.settings.needX2MealLimit} Extra Meals
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-md border-0 bg-gradient-to-br from-emerald-50 to-green-50 card-hover border-l-4 border-l-emerald-500 rounded-2xl">
-            <CardHeader className="p-4 pb-2">
-              <CardTitle className="text-xs font-bold text-emerald-700 uppercase tracking-wider">My Financial Status</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="text-2xl font-extrabold">
-                {currentAccount.due > 0 ? (
-                  <span className="text-red-500">Due: ৳ {currentAccount.due.toFixed(2)}</span>
-                ) : (
-                  <span className="text-emerald-600">Advance: ৳ {currentAccount.advance.toFixed(2)}</span>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {currentAccount.previousDue > 0 && <span className="text-red-500 font-semibold">Prev Due: ৳ {currentAccount.previousDue.toFixed(2)} | </span>}
-                {currentAccount.previousAdvance > 0 && <span className="text-emerald-600 font-semibold">Prev Advance: ৳ {currentAccount.previousAdvance.toFixed(2)} | </span>}
-                Total Deposits: ৳ {currentAccount.totalDeposits} | Fine: ৳ {currentAccount.marketFine}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Meal Polling / Toggle Widget */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div>
-                <CardTitle className="text-xl font-bold flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600">
-                    <Utensils className="w-4 h-4 text-white" />
-                  </div>
-                  Daily Meal Polling (Tomorrow)
-                </CardTitle>
-                <CardDescription className="mt-1">
-                  Toggle your meal requirements for tomorrow before the cutoff deadline.
-                </CardDescription>
-              </div>
-              <Badge variant="outline" className="flex items-center gap-1.5 text-xs border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg">
-                <Clock className="w-3.5 h-3.5" /> Cutoff: {data.settings.mealCutoffTime}
-              </Badge>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-6 p-5 md:p-6">
-            <div className="flex flex-col gap-4">
-              
-              {/* Breakfast Input */}
-              <div className="flex items-center justify-between p-4 border border-emerald-100 rounded-2xl bg-gradient-to-r from-white to-emerald-50/50 shadow-sm card-hover">
-                <div>
-                  <p className="font-bold text-base">Breakfast (The next day)</p>
-                </div>
-                <div className="w-24">
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    value={breakfast}
-                    onChange={(e) => setBreakfast(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </div>
-              </div>
-
-              {/* Lunch Input */}
-              <div className="flex items-center justify-between p-4 border border-emerald-100 rounded-2xl bg-gradient-to-r from-white to-emerald-50/50 shadow-sm card-hover">
-                <div>
-                  <p className="font-bold text-base">Lunch</p>
-                </div>
-                <div className="w-24">
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    value={lunch}
-                    onChange={(e) => setLunch(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </div>
-              </div>
-
-              {/* Dinner Input */}
-              <div className="flex items-center justify-between p-4 border border-emerald-100 rounded-2xl bg-gradient-to-r from-white to-emerald-50/50 shadow-sm card-hover">
-                <div>
-                  <p className="font-bold text-base">Dinner</p>
-                </div>
-                <div className="w-24">
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    value={dinner}
-                    onChange={(e) => setDinner(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end mt-2">
-                <Button onClick={handleSubmitMeals} className="bg-emerald-600 hover:bg-emerald-700 text-white px-8">
-                  Submit Options
-                </Button>
-              </div>
-
-            </div>
-
-            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 text-xs text-muted-foreground flex items-start sm:items-center gap-2">
-              <Clock className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 sm:mt-0" />
-              <span>
-                Unchanged slots automatically retain the default daily meal threshold (<strong>{data.settings.defaultDailyMealThreshold} meals/day</strong>). Choices auto-lock past {data.settings.mealCutoffTime}.
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Individual Cost Breakdown Card */}
-        <Card className="shadow-md border-0 bg-white/80 backdrop-blur-sm rounded-2xl">
-          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100 rounded-t-2xl">
-            <CardTitle className="text-lg font-bold">My Monthly Financial Statement</CardTitle>
-            <CardDescription>Live cost calculations based on Current Mess Meal Rate (৳ {data.liveMealRate.toFixed(2)})</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-0 text-sm p-5 md:p-6">
-            <div className="flex justify-between py-3 border-b border-emerald-100/50">
-              <span className="text-muted-foreground">Individual Meal Cost ({currentAccount.totalMeals} meals &times; ৳{data.liveMealRate.toFixed(2)})</span>
-              <span className="font-semibold">৳ {currentAccount.individualMealCost.toFixed(2)}</span>
-            </div>
-
-            {/* Overheads Breakdown */}
-            <div className="py-3 border-b border-emerald-100/50">
-              <span className="text-muted-foreground block mb-2 font-medium">Overheads Breakdown:</span>
-              <div className="space-y-2 pl-4">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground text-sm">Khala Bill {currentAccount.M_X2 > 1 ? `(× ${currentAccount.M_X2})` : ""}</span>
-                  <span className="font-medium text-sm">৳ {(currentAccount.baseKhala * currentAccount.M_X2).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground text-sm">Manager Bill {currentAccount.M_X2 > 1 ? `(× ${currentAccount.M_X2})` : ""}</span>
-                  <span className="font-medium text-sm">৳ {(currentAccount.baseManager * currentAccount.M_X2).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground text-sm">Gas Bill {currentAccount.M_X2 > 1 ? `(× ${currentAccount.M_X2})` : ""}</span>
-                  <span className="font-medium text-sm">৳ {(currentAccount.baseGas * currentAccount.M_X2).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground text-sm">Paper Bill</span>
-                  <span className="font-medium text-sm">৳ {currentAccount.paper.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground text-sm">Current Bill</span>
-                  <span className="font-medium text-sm">৳ {currentAccount.current.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground text-sm">Festival Bill</span>
-                  <span className="font-medium text-sm">৳ {currentAccount.festival.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-between py-3 border-b border-emerald-100/50">
-              <span className="text-muted-foreground">Market Fine (Markets Logged: {currentAccount.totalMarketsCount})</span>
-              <span className="font-semibold text-red-500">৳ {currentAccount.marketFine}</span>
-            </div>
-
-            <div className="flex justify-between py-3 border-b border-emerald-200 font-bold text-base bg-emerald-50/50 -mx-5 md:-mx-6 px-5 md:px-6">
-              <span>Total Monthly Cost</span>
-              <span>৳ {currentAccount.totalCost.toFixed(2)}</span>
-            </div>
-
-            <div className="flex justify-between py-3 border-b border-emerald-100/50 text-emerald-600 font-semibold">
-              <span>Total Cash Deposits Paid</span>
-              <span>- ৳ {currentAccount.totalDeposits}</span>
-            </div>
-
-            <div className="flex justify-between py-4 text-lg font-extrabold bg-gradient-to-r from-emerald-50 to-green-50 -mx-5 md:-mx-6 px-5 md:px-6 rounded-b-2xl mt-1">
-              <span>Net Financial Status</span>
-              {currentAccount.due > 0 ? (
-                <span className="text-red-500">DUE: ৳ {currentAccount.due.toFixed(2)}</span>
-              ) : (
-                <span className="text-emerald-600">ADVANCE: ৳ {currentAccount.advance.toFixed(2)}</span>
-              )}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
