@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getMessData, toggleDailyMeal } from "@/app/actions/mess";
-import { logoutAction } from "@/app/actions/auth";
+import { logoutAction, getSession } from "@/app/actions/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 export default function MemberDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   
   // Tomorrow's meal selection inputs
   const [breakfast, setBreakfast] = useState<number | string>(0.5);
@@ -20,8 +21,9 @@ export default function MemberDashboard() {
 
   const fetchData = async () => {
     setLoading(true);
-    const res = await getMessData();
+    const [res, session] = await Promise.all([getMessData(), getSession()]);
     setData(res);
+    if (session?.userId) setSessionUserId(session.userId);
     setLoading(false);
   };
 
@@ -34,8 +36,8 @@ export default function MemberDashboard() {
     const numLunch = Number(lunch) || 0;
     const numDinner = Number(dinner) || 0;
 
-    // Pick logged in member (Istiak Masrur for demo)
-    const memberObj = data?.members.find((m: any) => m.member.user.email === "member@mess.com") || data?.members[0];
+    // Pick logged in member from session userId
+    const memberObj = data?.members.find((m: any) => m.member.userId === sessionUserId) || data?.members[0];
     if (!memberObj) return;
 
     const formData = new FormData();
@@ -63,8 +65,8 @@ export default function MemberDashboard() {
     );
   }
 
-  // Find active member account (Istiak Masrur demo)
-  const currentAccount = data.members.find((m: any) => m.member.user.email === "member@mess.com") || data.members[0];
+  // Find logged-in member account from session
+  const currentAccount = data.members.find((m: any) => m.member.userId === sessionUserId) || data.members[0];
 
   return (
     <div className="flex-1 min-h-screen">
