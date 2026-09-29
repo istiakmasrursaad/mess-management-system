@@ -50,9 +50,9 @@ export default function MemberDashboard() {
     setSubmitting(false);
 
     if (result.isPastCutoff) {
-      toast.warning("রাত ১০টা পেরিয়ে গেছে — পরদিনের জন্য apply হবে।");
+      toast.warning("Past cutoff time — changes will apply for the next day.");
     } else {
-      toast.success("আগামীকালের meal submit হয়েছে ✓");
+      toast.success("Tomorrow's meals submitted successfully ✓");
     }
     await fetchData();
   };
@@ -151,7 +151,7 @@ export default function MemberDashboard() {
               </div>
             </div>
             <div className="text-3xl font-extrabold text-white">{currentAccount.totalMeals}</div>
-            <div className="text-xs text-slate-500">এই মাসের মোট খাবার</div>
+            <div className="text-xs text-slate-500">Total meals this month</div>
           </div>
 
           {/* Extra Meals */}
@@ -190,7 +190,7 @@ export default function MemberDashboard() {
               ৳ {netStatus.amount.toFixed(0)}
             </div>
             <div className="text-xs font-semibold" style={{ color: netStatus.color }}>
-              {netStatus.label === "Due" ? "বাকি আছে" : "এগিয়ে আছো"}
+              {netStatus.label === "Due" ? "Amount owed" : "Paid in advance"}
             </div>
           </div>
 
@@ -204,7 +204,7 @@ export default function MemberDashboard() {
               </div>
             </div>
             <div className="text-2xl font-extrabold text-white">৳ {data.liveMealRate.toFixed(2)}</div>
-            <div className="text-xs text-slate-500">প্রতি meal এর rate</div>
+            <div className="text-xs text-slate-500">Per meal rate (live)</div>
           </div>
         </div>
 
@@ -221,9 +221,9 @@ export default function MemberDashboard() {
                   <div className="p-1.5 rounded-lg" style={{ background: "linear-gradient(135deg, #059669, #0ea5e9)" }}>
                     <Utensils className="w-3.5 h-3.5 text-white" />
                   </div>
-                  <h2 className="text-base font-bold text-white">আগামীকালের খাবার</h2>
+                  <h2 className="text-base font-bold text-white">Tomorrow's Meals</h2>
                 </div>
-                <p className="text-xs text-slate-500 ml-8">Submit করো কাটঅফের আগে</p>
+                <p className="text-xs text-slate-500 ml-8">Submit before the daily cutoff</p>
               </div>
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
                 style={{ background: "rgba(16,185,129,0.1)", color: "#34d399", border: "1px solid rgba(16,185,129,0.2)" }}>
@@ -280,12 +280,12 @@ export default function MemberDashboard() {
                   <div className="p-1.5 rounded-lg" style={{ background: "linear-gradient(135deg, #059669, #10b981)" }}>
                     <CreditCard className="w-3.5 h-3.5 text-white" />
                   </div>
-                  <h2 className="text-base font-bold text-white">আমার জমা</h2>
+                  <h2 className="text-base font-bold text-white">My Deposits</h2>
                 </div>
                 <p className="text-xs text-slate-500 ml-8">Deposit history this month</p>
               </div>
               <div className="text-right">
-                <div className="text-xs text-slate-500 mb-0.5">মোট জমা</div>
+                <div className="text-xs text-slate-500 mb-0.5">Total Deposited</div>
                 <div className="text-lg font-extrabold text-emerald-400">
                   ৳ {currentAccount.totalDeposits.toFixed(0)}
                 </div>
@@ -299,7 +299,7 @@ export default function MemberDashboard() {
                     style={{ background: "rgba(255,255,255,0.05)" }}>
                     <CreditCard className="w-5 h-5 text-slate-500" />
                   </div>
-                  <p className="text-slate-500 text-sm">এই মাসে কোনো deposit নেই</p>
+                  <p className="text-slate-500 text-sm">No deposits recorded this month</p>
                 </div>
               ) : (
                 <div className="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
