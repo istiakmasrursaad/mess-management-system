@@ -943,10 +943,18 @@ export default function AdminWorkspace() {
               />
             </div>
             <Button
-              className="w-full h-11 text-sm font-bold btn-glow rounded-xl"
+              className="w-full h-11 text-sm font-bold btn-glow rounded-xl gap-2"
               onClick={() => fetchData(selectedMonth, true)}
+              disabled={loading}
             >
-              Start Managing →
+              {loading ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "Start Managing →"
+              )}
             </Button>
           </div>
         </div>

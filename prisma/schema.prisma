@@ -68,6 +68,8 @@ model DailyMeal {
   
   // Relations
   member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([monthYear])
 }
 
 model Market {
@@ -81,6 +83,8 @@ model Market {
   
   // Inventory items for this market
   inventoryItems Inventory[]
+
+  @@index([monthYear])
 }
 
 model Inventory {
@@ -109,6 +113,8 @@ model Bill {
   
   // Relations
   member          Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([monthYear])
 }
 
 model Deposit {
@@ -123,6 +129,8 @@ model Deposit {
   // Relations
   member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
   recordedBy   User      @relation("recordedBy", fields: [recordedById], references: [id])
+
+  @@index([monthYear])
 }
 
 model MonthlyAccount {
@@ -135,6 +143,8 @@ model MonthlyAccount {
   
   // Relations
   member          Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([monthYear])
 }
 
 model SpecificBill {
@@ -147,6 +157,8 @@ model SpecificBill {
   
   // Relations
   member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([monthYear])
 }
 
 // --- Monthly Snapshot Models (Finalized Ledger Storage) ---
