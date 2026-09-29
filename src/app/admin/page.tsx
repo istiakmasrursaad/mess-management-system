@@ -27,6 +27,7 @@ import {
   toggleApplyDefaultBills,
   updateSpecificBill,
   deleteSpecificBill,
+  getAdminDashboardInitialData,
 } from "@/app/actions/mess";
 import { getSession, getManagersAction, addManagerAction, removeManagerAction, logoutAction } from "@/app/actions/auth";
 import { getDiningCalc } from "@/app/actions/dining-calc";
@@ -305,14 +306,46 @@ export default function AdminWorkspace() {
   };
 
   useEffect(() => {
-    // Initial background load — do NOT dismiss the popup (user must click "Start Managing")
-    fetchData(undefined, false);
-    fetchDailyMeals(selectedMealDate);
-    fetchAvailableMonths();
-    fetchSnapshots();
-    // Fetch session to detect Super Admin role
-    getSession().then(setSession);
-    getManagersAction().then(setManagers);
+    // Single consolidated network request to fetch ALL initial data
+    const loadInitialData = async () => {
+      setLoading(true);
+      const res = await getAdminDashboardInitialData(selectedMonth, selectedMealDate);
+      
+      // Apply the fetched data
+      setData(res.data);
+      if (res.data.settings) {
+        setSettingsForm({
+          defaultDailyMealThreshold: res.data.settings.defaultDailyMealThreshold,
+          needX2MealLimit: res.data.settings.needX2MealLimit,
+          defaultMarketFine: res.data.settings.defaultMarketFine,
+          extraMarketRate: res.data.settings.extraMarketRate,
+          mealCutoffTime: res.data.settings.mealCutoffTime,
+          defaultKhalaBill: res.data.settings.defaultKhalaBill,
+          defaultManagerBill: res.data.settings.defaultManagerBill,
+          defaultGasBill: res.data.settings.defaultGasBill,
+          defaultPaperBill: res.data.settings.defaultPaperBill,
+          defaultCurrentBill: res.data.settings.defaultCurrentBill,
+          defaultFestivalBill: res.data.settings.defaultFestivalBill,
+          applyDefaultBills: res.data.settings.applyDefaultBills,
+        });
+      }
+      
+      setDailyMealsData(res.meals);
+      const initialInputs: Record<string, number> = {};
+      res.meals.forEach((m: any) => {
+        initialInputs[m.memberId] = m.mealRecord ? m.mealRecord.totalMeal : 0;
+      });
+      setMealInputValues(initialInputs);
+      
+      setAvailableMonths(res.availableMonths);
+      setSnapshots(res.snapshots);
+      setSession(res.session);
+      setManagers(res.managers);
+      
+      setLoading(false);
+    };
+
+    loadInitialData();
   }, []);
 
   const fetchManagers = async () => {

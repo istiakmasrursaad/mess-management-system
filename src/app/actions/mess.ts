@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { getSession, getManagersAction } from "./auth";
+import { getSession, getManagersAction } from "./auth";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -893,4 +895,25 @@ export async function updateMembersSerial(updates: { id: string; serial: number 
   
   revalidatePath("/admin");
   return { success: true };
+}
+
+
+export async function getAdminDashboardInitialData(monthStr?: string, mealDate?: string) {
+  const [data, meals, availableMonths, snapshots, session, managers] = await Promise.all([
+    getMessData(monthStr),
+    mealDate ? getDailyMealsByDate(mealDate) : Promise.resolve([]),
+    getAvailableMonths(),
+    getFinalizedSnapshots(),
+    getSession(),
+    getManagersAction()
+  ]);
+
+  return {
+    data,
+    meals,
+    availableMonths,
+    snapshots,
+    session,
+    managers
+  };
 }
