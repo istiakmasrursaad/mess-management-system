@@ -54,7 +54,9 @@ export default function MarketsTab({ props }: { props: any }) {
                       const marketerName = mem?.member.user.name || "Unknown";
                       return (
                         <tr key={m.id}>
-                          <td className="font-medium">{new Date(m.date).toLocaleDateString()}</td>
+                          <td className="font-medium">
+                            {new Date(m.date).toLocaleDateString()} <span className="text-muted-foreground text-xs">({new Date(m.date).toLocaleDateString('en-US', { weekday: 'short' })})</span>
+                          </td>
                           <td className="font-semibold text-foreground">{marketerName}</td>
                           <td className="font-bold" style={{ color: 'oklch(0.70 0.19 162)' }}>৳ {m.amount.toLocaleString()}</td>
                           <td className="text-center">
