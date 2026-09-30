@@ -723,44 +723,52 @@ export async function updateMemberDailyMeal(formData: FormData) {
 export async function saveAllDailyMeals(mealsData: { memberId: string; totalMeal: number; dateStr: string }[]) {
   if (!mealsData || mealsData.length === 0) return { success: true };
 
-  const firstDate = new Date(mealsData[0].dateStr);
-  const monthYear = dateToMonthYear(firstDate);
-  const startOfDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
-  const endOfDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate(), 23, 59, 59, 999);
-
-  const existingMeals = await prisma.dailyMeal.findMany({
-    where: {
-      date: { gte: startOfDay, lte: endOfDay },
-    },
-  });
-
-  const existingMap = new Map(existingMeals.map((m) => [m.memberId, m]));
-
-  const operations = mealsData.map((meal) => {
-    const existing = existingMap.get(meal.memberId);
-    if (existing) {
-      return prisma.dailyMeal.update({
-        where: { id: existing.id },
-        data: { totalMeal: meal.totalMeal },
-      });
-    } else {
-      return prisma.dailyMeal.create({
-        data: {
-          memberId: meal.memberId,
-          date: new Date(meal.dateStr),
-          monthYear,
-          breakfast: 0,
-          lunchDinner: 0,
-          totalMeal: meal.totalMeal,
-        },
-      });
+  try {
+    const firstDate = new Date(mealsData[0].dateStr);
+    if (isNaN(firstDate.getTime())) {
+      return { success: false, error: "Invalid date provided." };
     }
-  });
+    const monthYear = dateToMonthYear(firstDate);
+    const startOfDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+    const endOfDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate(), 23, 59, 59, 999);
 
-  await prisma.$transaction(operations);
-  revalidatePath("/admin");
-  revalidatePath("/member");
-  return { success: true };
+    const existingMeals = await prisma.dailyMeal.findMany({
+      where: {
+        date: { gte: startOfDay, lte: endOfDay },
+      },
+    });
+
+    const existingMap = new Map(existingMeals.map((m) => [m.memberId, m]));
+
+    const operations = mealsData.map((meal) => {
+      const existing = existingMap.get(meal.memberId);
+      if (existing) {
+        return prisma.dailyMeal.update({
+          where: { id: existing.id },
+          data: { totalMeal: meal.totalMeal },
+        });
+      } else {
+        return prisma.dailyMeal.create({
+          data: {
+            memberId: meal.memberId,
+            date: new Date(meal.dateStr),
+            monthYear,
+            breakfast: 0,
+            lunchDinner: 0,
+            totalMeal: meal.totalMeal,
+          },
+        });
+      }
+    });
+
+    await prisma.$transaction(operations);
+    revalidatePath("/admin");
+    revalidatePath("/member");
+    return { success: true };
+  } catch (err: any) {
+    console.error("saveAllDailyMeals Error:", err);
+    return { success: false, error: err.message || "Failed to save meals. Connection might have timed out." };
+  }
 }
 
 // ─── 12. Add Specific Bill ────────────────────────────────────────────────────
@@ -773,7 +781,12 @@ export async function addSpecificBill(formData: FormData) {
 
   if (!memberIds || memberIds.length === 0) return { error: "No member selected" };
 
-  const records = memberIds.map((id) => ({ memberId: id, amount, description, monthYear }));
+  const records = memberIds.map((id) => {
+    const countStr = formData.get(`count_${id}`) as string;
+    const count = countStr ? parseInt(countStr, 10) : 1;
+    const finalAmount = amount * (isNaN(count) ? 1 : count);
+    return { memberId: id, amount: finalAmount, description: count > 1 ? `${description} (x${count})` : description, monthYear };
+  });
 
   await prisma.specificBill.createMany({ data: records });
 

@@ -36,7 +36,7 @@ export async function loginAction(formData: FormData) {
         {
           httpOnly: true,
           path: "/",
-          maxAge: 60 * 60 * 24 * 7,
+          maxAge: 60 * 60 * 24 * 30,
           sameSite: "lax",
           secure: process.env.NODE_ENV === "production",
         }
@@ -71,7 +71,7 @@ export async function loginAction(formData: FormData) {
       {
         httpOnly: true,
         path: "/",
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24 * 30,
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
       }

@@ -12,6 +12,8 @@ import { Select } from "@/components/ui/select";
 
 export default function SpecificbillsTab({ props }: { props: any }) {
   const { data, isEditSpecificBillDialogOpen, setIsEditSpecificBillDialogOpen, editingMember, setEditingMember, editingBillId, setEditingBillId, editBillCategory, setEditBillCategory, editBillAmount, setEditBillAmount, fetchData, handleAddSpecificBill } = props;
+  const [memberCounts, setMemberCounts] = React.useState<Record<string, number>>({});
+  const getCount = (id: string) => memberCounts[id] || 1;
 
   return (
     <>
@@ -27,11 +29,19 @@ export default function SpecificbillsTab({ props }: { props: any }) {
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Select Members</Label>
                         <div className="rounded-xl p-3 max-h-48 overflow-y-auto space-y-1" style={{ background: 'oklch(0.18 0.02 260)', border: '1px solid oklch(1 0 0 / 10%)' }}>
                           {data.members.map((m: any) => (
-                            <label key={m.member.id} className="flex items-center gap-2 cursor-pointer rounded-lg px-2 py-1.5 transition-colors hover:bg-white/5">
-                              <input type="checkbox" name="memberId" value={m.member.id} className="w-4 h-4 rounded" style={{ accentColor: 'oklch(0.65 0.25 275)' }} />
-                              <span className="text-sm font-medium text-foreground">{m.member.user.name}</span>
-                              <span className="text-xs text-muted-foreground ml-auto">R{m.member.roomNo}</span>
-                            </label>
+                            <div key={m.member.id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/5">
+                              <label className="flex items-center gap-2 cursor-pointer flex-1">
+                                <input type="checkbox" name="memberId" value={m.member.id} className="w-4 h-4 rounded" style={{ accentColor: 'oklch(0.65 0.25 275)' }} />
+                                <span className="text-sm font-medium text-foreground">{m.member.user.name}</span>
+                                <span className="text-xs text-muted-foreground ml-2">R{m.member.roomNo}</span>
+                              </label>
+                              <div className="flex items-center gap-2">
+                                <Button type="button" variant="outline" size="icon" className="h-6 w-6 rounded-md" onClick={() => setMemberCounts(p => ({ ...p, [m.member.id]: Math.max(1, getCount(m.member.id) - 1) }))}>-</Button>
+                                <span className="text-xs font-bold w-4 text-center">{getCount(m.member.id)}</span>
+                                <Button type="button" variant="outline" size="icon" className="h-6 w-6 rounded-md" onClick={() => setMemberCounts(p => ({ ...p, [m.member.id]: getCount(m.member.id) + 1 }))}>+</Button>
+                                <input type="hidden" name={`count_${m.member.id}`} value={getCount(m.member.id)} />
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>

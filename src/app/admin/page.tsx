@@ -430,9 +430,13 @@ export default function AdminWorkspace() {
         };
       });
 
-      await saveAllDailyMeals(mealsData);
-      await Promise.all([fetchDailyMeals(selectedMealDate), fetchData()]);
-      toast.success("All meals saved successfully!");
+      const res = await saveAllDailyMeals(mealsData);
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        await Promise.all([fetchDailyMeals(selectedMealDate), fetchData()]);
+        toast.success("All meals saved successfully!");
+      }
     } finally {
       setIsSavingMeals(false);
     }
