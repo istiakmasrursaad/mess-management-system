@@ -51,7 +51,7 @@ export default function DailymealsTab({ props }: { props: any }) {
                                      <button type="button" onClick={() => setMealInputValues((prev: any) => ({ ...prev, [m.memberId]: (prev[m.memberId] !== undefined ? prev[m.memberId] : val) + 0.5 }))} className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 font-extrabold text-sm flex items-center justify-center text-foreground cursor-pointer">+</button>
                                    </div>
                                    <div className="flex items-center gap-1 flex-wrap">
-                                     {[0, 1, 1.5, 2, 2.5].map((preset) => (
+                                     {[0, 0.5, 1, 1.5, 2, 2.5].map((preset) => (
                                        <button key={preset} type="button" onClick={() => setMealInputValues((prev: any) => ({ ...prev, [m.memberId]: preset }))} className={`px-2 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${val === preset ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10'}`}>{preset}</button>
                                      ))}
                                    </div>
