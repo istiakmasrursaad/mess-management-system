@@ -1,6 +1,6 @@
+"use client";
 import { deleteMarketEntry } from "@/app/actions/mess";
 import { toast } from "react-toastify";
-"use client";
 
 import React from "react";
 import { Button } from "@/components/ui/button";

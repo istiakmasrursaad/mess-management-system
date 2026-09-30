@@ -1,5 +1,5 @@
-import { toggleApplyDefaultBills } from "@/app/actions/mess";
 "use client";
+import { toggleApplyDefaultBills } from "@/app/actions/mess";
 
 import React from "react";
 import { Button } from "@/components/ui/button";

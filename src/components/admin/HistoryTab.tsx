@@ -1,5 +1,5 @@
-import { getDiningCalc } from "@/app/actions/dining-calc";
 "use client";
+import { getDiningCalc } from "@/app/actions/dining-calc";
 
 import React from "react";
 import { Button } from "@/components/ui/button";

@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { getSession, getManagersAction } from "./auth";
-import { getSession, getManagersAction } from "./auth";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
