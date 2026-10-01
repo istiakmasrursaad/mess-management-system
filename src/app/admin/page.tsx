@@ -166,8 +166,7 @@ export default function AdminWorkspace() {
     applyDefaultBills: false,
   });
 
-  // Daily Meals state
-  const [selectedMealDate, setSelectedMealDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [selectedMealDate, setSelectedMealDate] = useState<string>("");
   const [dailyMealsData, setDailyMealsData] = useState<any[]>([]);
   const [mealInputValues, setMealInputValues] = useState<Record<string, number>>({});
   const [loadingDailyMeals, setLoadingDailyMeals] = useState(false);
@@ -412,17 +411,9 @@ export default function AdminWorkspace() {
   useEffect(() => {
     if (!hasSelectedMonth) return;
     
-    const d = new Date();
-    const currentMonthYear = `${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
-    
-    if (selectedMonth === currentMonthYear) {
-      const todayDate = d.toISOString().split("T")[0];
-      setSelectedMealDate(todayDate);
-      fetchDailyMeals(todayDate);
-    } else {
-      setSelectedMealDate("");
-      setDailyMealsData([]);
-    }
+    setSelectedMealDate("");
+    setDailyMealsData([]);
+    setMealInputValues({});
   }, [selectedMonth, hasSelectedMonth]);
 
   const fetchDailyMeals = async (date: string) => {

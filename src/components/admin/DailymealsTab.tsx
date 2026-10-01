@@ -28,6 +28,11 @@ export default function DailymealsTab({ props }: { props: any }) {
                 <div className="flex justify-center p-8">
                   <RefreshCw className="h-7 w-7 animate-spin" style={{ color: 'oklch(0.65 0.25 275)' }} />
                 </div>
+              ) : !selectedMealDate ? (
+                <div className="flex flex-col items-center justify-center p-12 text-center border-t border-white/5">
+                  <Utensils className="w-12 h-12 text-white/20 mb-4" />
+                  <p className="text-muted-foreground text-sm">Please select a date to view and manage daily meals.</p>
+                </div>
               ) : (
                 <>
                   <div className="table-responsive">
