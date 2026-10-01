@@ -13,6 +13,7 @@ import { Select } from "@/components/ui/select";
 export default function SpecificbillsTab({ props }: { props: any }) {
   const { data, isEditSpecificBillDialogOpen, setIsEditSpecificBillDialogOpen, editingMember, setEditingMember, editingBillId, setEditingBillId, editBillCategory, setEditBillCategory, editBillAmount, setEditBillAmount, fetchData, handleAddSpecificBill } = props;
   const [memberCounts, setMemberCounts] = React.useState<Record<string, number>>({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const getCount = (id: string) => memberCounts[id] || 1;
 
   return (
@@ -24,7 +25,16 @@ export default function SpecificbillsTab({ props }: { props: any }) {
                     <div><h3 className="text-sm font-bold text-foreground">Add Specific Bill</h3><p className="text-xs text-muted-foreground mt-0.5">Assign a bill to specific members.</p></div>
                   </div>
                   <div className="p-4">
-                    <form onSubmit={handleAddSpecificBill} className="space-y-3">
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      setIsSubmitting(true);
+                      try {
+                        await handleAddSpecificBill(e);
+                        setMemberCounts({});
+                      } finally {
+                        setIsSubmitting(false);
+                      }
+                    }} className="space-y-3">
                       <div className="space-y-1.5">
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Select Members</Label>
                         <div className="rounded-xl p-3 max-h-48 overflow-y-auto space-y-1" style={{ background: 'oklch(0.18 0.02 260)', border: '1px solid oklch(1 0 0 / 10%)' }}>
@@ -56,7 +66,9 @@ export default function SpecificbillsTab({ props }: { props: any }) {
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Amount (Tk)</Label>
                         <Input name="amount" type="number" step="0.01" min="0" required className="h-10 rounded-xl bg-white/5 border-white/10 text-foreground" />
                       </div>
-                      <Button type="submit" className="w-full h-10 font-bold btn-glow text-sm">Add Bill to Selected Members</Button>
+                      <Button type="submit" disabled={isSubmitting} className="w-full h-10 font-bold btn-glow text-sm">
+                        {isSubmitting ? "Adding..." : "Add Bill to Selected Members"}
+                      </Button>
                     </form>
                   </div>
                 </div>
