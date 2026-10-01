@@ -360,9 +360,9 @@ export default function MemberDashboard() {
               <p className="text-slate-400 font-medium mb-2.5">Overheads</p>
               <div className="space-y-2 pl-3">
                 {[
-                  { label: `Khala Bill${currentAccount.M_X2 > 1 ? ` (×${currentAccount.M_X2})` : ""}`, val: (currentAccount.baseKhala * currentAccount.M_X2) },
-                  { label: `Manager Bill${currentAccount.M_X2 > 1 ? ` (×${currentAccount.M_X2})` : ""}`, val: (currentAccount.baseManager * currentAccount.M_X2) },
-                  { label: `Gas Bill${currentAccount.M_X2 > 1 ? ` (×${currentAccount.M_X2})` : ""}`, val: (currentAccount.baseGas * currentAccount.M_X2) },
+                  { label: `Khala Bill${currentAccount.M_X2 > 1 ? ` (×${currentAccount.M_X2})` : ""}`, val: currentAccount.baseKhala },
+                  { label: `Manager Bill${currentAccount.M_X2 > 1 ? ` (×${currentAccount.M_X2})` : ""}`, val: currentAccount.baseManager },
+                  { label: `Gas Bill${currentAccount.M_X2 > 1 ? ` (×${currentAccount.M_X2})` : ""}`, val: currentAccount.baseGas },
                   { label: "Paper Bill", val: currentAccount.paper },
                   { label: "Current Bill", val: currentAccount.current },
                   { label: "Festival Bill", val: currentAccount.festival },

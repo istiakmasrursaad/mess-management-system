@@ -671,11 +671,11 @@ export default function AdminWorkspace() {
         m.member.user.name,
         m.totalMeals.toString(),
         m.individualMealCost.toFixed(2),
-        isSnapshot ? m.adjustedOverheads.toFixed(0) : (m.baseKhala * m.M_X2).toFixed(0),
-        (m.baseManager * m.M_X2).toFixed(0),
+        isSnapshot ? m.adjustedOverheads.toFixed(0) : m.baseKhala.toFixed(0),
+        m.baseManager.toFixed(0),
         m.paper.toFixed(0),
         m.current.toFixed(0),
-        (m.baseGas * m.M_X2).toFixed(0),
+        m.baseGas.toFixed(0),
         m.festival.toFixed(0),
         m.marketFine > 0 ? m.marketFine.toFixed(0) : "",
         m.totalCost.toFixed(2),
@@ -867,11 +867,11 @@ export default function AdminWorkspace() {
 
     const tableRows = exportData.members.map((m: any, index: number) => {
       totalMealCost += m.individualMealCost;
-      totalKhala += m.baseKhala * m.M_X2;
-      totalManager += m.baseManager * m.M_X2;
+      totalKhala += m.baseKhala;
+      totalManager += m.baseManager;
       totalPaper += m.paper;
       totalCurrent += m.current;
-      totalGas += m.baseGas * m.M_X2;
+      totalGas += m.baseGas;
       totalFest += m.festival;
       totalFine += m.marketFine;
       totalCostAll += m.totalCost;
@@ -881,11 +881,11 @@ export default function AdminWorkspace() {
         m.member.user.name,
         m.totalMeals,
         m.individualMealCost.toFixed(2),
-        isSnapshot ? m.adjustedOverheads.toFixed(0) : (m.baseKhala * m.M_X2).toFixed(0),
-        (m.baseManager * m.M_X2).toFixed(0),
+        isSnapshot ? m.adjustedOverheads.toFixed(0) : m.baseKhala.toFixed(0),
+        m.baseManager.toFixed(0),
         m.paper.toFixed(0),
         m.current.toFixed(0),
-        (m.baseGas * m.M_X2).toFixed(0),
+        m.baseGas.toFixed(0),
         m.festival.toFixed(0),
         m.marketFine > 0 ? m.marketFine.toFixed(0) : "",
         m.totalCost.toFixed(2),

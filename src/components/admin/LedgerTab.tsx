@@ -53,11 +53,11 @@ export default function LedgerTab({ props }: { props: any }) {
                         <td className="font-semibold text-foreground whitespace-nowrap">{m.member.user.name}</td>
                         <td className="font-medium">{m.totalMeals}</td>
                         <td>৳{m.individualMealCost.toFixed(2)}</td>
-                        <td>৳{(m.baseKhala * m.M_X2).toFixed(2)}</td>
-                        <td>৳{(m.baseManager * m.M_X2).toFixed(2)}</td>
+                        <td>৳{m.baseKhala.toFixed(2)}</td>
+                        <td>৳{m.baseManager.toFixed(2)}</td>
                         <td>৳{m.paper.toFixed(2)}</td>
                         <td>৳{m.current.toFixed(2)}</td>
-                        <td>৳{(m.baseGas * m.M_X2).toFixed(2)}</td>
+                        <td>৳{m.baseGas.toFixed(2)}</td>
                         <td>৳{m.festival.toFixed(2)}</td>
                         <td>৳{m.marketFine.toFixed(2)}</td>
                         <td className="font-bold text-foreground">৳{m.totalCost.toFixed(2)}</td>

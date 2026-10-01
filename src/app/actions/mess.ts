@@ -111,28 +111,26 @@ async function calculateMonthMetrics(targetMonth: string, settings: any) {
       marketFine = totalMarketsCount === 0 ? settings.defaultMarketFine : 0;
     }
 
-    let baseKhala = settings.applyDefaultBills ? settings.defaultKhalaBill : 0;
-    let baseManager = settings.applyDefaultBills ? settings.defaultManagerBill : 0;
-    let baseGas = settings.applyDefaultBills ? settings.defaultGasBill : 0;
+    let baseKhala = (settings.applyDefaultBills ? settings.defaultKhalaBill : 0) * M_X2;
+    let baseManager = (settings.applyDefaultBills ? settings.defaultManagerBill : 0) * M_X2;
+    let baseGas = (settings.applyDefaultBills ? settings.defaultGasBill : 0) * M_X2;
     let paper = settings.applyDefaultBills ? settings.defaultPaperBill : 0;
     let current = settings.applyDefaultBills ? settings.defaultCurrentBill : 0;
     let festival = settings.applyDefaultBills ? settings.defaultFestivalBill : 0;
     let specificOther = 0;
 
     member.specificBills.forEach((b: any) => {
-      switch (b.description) {
-        case "Khala Bill": baseKhala += b.amount; break;
-        case "Manager Bill": baseManager += b.amount; break;
-        case "Gas Bill": baseGas += b.amount; break;
-        case "Paper Bill": paper += b.amount; break;
-        case "Current Bill": current += b.amount; break;
-        case "Fest Meal": festival += b.amount; break;
-        case "Market Fine": marketFine += b.amount; break;
-        default: specificOther += b.amount; break;
-      }
+      if (b.description.startsWith("Khala Bill")) baseKhala += b.amount;
+      else if (b.description.startsWith("Manager Bill")) baseManager += b.amount;
+      else if (b.description.startsWith("Gas Bill")) baseGas += b.amount;
+      else if (b.description.startsWith("Paper Bill")) paper += b.amount;
+      else if (b.description.startsWith("Current Bill")) current += b.amount;
+      else if (b.description.startsWith("Fest Meal")) festival += b.amount;
+      else if (b.description.startsWith("Market Fine")) marketFine += b.amount;
+      else specificOther += b.amount;
     });
 
-    const adjustedOverheads = (baseKhala + baseManager + baseGas) * M_X2 + paper + current + festival + marketFine + specificOther;
+    const adjustedOverheads = baseKhala + baseManager + baseGas + paper + current + festival + marketFine + specificOther;
     const totalDeposits = member.deposits.reduce((sum: number, dep: any) => sum + dep.amount, 0);
 
     return {
