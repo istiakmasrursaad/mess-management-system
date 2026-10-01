@@ -183,8 +183,8 @@ export default function AdminWorkspace() {
     }
   }, [data]);
 
-  const fetchData = async (month?: string, dismissPopup = false) => {
-    setLoading(true);
+  const fetchData = async (month?: string, dismissPopup = false, silent = false) => {
+    if (!silent) setLoading(true);
     const res = await getMessData(month || selectedMonth);
     setData(res);
     if (res.settings) {
@@ -207,7 +207,7 @@ export default function AdminWorkspace() {
         setHasSelectedMonth(true);
       }
     }
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
   const fetchAvailableMonths = async () => {
@@ -279,7 +279,7 @@ export default function AdminWorkspace() {
     await updateDeposit(formData);
     setIsEditDepositDialogOpen(false);
     setEditingDeposit(null);
-    await fetchData();
+    await fetchData(undefined, false, true);
     toast.success("Deposit updated successfully!");
   };
 
@@ -288,7 +288,7 @@ export default function AdminWorkspace() {
     const formData = new FormData();
     formData.append("id", depId);
     await deleteDeposit(formData);
-    await fetchData();
+    await fetchData(undefined, false, true);
     toast.success("Deposit deleted successfully!");
   };
 
@@ -305,7 +305,7 @@ export default function AdminWorkspace() {
     if (!window.confirm(`"${monthLabel}" এর ফাইল হিস্ট্রি মুছে ফেলতে চান? এতে এই মাসের সংরক্ষিত হিসাব মুছে যাবে এবং পরবর্তী মাসের Due/Advance এ আর কোনো প্রভাব ফেলবে না।`)) return;
     await deleteFinalizedSnapshot(id);
     await fetchSnapshots();
-    await fetchData();
+    await fetchData(undefined, false, true);
     toast.success(`"${monthLabel}" এর হিস্ট্রি মুছে ফেলা হয়েছে!`);
   };
 
@@ -464,7 +464,7 @@ export default function AdminWorkspace() {
       if (res.error) {
         toast.error(res.error);
       } else {
-        await Promise.all([fetchDailyMeals(selectedMealDate), fetchData()]);
+        await Promise.all([fetchDailyMeals(selectedMealDate), fetchData(undefined, false, true)]);
         toast.success("All meals saved successfully!");
       }
     } finally {
@@ -488,7 +488,7 @@ export default function AdminWorkspace() {
     formData.append("defaultFestivalBill", settingsForm.defaultFestivalBill.toString());
 
     await updateMessSettings(formData);
-    await fetchData();
+    await fetchData(undefined, false, true);
     toast.success("Mess Rules updated successfully!");
   };
 
@@ -497,7 +497,7 @@ export default function AdminWorkspace() {
       const formData = new FormData();
       formData.append("memberId", memberId);
       await removeMember(formData);
-      await fetchData();
+      await fetchData(undefined, false, true);
       toast.success("Member removed successfully!");
     }
   };
@@ -529,7 +529,7 @@ export default function AdminWorkspace() {
     if (res.success) {
       setIsEditMemberDialogOpen(false);
       setEditingMemberInfo(null);
-      await fetchData();
+      await fetchData(undefined, false, true);
       toast.success("Member info updated successfully!");
     } else {
       setEditMemberError(res.error || "Failed to update member.");
@@ -541,7 +541,7 @@ export default function AdminWorkspace() {
     const formData = new FormData(e.currentTarget);
     formData.append("monthYear", selectedMonth);
     await addSpecificBill(formData);
-    await fetchData();
+    await fetchData(undefined, false, true);
     (e.target as HTMLFormElement).reset();
     toast.success("Specific Bill Added!");
   };
@@ -552,7 +552,7 @@ export default function AdminWorkspace() {
     await addMember(formData);
     setIsMemberDialogOpen(false);
     setAddMemberForm({ name: "", emailPrefix: "", emailSuffix: "@gmail.com" });
-    await fetchData();
+    await fetchData(undefined, false, true);
     toast.success("Member added successfully!");
   };
 
@@ -565,7 +565,7 @@ export default function AdminWorkspace() {
       return;
     }
     setIsMarketDialogOpen(false);
-    await fetchData();
+    await fetchData(undefined, false, true);
     toast.success("Market entry added successfully!");
   };
 
@@ -576,7 +576,7 @@ export default function AdminWorkspace() {
     await updateMarketEntry(formData);
     setIsEditMarketDialogOpen(false);
     setEditingMarket(null);
-    await fetchData();
+    await fetchData(undefined, false, true);
   };
 
   const handleEditSpecificBill = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -585,7 +585,7 @@ export default function AdminWorkspace() {
     await updateSpecificBill(formData);
     setIsEditSpecificBillDialogOpen(false);
     setEditingMember(null);
-    await fetchData();
+    await fetchData(undefined, false, true);
   };
 
   const handleAddDeposit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -593,7 +593,7 @@ export default function AdminWorkspace() {
     const formData = new FormData(e.currentTarget);
     await addDeposit(formData);
     setIsDepositDialogOpen(false);
-    await fetchData();
+    await fetchData(undefined, false, true);
   };
 
   const handleSaveFineOverride = async (memberId: string, customFine: number) => {
@@ -602,7 +602,7 @@ export default function AdminWorkspace() {
     formData.append("marketFine", customFine.toString());
     formData.append("monthYear", selectedMonth);
     await saveFineOverride(formData);
-    await fetchData();
+    await fetchData(undefined, false, true);
   };
 
   const handleRevertFineOverride = async (memberId: string) => {
@@ -610,7 +610,7 @@ export default function AdminWorkspace() {
     formData.append("memberId", memberId);
     formData.append("monthYear", selectedMonth);
     await revertFineOverride(formData);
-    await fetchData();
+    await fetchData(undefined, false, true);
   };
 
   // Open member filter popup before export

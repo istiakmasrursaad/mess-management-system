@@ -31,7 +31,7 @@ export default function SettingsTab({ props }: { props: any }) {
                     onCheckedChange={async (checked) => {
                       setSettingsForm({ ...settingsForm, applyDefaultBills: checked });
                       await toggleApplyDefaultBills(checked);
-                      fetchData();
+                      fetchData(undefined, false, true);
                     }}
                   />
                 </div>

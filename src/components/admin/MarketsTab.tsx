@@ -68,7 +68,7 @@ export default function MarketsTab({ props }: { props: any }) {
                           <td className="text-right">
                             <div className="flex items-center justify-end gap-1.5">
                               <Button variant="outline" size="sm" onClick={() => { setEditingMarket(m); setIsEditMarketDialogOpen(true); }} className="h-7 px-2.5 text-xs rounded-lg border-white/10 hover:bg-white/5 text-muted-foreground">Edit</Button>
-                              <Button variant="destructive" size="sm" onClick={async () => { if (confirm("Delete this market entry?")) { const fd = new FormData(); fd.append("id", m.id); await deleteMarketEntry(fd); await fetchData(); } }} className="h-7 px-2.5 text-xs rounded-lg">Delete</Button>
+                              <Button variant="destructive" size="sm" onClick={async () => { if (confirm("Delete this market entry?")) { const fd = new FormData(); fd.append("id", m.id); await deleteMarketEntry(fd); await fetchData(undefined, false, true); } }} className="h-7 px-2.5 text-xs rounded-lg">Delete</Button>
                             </div>
                           </td>
                         </tr>
