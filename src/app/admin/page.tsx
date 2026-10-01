@@ -98,7 +98,21 @@ export default function AdminWorkspace() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
-  const [hasSelectedMonth, setHasSelectedMonth] = useState(false);
+
+  // ── Persist selected month in localStorage so popup never re-appears on login ──
+  const defaultMonthYear = () => {
+    const d = new Date();
+    return `${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
+  };
+  const getSavedMonth = () => {
+    if (typeof window === "undefined") return defaultMonthYear();
+    return localStorage.getItem("adminSelectedMonth") || defaultMonthYear();
+  };
+  const [selectedMonth, setSelectedMonth] = useState<string>(getSavedMonth());
+  // If a month was previously saved, skip the popup entirely
+  const [hasSelectedMonth, setHasSelectedMonth] = useState(
+    typeof window !== "undefined" && !!localStorage.getItem("adminSelectedMonth")
+  );
 
   // Session & Super Admin state
   const [session, setSession] = useState<any>(null);
@@ -106,13 +120,6 @@ export default function AdminWorkspace() {
   const [isAddManagerOpen, setIsAddManagerOpen] = useState(false);
   const [managerForm, setManagerForm] = useState({ name: "", email: "", phone: "", password: "", role: "ADMIN" });
   const [managerError, setManagerError] = useState("");
-
-  // Month selector state
-  const defaultMonthYear = () => {
-    const d = new Date();
-    return `${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
-  };
-  const [selectedMonth, setSelectedMonth] = useState<string>(defaultMonthYear());
   const [availableMonths, setAvailableMonths] = useState<string[]>(["08-2026"]);
 
   // Monthly snapshots (history)
@@ -220,6 +227,8 @@ export default function AdminWorkspace() {
 
   const handleMonthChange = (newMonth: string) => {
     setSelectedMonth(newMonth);
+    // Save the newly selected month so it persists across sessions
+    localStorage.setItem("adminSelectedMonth", newMonth);
     fetchData(newMonth);
   };
 
@@ -342,6 +351,10 @@ export default function AdminWorkspace() {
       setSession(res.session);
       setManagers(res.managers);
       
+      // Persist the loaded month so popup is skipped on next login
+      localStorage.setItem("adminSelectedMonth", selectedMonth);
+      setHasSelectedMonth(true);
+
       setLoading(false);
     };
 
@@ -999,7 +1012,10 @@ export default function AdminWorkspace() {
             </div>
             <Button
               className="w-full h-11 text-sm font-bold btn-glow rounded-xl gap-2"
-              onClick={() => setHasSelectedMonth(true)}
+              onClick={() => {
+                localStorage.setItem("adminSelectedMonth", selectedMonth);
+                setHasSelectedMonth(true);
+              }}
               disabled={loading}
             >
               {loading ? (
