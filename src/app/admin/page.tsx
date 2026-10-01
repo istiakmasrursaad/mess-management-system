@@ -637,12 +637,17 @@ export default function AdminWorkspace() {
       ...data,
       members: data.members.filter((m: any) => selectedExportMembers.has(m.member.id))
     };
-    if (exportType === 'pdf') {
-      const diningData = await getDiningCalc(selectedMonth);
-      generatePDFForData(filteredData, monthYearToLabel(selectedMonth), false, diningData);
-    } else {
-      const diningData = await getDiningCalc(selectedMonth);
-      generateWordForData(filteredData, monthYearToLabel(selectedMonth), false, diningData);
+    try {
+      if (exportType === 'pdf') {
+        const diningData = await getDiningCalc(selectedMonth);
+        generatePDFForData(filteredData, monthYearToLabel(selectedMonth), false, diningData);
+      } else {
+        const diningData = await getDiningCalc(selectedMonth);
+        generateWordForData(filteredData, monthYearToLabel(selectedMonth), false, diningData);
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to export document");
     }
   };
 
