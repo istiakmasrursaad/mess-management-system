@@ -199,7 +199,7 @@ export default function AdminWorkspace() {
         defaultPaperBill: res.settings.defaultPaperBill,
         defaultCurrentBill: res.settings.defaultCurrentBill,
         defaultFestivalBill: res.settings.defaultFestivalBill,
-        applyDefaultBills: res.settings.applyDefaultBills,
+        applyDefaultBills: res.monthConfig.applyDefaultBills,
       });
       // Only dismiss the popup if explicitly requested (i.e. user clicked "Start Managing")
       if (dismissPopup) {
@@ -354,7 +354,7 @@ export default function AdminWorkspace() {
           defaultPaperBill: res.data.settings.defaultPaperBill,
           defaultCurrentBill: res.data.settings.defaultCurrentBill,
           defaultFestivalBill: res.data.settings.defaultFestivalBill,
-          applyDefaultBills: res.data.settings.applyDefaultBills,
+          applyDefaultBills: res.data.monthConfig.applyDefaultBills,
         });
       }
       

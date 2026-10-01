@@ -10,7 +10,7 @@ import { Settings, Lock } from "lucide-react";
 
 
 export default function SettingsTab({ props }: { props: any }) {
-  const { settingsForm, setSettingsForm, fetchData, handleUpdateSettings } = props;
+  const { settingsForm, setSettingsForm, fetchData, handleUpdateSettings, selectedMonth } = props;
 
   const [isSaving, setIsSaving] = React.useState(false);
 
@@ -32,7 +32,7 @@ export default function SettingsTab({ props }: { props: any }) {
                     checked={settingsForm.applyDefaultBills}
                     onCheckedChange={async (checked) => {
                       setSettingsForm({ ...settingsForm, applyDefaultBills: checked });
-                      await toggleApplyDefaultBills(checked);
+                      await toggleApplyDefaultBills(checked, selectedMonth);
                       fetchData(undefined, false, true);
                     }}
                   />

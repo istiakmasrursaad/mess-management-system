@@ -204,3 +204,9 @@ model DiningCalc {
   previousRemaining Float    @default(0)
   totalCost         Float    @default(0)
 }
+
+model MonthConfig {
+  id                String   @id @default(cuid())
+  monthYear         String   @unique
+  applyDefaultBills Boolean  @default(false)
+}

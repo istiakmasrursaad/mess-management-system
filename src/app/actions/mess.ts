@@ -45,7 +45,7 @@ export async function getMessSettings() {
 }
 
 // Helper to calculate exact single month metrics for all members
-async function calculateMonthMetrics(targetMonth: string, settings: any) {
+async function calculateMonthMetrics(targetMonth: string, settings: any, monthConfig: any) {
   const members = await prisma.member.findMany({
     include: {
       user: true,
@@ -111,12 +111,12 @@ async function calculateMonthMetrics(targetMonth: string, settings: any) {
       marketFine = totalMarketsCount === 0 ? settings.defaultMarketFine : 0;
     }
 
-    let baseKhala = (memberBill && memberBill.isKhalaOverridden) ? memberBill.baseKhala : (settings.applyDefaultBills ? settings.defaultKhalaBill : 0);
-    let baseManager = (memberBill && memberBill.isManagerOverridden) ? memberBill.manager : (settings.applyDefaultBills ? settings.defaultManagerBill : 0);
-    let baseGas = (memberBill && memberBill.isGasOverridden) ? memberBill.gasBill : (settings.applyDefaultBills ? settings.defaultGasBill : 0);
-    let paper = (memberBill && memberBill.isPaperOverridden) ? memberBill.paper : (settings.applyDefaultBills ? settings.defaultPaperBill : 0);
-    let current = (memberBill && memberBill.isCurrentOverridden) ? memberBill.current : (settings.applyDefaultBills ? settings.defaultCurrentBill : 0);
-    let festival = (memberBill && memberBill.isFestivalOverridden) ? memberBill.festival : (settings.applyDefaultBills ? settings.defaultFestivalBill : 0);
+    let baseKhala = (memberBill && memberBill.isKhalaOverridden) ? memberBill.baseKhala : (monthConfig.applyDefaultBills ? settings.defaultKhalaBill : 0);
+    let baseManager = (memberBill && memberBill.isManagerOverridden) ? memberBill.manager : (monthConfig.applyDefaultBills ? settings.defaultManagerBill : 0);
+    let baseGas = (memberBill && memberBill.isGasOverridden) ? memberBill.gasBill : (monthConfig.applyDefaultBills ? settings.defaultGasBill : 0);
+    let paper = (memberBill && memberBill.isPaperOverridden) ? memberBill.paper : (monthConfig.applyDefaultBills ? settings.defaultPaperBill : 0);
+    let current = (memberBill && memberBill.isCurrentOverridden) ? memberBill.current : (monthConfig.applyDefaultBills ? settings.defaultCurrentBill : 0);
+    let festival = (memberBill && memberBill.isFestivalOverridden) ? memberBill.festival : (monthConfig.applyDefaultBills ? settings.defaultFestivalBill : 0);
     let specificOther = 0;
 
     member.specificBills.forEach((b: any) => {
@@ -258,7 +258,17 @@ export async function getMessData(monthYear?: string) {
   const targetMonth = monthYear || dateToMonthYear(new Date());
   const settings = await getMessSettings();
   const priorBalances = await getPriorNetBalances(targetMonth, settings);
-  const monthData = await calculateMonthMetrics(targetMonth, settings);
+  
+  let monthConfig = await prisma.monthConfig.findUnique({
+    where: { monthYear: targetMonth }
+  });
+  if (!monthConfig) {
+    monthConfig = await prisma.monthConfig.create({
+      data: { monthYear: targetMonth, applyDefaultBills: false }
+    });
+  }
+
+  const monthData = await calculateMonthMetrics(targetMonth, settings, monthConfig);
 
   let grandTotalDeposits = 0;
   let grandTotalDues = 0;
@@ -289,6 +299,7 @@ export async function getMessData(monthYear?: string) {
 
   return {
     settings,
+    monthConfig,
     members: fullLedger,
     markets: monthData.markets,
     totalMarketCost: monthData.totalMarketCost,
@@ -361,9 +372,11 @@ export async function updateMessSettings(formData: FormData) {
   revalidatePath("/member");
 }
 
-export async function toggleApplyDefaultBills(applyDefaultBills: boolean) {
-  await prisma.messSettings.updateMany({
-    data: { applyDefaultBills },
+export async function toggleApplyDefaultBills(applyDefaultBills: boolean, monthYear: string) {
+  await prisma.monthConfig.upsert({
+    where: { monthYear },
+    update: { applyDefaultBills },
+    create: { monthYear, applyDefaultBills }
   });
   revalidatePath("/admin");
   revalidatePath("/member");
