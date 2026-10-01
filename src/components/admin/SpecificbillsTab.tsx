@@ -88,7 +88,7 @@ export default function SpecificbillsTab({ props }: { props: any }) {
             </div>
 
             {/* Edit Specific Bill Dialog */}
-            <Dialog open={isEditSpecificBillDialogOpen} onOpenChange={(open) => { setIsEditSpecificBillDialogOpen(open); if (!open) { setEditingMember(null); setEditingBillId(null); } }}>
+            <Dialog open={isEditSpecificBillDialogOpen} onOpenChange={(open) => { setIsEditSpecificBillDialogOpen(open); if (!open) { setEditingMember(null); setEditingBillId(null); fetchData(undefined, false, true); } }}>
               <DialogContent className="rounded-2xl mx-4 sm:mx-auto max-w-md max-h-[80vh] overflow-hidden flex flex-col">
                 <DialogHeader>
                   <DialogTitle className="font-bold">Manage Bills: {editingMember?.user?.name}</DialogTitle>
@@ -109,7 +109,7 @@ export default function SpecificbillsTab({ props }: { props: any }) {
                           </div>
                           <div className="flex justify-end gap-2">
                             <Button variant="ghost" size="sm" onClick={() => setEditingBillId(null)} className="h-7 px-2.5 text-xs rounded-lg">Cancel</Button>
-                            <Button size="sm" onClick={async () => { if (!editBillCategory.trim() || !editBillAmount) return; const fd = new FormData(); fd.append("id", bill.id); fd.append("description", editBillCategory); fd.append("amount", editBillAmount); await updateSpecificBill(fd); setEditingMember((prev: any) => ({ ...prev, specificBills: prev.specificBills.map((b: any) => b.id === bill.id ? { ...b, description: editBillCategory, amount: parseFloat(editBillAmount) || 0 } : b) })); await fetchData(undefined, false, true); setEditingBillId(null); }} className="h-7 px-3 text-xs font-semibold btn-glow rounded-lg">Save</Button>
+                            <Button size="sm" onClick={async () => { if (!editBillCategory.trim() || !editBillAmount) return; const fd = new FormData(); fd.append("id", bill.id); fd.append("description", editBillCategory); fd.append("amount", editBillAmount); await updateSpecificBill(fd); setEditingMember((prev: any) => ({ ...prev, specificBills: prev.specificBills.map((b: any) => b.id === bill.id ? { ...b, description: editBillCategory, amount: parseFloat(editBillAmount) || 0 } : b) })); setEditingBillId(null); }} className="h-7 px-3 text-xs font-semibold btn-glow rounded-lg">Save</Button>
                           </div>
                         </div>
                       );
@@ -119,7 +119,7 @@ export default function SpecificbillsTab({ props }: { props: any }) {
                         <div><p className="font-semibold text-sm text-foreground">{bill.description}</p><p className="text-xs font-bold" style={{ color: 'oklch(0.70 0.19 162)' }}>৳ {parseFloat(bill.amount).toFixed(2)}</p></div>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" onClick={() => { setEditingBillId(bill.id); setEditBillCategory(bill.description); setEditBillAmount(bill.amount.toString()); }} className="h-7 px-2.5 text-xs rounded-lg border-white/10 hover:bg-white/5 text-muted-foreground">Edit</Button>
-                          <Button variant="destructive" size="sm" onClick={async () => { if (confirm("Delete this bill?")) { const fd = new FormData(); fd.append("id", bill.id); await deleteSpecificBill(fd); setEditingMember((prev: any) => ({ ...prev, specificBills: prev.specificBills.filter((b: any) => b.id !== bill.id) })); await fetchData(undefined, false, true); } }} className="h-7 px-2.5 text-xs rounded-lg">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={async () => { if (confirm("Delete this bill?")) { const fd = new FormData(); fd.append("id", bill.id); await deleteSpecificBill(fd); setEditingMember((prev: any) => ({ ...prev, specificBills: prev.specificBills.filter((b: any) => b.id !== bill.id) })); } }} className="h-7 px-2.5 text-xs rounded-lg">Delete</Button>
                         </div>
                       </div>
                     );
