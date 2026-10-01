@@ -111,9 +111,9 @@ async function calculateMonthMetrics(targetMonth: string, settings: any) {
       marketFine = totalMarketsCount === 0 ? settings.defaultMarketFine : 0;
     }
 
-    let baseKhala = (settings.applyDefaultBills ? settings.defaultKhalaBill : 0) * M_X2;
-    let baseManager = (settings.applyDefaultBills ? settings.defaultManagerBill : 0) * M_X2;
-    let baseGas = (settings.applyDefaultBills ? settings.defaultGasBill : 0) * M_X2;
+    let baseKhala = settings.applyDefaultBills ? settings.defaultKhalaBill : 0;
+    let baseManager = settings.applyDefaultBills ? settings.defaultManagerBill : 0;
+    let baseGas = settings.applyDefaultBills ? settings.defaultGasBill : 0;
     let paper = settings.applyDefaultBills ? settings.defaultPaperBill : 0;
     let current = settings.applyDefaultBills ? settings.defaultCurrentBill : 0;
     let festival = settings.applyDefaultBills ? settings.defaultFestivalBill : 0;
@@ -129,6 +129,10 @@ async function calculateMonthMetrics(targetMonth: string, settings: any) {
       else if (b.description.startsWith("Market Fine")) marketFine += b.amount;
       else specificOther += b.amount;
     });
+
+    baseKhala *= M_X2;
+    baseManager *= M_X2;
+    baseGas *= M_X2;
 
     const adjustedOverheads = baseKhala + baseManager + baseGas + paper + current + festival + marketFine + specificOther;
     const totalDeposits = member.deposits.reduce((sum: number, dep: any) => sum + dep.amount, 0);
