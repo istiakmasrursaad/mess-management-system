@@ -99,20 +99,15 @@ export default function AdminWorkspace() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
-  // ── Persist selected month in localStorage so popup never re-appears on login ──
+  // ── Month persistence ──
+  // NOTE: useState initializer runs on server (SSR) where localStorage is unavailable,
+  // so we always start with defaults here and read localStorage inside useEffect.
   const defaultMonthYear = () => {
     const d = new Date();
     return `${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
   };
-  const getSavedMonth = () => {
-    if (typeof window === "undefined") return defaultMonthYear();
-    return localStorage.getItem("adminSelectedMonth") || defaultMonthYear();
-  };
-  const [selectedMonth, setSelectedMonth] = useState<string>(getSavedMonth());
-  // If a month was previously saved, skip the popup entirely
-  const [hasSelectedMonth, setHasSelectedMonth] = useState(
-    typeof window !== "undefined" && !!localStorage.getItem("adminSelectedMonth")
-  );
+  const [selectedMonth, setSelectedMonth] = useState<string>(defaultMonthYear());
+  const [hasSelectedMonth, setHasSelectedMonth] = useState(false);
 
   // Session & Super Admin state
   const [session, setSession] = useState<any>(null);
@@ -315,10 +310,20 @@ export default function AdminWorkspace() {
   };
 
   useEffect(() => {
+    // Read localStorage INSIDE the effect (runs only on client after mount).
+    // This is the ONLY safe place to access localStorage in Next.js — never in useState init.
+    const savedMonth = localStorage.getItem("adminSelectedMonth");
+    const monthToLoad = savedMonth || defaultMonthYear();
+
+    // Update state to reflect the saved month before loading data
+    if (savedMonth) {
+      setSelectedMonth(savedMonth);
+    }
+
     // Single consolidated network request to fetch ALL initial data
     const loadInitialData = async () => {
       setLoading(true);
-      const res = await getAdminDashboardInitialData(selectedMonth, selectedMealDate);
+      const res = await getAdminDashboardInitialData(monthToLoad, selectedMealDate);
       
       // Apply the fetched data
       setData(res.data);
@@ -352,7 +357,7 @@ export default function AdminWorkspace() {
       setManagers(res.managers);
       
       // Persist the loaded month so popup is skipped on next login
-      localStorage.setItem("adminSelectedMonth", selectedMonth);
+      localStorage.setItem("adminSelectedMonth", monthToLoad);
       setHasSelectedMonth(true);
 
       setLoading(false);
