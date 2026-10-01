@@ -111,12 +111,12 @@ async function calculateMonthMetrics(targetMonth: string, settings: any) {
       marketFine = totalMarketsCount === 0 ? settings.defaultMarketFine : 0;
     }
 
-    let baseKhala = settings.applyDefaultBills ? settings.defaultKhalaBill : 0;
-    let baseManager = settings.applyDefaultBills ? settings.defaultManagerBill : 0;
-    let baseGas = settings.applyDefaultBills ? settings.defaultGasBill : 0;
-    let paper = settings.applyDefaultBills ? settings.defaultPaperBill : 0;
-    let current = settings.applyDefaultBills ? settings.defaultCurrentBill : 0;
-    let festival = settings.applyDefaultBills ? settings.defaultFestivalBill : 0;
+    let baseKhala = (memberBill && memberBill.isKhalaOverridden) ? memberBill.baseKhala : (settings.applyDefaultBills ? settings.defaultKhalaBill : 0);
+    let baseManager = (memberBill && memberBill.isManagerOverridden) ? memberBill.manager : (settings.applyDefaultBills ? settings.defaultManagerBill : 0);
+    let baseGas = (memberBill && memberBill.isGasOverridden) ? memberBill.gasBill : (settings.applyDefaultBills ? settings.defaultGasBill : 0);
+    let paper = (memberBill && memberBill.isPaperOverridden) ? memberBill.paper : (settings.applyDefaultBills ? settings.defaultPaperBill : 0);
+    let current = (memberBill && memberBill.isCurrentOverridden) ? memberBill.current : (settings.applyDefaultBills ? settings.defaultCurrentBill : 0);
+    let festival = (memberBill && memberBill.isFestivalOverridden) ? memberBill.festival : (settings.applyDefaultBills ? settings.defaultFestivalBill : 0);
     let specificOther = 0;
 
     member.specificBills.forEach((b: any) => {
@@ -148,6 +148,18 @@ async function calculateMonthMetrics(targetMonth: string, settings: any) {
       extraMarketAllowance,
       marketFine,
       isFineOverridden,
+      isKhalaOverridden: memberBill?.isKhalaOverridden || false,
+      isManagerOverridden: memberBill?.isManagerOverridden || false,
+      isGasOverridden: memberBill?.isGasOverridden || false,
+      isPaperOverridden: memberBill?.isPaperOverridden || false,
+      isCurrentOverridden: memberBill?.isCurrentOverridden || false,
+      isFestivalOverridden: memberBill?.isFestivalOverridden || false,
+      rawBaseKhala: memberBill?.baseKhala || 0,
+      rawManager: memberBill?.manager || 0,
+      rawGas: memberBill?.gasBill || 0,
+      rawPaper: memberBill?.paper || 0,
+      rawCurrent: memberBill?.current || 0,
+      rawFestival: memberBill?.festival || 0,
       baseKhala,
       baseManager,
       baseGas,
@@ -608,6 +620,83 @@ export async function revertFineOverride(formData: FormData) {
     await prisma.bill.update({
       where: { id: existingBill.id },
       data: { marketFine: 0, isFineOverridden: false },
+    });
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/member");
+  return { success: true };
+}
+
+export async function saveBillOverrides(formData: FormData) {
+  const memberId = formData.get("memberId") as string;
+  const monthYear = formData.get("monthYear") as string || "08-2026";
+  
+  const overrides: any = {};
+  
+  // Parse inputs (null means no override/revert)
+  const baseKhala = formData.get("baseKhala");
+  if (baseKhala !== null) { overrides.baseKhala = baseKhala === "" ? null : parseFloat(baseKhala as string); }
+  
+  const manager = formData.get("manager");
+  if (manager !== null) { overrides.manager = manager === "" ? null : parseFloat(manager as string); }
+  
+  const gasBill = formData.get("gasBill");
+  if (gasBill !== null) { overrides.gasBill = gasBill === "" ? null : parseFloat(gasBill as string); }
+  
+  const paper = formData.get("paper");
+  if (paper !== null) { overrides.paper = paper === "" ? null : parseFloat(paper as string); }
+  
+  const current = formData.get("current");
+  if (current !== null) { overrides.current = current === "" ? null : parseFloat(current as string); }
+  
+  const festival = formData.get("festival");
+  if (festival !== null) { overrides.festival = festival === "" ? null : parseFloat(festival as string); }
+
+  const existingBill = await prisma.bill.findFirst({
+    where: { memberId, monthYear },
+  });
+
+  const updateData: any = {};
+  
+  if (overrides.baseKhala !== undefined) {
+    updateData.isKhalaOverridden = overrides.baseKhala !== null;
+    if (overrides.baseKhala !== null) updateData.baseKhala = overrides.baseKhala;
+  }
+  if (overrides.manager !== undefined) {
+    updateData.isManagerOverridden = overrides.manager !== null;
+    if (overrides.manager !== null) updateData.manager = overrides.manager;
+  }
+  if (overrides.gasBill !== undefined) {
+    updateData.isGasOverridden = overrides.gasBill !== null;
+    if (overrides.gasBill !== null) updateData.gasBill = overrides.gasBill;
+  }
+  if (overrides.paper !== undefined) {
+    updateData.isPaperOverridden = overrides.paper !== null;
+    if (overrides.paper !== null) updateData.paper = overrides.paper;
+  }
+  if (overrides.current !== undefined) {
+    updateData.isCurrentOverridden = overrides.current !== null;
+    if (overrides.current !== null) updateData.current = overrides.current;
+  }
+  if (overrides.festival !== undefined) {
+    updateData.isFestivalOverridden = overrides.festival !== null;
+    if (overrides.festival !== null) updateData.festival = overrides.festival;
+  }
+
+  if (existingBill) {
+    await prisma.bill.update({
+      where: { id: existingBill.id },
+      data: updateData,
+    });
+  } else {
+    // defaults needed for fields not being overridden right now
+    await prisma.bill.create({
+      data: {
+        memberId,
+        monthYear,
+        ...updateData,
+      },
     });
   }
 

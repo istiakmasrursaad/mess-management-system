@@ -12,6 +12,8 @@ import { Settings, Lock } from "lucide-react";
 export default function SettingsTab({ props }: { props: any }) {
   const { settingsForm, setSettingsForm, fetchData, handleUpdateSettings } = props;
 
+  const [isSaving, setIsSaving] = React.useState(false);
+
   return (
     <>
       <div className="max-w-2xl mx-auto section-panel">
@@ -37,7 +39,15 @@ export default function SettingsTab({ props }: { props: any }) {
                 </div>
               </div>
               <div className="p-5">
-                <form onSubmit={handleUpdateSettings} className="space-y-4">
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setIsSaving(true);
+                  try {
+                    await handleUpdateSettings(e);
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }} className="space-y-4">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Default Daily Meal Threshold</Label>
                     <Input type="number" step="0.1" value={isNaN(settingsForm.defaultDailyMealThreshold) ? "" : settingsForm.defaultDailyMealThreshold}
@@ -91,7 +101,7 @@ export default function SettingsTab({ props }: { props: any }) {
                       required className="h-10 rounded-xl bg-white/5 border-white/10 focus:border-white/25 text-foreground" />
                     <p className="text-xs text-muted-foreground">Lock time for next-day meal toggles (Default: 10:00 PM)</p>
                   </div>
-                  <Button type="submit" className="w-full h-10 text-sm font-bold btn-glow mt-2">Save Mess Rules</Button>
+                  <Button type="submit" disabled={isSaving} className="w-full h-10 text-sm font-bold btn-glow mt-2">{isSaving ? "Saving..." : "Save Mess Rules"}</Button>
                 </form>
               </div>
             </div>

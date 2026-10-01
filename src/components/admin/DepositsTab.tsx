@@ -13,6 +13,9 @@ import { DollarSign, CheckCircle2, History, Trash2, Pencil } from "lucide-react"
 
 export default function DepositsTab({ props }: { props: any }) {
   const { data, isEditDepositDialogOpen, setIsEditDepositDialogOpen, editingDeposit, editDepositAmount, setEditDepositAmount, editDepositDate, setEditDepositDate, fetchData, openEditDeposit, handleUpdateDeposit, handleDeleteDeposit } = props;
+  const [isAdding, setIsAdding] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [deletingId, setDeletingId] = React.useState<string | null>(null);
 
   return (
     <>
@@ -28,11 +31,23 @@ export default function DepositsTab({ props }: { props: any }) {
                     </div>
                   </div>
                   <div className="p-4">
-                    <form onSubmit={async (e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); await addDeposit(fd); (e.target as HTMLFormElement).reset(); await fetchData(undefined, false, true); toast.success("Deposit added successfully!"); }} className="space-y-3">
+                    <form onSubmit={async (e) => { 
+                      e.preventDefault(); 
+                      setIsAdding(true);
+                      try {
+                        const fd = new FormData(e.currentTarget); 
+                        await addDeposit(fd); 
+                        (e.target as HTMLFormElement).reset(); 
+                        await fetchData(undefined, false, true); 
+                        toast.success("Deposit added successfully!");
+                      } finally {
+                        setIsAdding(false);
+                      }
+                    }} className="space-y-3">
                       <div className="space-y-1.5"><Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Select Member</Label><select name="memberId" required className="w-full h-10 px-3 rounded-xl text-sm font-medium focus:outline-none" style={{ background: 'oklch(0.18 0.02 260)', border: '1px solid oklch(1 0 0 / 12%)', color: 'oklch(0.93 0.01 260)' }}><option value="">Choose a member...</option>{data.members.map((m: any) => <option key={m.member.id} value={m.member.id} style={{ background: 'oklch(0.18 0.02 260)' }}>{m.member.user.name} (R{m.member.roomNo})</option>)}</select></div>
                       <div className="space-y-1.5"><Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Deposit Amount (Tk)</Label><Input name="amount" type="number" step="0.01" min="1" placeholder="3000" required className="h-10 rounded-xl bg-white/5 border-white/10 text-foreground" /></div>
                       <div className="space-y-1.5"><Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Deposit Date</Label><Input name="date" type="date" required defaultValue={new Date().toISOString().split("T")[0]} className="h-10 rounded-xl bg-white/5 border-white/10 text-foreground" /></div>
-                      <Button type="submit" className="w-full h-10 font-bold btn-glow text-sm gap-2"><CheckCircle2 className="w-4 h-4" /> Record Deposit</Button>
+                      <Button type="submit" disabled={isAdding} className="w-full h-10 font-bold btn-glow text-sm gap-2"><CheckCircle2 className="w-4 h-4" /> {isAdding ? "Saving..." : "Record Deposit"}</Button>
                     </form>
                   </div>
                 </div>
@@ -76,11 +91,19 @@ export default function DepositsTab({ props }: { props: any }) {
                                             type="button"
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => handleDeleteDeposit(dep.id, dep.amount, m.member.user.name)}
+                                            disabled={deletingId === dep.id}
+                                            onClick={async () => {
+                                              setDeletingId(dep.id);
+                                              try {
+                                                await handleDeleteDeposit(dep.id, dep.amount, m.member.user.name);
+                                              } finally {
+                                                setDeletingId(null);
+                                              }
+                                            }}
                                             className="h-6 w-6 p-0 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-md"
                                             title="Delete Deposit"
                                           >
-                                            <Trash2 className="w-3.5 h-3.5" />
+                                            {deletingId === dep.id ? "..." : <Trash2 className="w-3.5 h-3.5" />}
                                           </Button>
                                         </div>
                                       </div>
@@ -117,7 +140,15 @@ export default function DepositsTab({ props }: { props: any }) {
                     Update deposit amount or date for {editingDeposit?.memberName || "Member"}
                   </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleUpdateDeposit} className="space-y-4 py-2">
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setIsEditing(true);
+                  try {
+                    await handleUpdateDeposit(e);
+                  } finally {
+                    setIsEditing(false);
+                  }
+                }} className="space-y-4 py-2">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Deposit Amount (Tk)</Label>
                     <Input
@@ -142,7 +173,7 @@ export default function DepositsTab({ props }: { props: any }) {
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
                     <Button variant="ghost" type="button" onClick={() => setIsEditDepositDialogOpen(false)}>Cancel</Button>
-                    <Button type="submit" className="btn-glow font-bold">Save Changes</Button>
+                    <Button type="submit" disabled={isEditing} className="btn-glow font-bold">{isEditing ? "Saving..." : "Save Changes"}</Button>
                   </div>
                 </form>
               </DialogContent>

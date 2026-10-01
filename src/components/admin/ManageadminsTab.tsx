@@ -10,6 +10,8 @@ import { PlusCircle, UserCog, Trash2 } from "lucide-react";
 
 export default function ManageadminsTab({ props }: { props: any }) {
   const { data, managers, isAddManagerOpen, setIsAddManagerOpen, managerForm, setManagerForm, managerError, setManagerError, handleAddManager, handleRemoveManager } = props;
+  const [isAdding, setIsAdding] = React.useState(false);
+  const [deletingId, setDeletingId] = React.useState<string | null>(null);
 
   return (
     <>
@@ -33,7 +35,15 @@ export default function ManageadminsTab({ props }: { props: any }) {
                     <DialogTitle className="font-bold">Add Manager</DialogTitle>
                     <DialogDescription>Create a new admin/manager account.</DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={handleAddManager} className="space-y-3 pt-2">
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    setIsAdding(true);
+                    try {
+                      await handleAddManager(e);
+                    } finally {
+                      setIsAdding(false);
+                    }
+                  }} className="space-y-3 pt-2">
                     {managerError && <p className="text-xs text-red-500 bg-red-500/10 p-2 rounded">{managerError}</p>}
                     <div className="space-y-1.5"><Label className="text-xs font-semibold">Name</Label><Input name="name" value={managerForm.name} onChange={(e) => setManagerForm({...managerForm, name: e.target.value})} placeholder="Manager Name" required className="h-10 rounded-xl bg-white/5 border-white/10 text-foreground" /></div>
                     <div className="space-y-1.5"><Label className="text-xs font-semibold">Email</Label><Input name="email" type="email" value={managerForm.email} onChange={(e) => setManagerForm({...managerForm, email: e.target.value})} placeholder="manager@mess.com" required className="h-10 rounded-xl bg-white/5 border-white/10 text-foreground" /></div>
@@ -45,7 +55,7 @@ export default function ManageadminsTab({ props }: { props: any }) {
                         <option value="MANAGER" className="bg-zinc-900">Manager</option>
                       </select>
                     </div>
-                    <Button type="submit" className="w-full h-10 font-bold btn-glow">Add Manager</Button>
+                    <Button type="submit" disabled={isAdding} className="w-full h-10 font-bold btn-glow">{isAdding ? "Adding..." : "Add Manager"}</Button>
                   </form>
                 </DialogContent>
               </Dialog>
@@ -71,8 +81,15 @@ export default function ManageadminsTab({ props }: { props: any }) {
                           <td>{m.phone || '-'}</td>
                           <td className="text-right">
                             {m.role !== 'SUPER_ADMIN' && (
-                              <Button variant="ghost" size="sm" onClick={() => handleRemoveManager(m.id, m.name)} className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg">
-                                <Trash2 className="w-4 h-4" />
+                              <Button variant="ghost" size="sm" disabled={deletingId === m.id} onClick={async () => {
+                                setDeletingId(m.id);
+                                try {
+                                  await handleRemoveManager(m.id, m.name);
+                                } finally {
+                                  setDeletingId(null);
+                                }
+                              }} className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg">
+                                {deletingId === m.id ? "..." : <Trash2 className="w-4 h-4" />}
                               </Button>
                             )}
                           </td>

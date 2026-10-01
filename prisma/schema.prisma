@@ -103,13 +103,19 @@ model Bill {
   memberId        String
   monthYear       String    // e.g., "08-2026"
   baseKhala       Float     @default(0)
+  isKhalaOverridden Boolean @default(false)
   manager         Float     @default(0)
+  isManagerOverridden Boolean @default(false)
   gasBill         Float     @default(0)
+  isGasOverridden Boolean   @default(false)
   paper           Float     @default(0)
+  isPaperOverridden Boolean @default(false)
   current         Float     @default(0)
+  isCurrentOverridden Boolean @default(false)
   festival        Float     @default(0)
+  isFestivalOverridden Boolean @default(false)
   marketFine      Float     @default(0)
-  isFineOverridden Boolean   @default(false)
+  isFineOverridden Boolean  @default(false)
   
   // Relations
   member          Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
