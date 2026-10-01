@@ -310,14 +310,20 @@ export default function AdminWorkspace() {
   };
 
   useEffect(() => {
-    // Read localStorage INSIDE the effect (runs only on client after mount).
-    // This is the ONLY safe place to access localStorage in Next.js — never in useState init.
+    // Read localStorage INSIDE the effect — the ONLY safe place in Next.js (no SSR here).
     const savedMonth = localStorage.getItem("adminSelectedMonth");
-    const monthToLoad = savedMonth || defaultMonthYear();
+    const monthToLoad = savedMonth ?? defaultMonthYear();
 
-    // Update state to reflect the saved month before loading data
+    // KEY FIX: Call both setSelectedMonth + setHasSelectedMonth SYNCHRONOUSLY together.
+    // React 18 batches all synchronous state updates from the same useEffect call into
+    // a SINGLE re-render. This guarantees that when the dashboard becomes visible
+    // (hasSelectedMonth=true), selectedMonth is ALREADY the saved month — never the
+    // default current month. Previously, setHasSelectedMonth(true) was called inside
+    // the async loadInitialData(), so they applied in separate renders and Vercel SSR
+    // hydration could cause selectedMonth to drift back to current month.
     if (savedMonth) {
-      setSelectedMonth(savedMonth);
+      setSelectedMonth(savedMonth);   // } batched → single re-render
+      setHasSelectedMonth(true);      // } popup skipped with correct month
     }
 
     // Single consolidated network request to fetch ALL initial data
@@ -356,9 +362,15 @@ export default function AdminWorkspace() {
       setSession(res.session);
       setManagers(res.managers);
       
-      // Persist the loaded month so popup is skipped on next login
+      // Save the loaded month to localStorage for next visit
       localStorage.setItem("adminSelectedMonth", monthToLoad);
-      setHasSelectedMonth(true);
+      
+      // If no savedMonth (first-ever login): let user pick & click "Start Managing".
+      // If savedMonth existed: hasSelectedMonth was already set to true above (sync).
+      if (!savedMonth) {
+        // Keep hasSelectedMonth=false so popup remains visible for first-time setup.
+        // The "Start Managing" button onClick will set it to true.
+      }
 
       setLoading(false);
     };
