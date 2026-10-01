@@ -1097,6 +1097,7 @@ export default function AdminWorkspace() {
                 onChange={(e) => {
                   const newMonth = `${e.target.value}-${selectedMonth.split('-')[1]}`;
                   setSelectedMonth(newMonth);
+                  localStorage.setItem("adminSelectedMonth", newMonth);
                   fetchData(newMonth);
                 }}
                 className="bg-transparent text-sm font-semibold focus:outline-none cursor-pointer text-foreground"
@@ -1110,9 +1111,24 @@ export default function AdminWorkspace() {
               <input
                 type="number" min="2020" max="2100"
                 value={selectedMonth.split('-')[1]}
-                onChange={(e) => setSelectedMonth(`${selectedMonth.split('-')[0]}-${e.target.value}`)}
-                onBlur={(e) => { if (e.target.value.length === 4) fetchData(`${selectedMonth.split('-')[0]}-${e.target.value}`); }}
-                onKeyDown={(e) => { if (e.key === 'Enter' && e.currentTarget.value.length === 4) fetchData(`${selectedMonth.split('-')[0]}-${e.currentTarget.value}`); }}
+                onChange={(e) => {
+                  const newMonth = `${selectedMonth.split('-')[0]}-${e.target.value}`;
+                  setSelectedMonth(newMonth);
+                }}
+                onBlur={(e) => {
+                  if (e.target.value.length === 4) {
+                    const newMonth = `${selectedMonth.split('-')[0]}-${e.target.value}`;
+                    localStorage.setItem("adminSelectedMonth", newMonth);
+                    fetchData(newMonth);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.currentTarget.value.length === 4) {
+                    const newMonth = `${selectedMonth.split('-')[0]}-${e.currentTarget.value}`;
+                    localStorage.setItem("adminSelectedMonth", newMonth);
+                    fetchData(newMonth);
+                  }
+                }}
                 className="bg-transparent text-sm font-semibold focus:outline-none w-14 text-foreground"
               />
             </div>
