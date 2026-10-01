@@ -8,7 +8,12 @@ import { Utensils, RefreshCw } from "lucide-react";
 
 
 export default function DailymealsTab({ props }: { props: any }) {
-  const { data, loading, selectedMealDate, dailyMealsData, mealInputValues, setMealInputValues, loadingDailyMeals, isSavingMeals, handleMealDateChange, handleSaveAllMeals } = props;
+  const { data, loading, selectedMealDate, dailyMealsData, mealInputValues, setMealInputValues, loadingDailyMeals, isSavingMeals, handleMealDateChange, handleSaveAllMeals, selectedMonth } = props;
+
+  const [m, y] = (selectedMonth || "").split("-");
+  const lastDayOfMonth = m && y ? new Date(Number(y), Number(m), 0).getDate() : 31;
+  const minDate = y && m ? `${y}-${m}-01` : undefined;
+  const maxDate = y && m ? `${y}-${m}-${lastDayOfMonth}` : undefined;
 
   return (
     <>
@@ -21,6 +26,7 @@ export default function DailymealsTab({ props }: { props: any }) {
                 <div className="flex items-center gap-2">
                   <Label htmlFor="mealDate" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">Date:</Label>
                   <Input id="mealDate" type="date" value={selectedMealDate} onChange={handleMealDateChange}
+                    min={minDate} max={maxDate}
                     className="h-9 rounded-xl bg-white/5 border-white/10 text-foreground w-36 text-sm" />
                 </div>
               </div>
