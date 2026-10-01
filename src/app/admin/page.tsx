@@ -294,10 +294,19 @@ export default function AdminWorkspace() {
   const handleFinalizeMonth = async () => {
     if (!window.confirm(`"${monthYearToLabel(selectedMonth)}" মাসের হিসাব চূড়ান্ত করে সেভ করবেন? এটি একটি স্থায়ী snapshot তৈরি করবে।`)) return;
     setIsFinalizing(true);
-    await finalizeMonth(selectedMonth);
-    await fetchSnapshots();
-    setIsFinalizing(false);
-    toast.success(`${monthYearToLabel(selectedMonth)} সফলভাবে চূড়ান্ত ও সেভ হয়েছে!`);
+    try {
+      const res = await finalizeMonth(selectedMonth);
+      if (!res.success) {
+        throw new Error(res.error);
+      }
+      await fetchSnapshots();
+      toast.success(`${monthYearToLabel(selectedMonth)} সফলভাবে চূড়ান্ত ও সেভ হয়েছে!`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to finalize month");
+    } finally {
+      setIsFinalizing(false);
+    }
   };
 
   const handleDeleteSnapshot = async (id: string, monthLabel: string) => {

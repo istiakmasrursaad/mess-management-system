@@ -927,38 +927,43 @@ export async function removeMember(formData: FormData) {
 // ─── 14. Finalize Month — Save Permanent Snapshot ─────────────────────────────
 
 export async function finalizeMonth(monthYear: string) {
-  const data = await getMessData(monthYear);
-  const monthLabel = monthYearToLabel(monthYear);
+  try {
+    const data = await getMessData(monthYear);
+    const monthLabel = monthYearToLabel(monthYear);
 
-  // Delete old snapshot if exists (overwrite/re-finalize)
-  await prisma.monthlySnapshot.deleteMany({ where: { monthYear } });
+    // Delete old snapshot if exists (overwrite/re-finalize)
+    await prisma.monthlySnapshot.deleteMany({ where: { monthYear } });
 
-  await prisma.monthlySnapshot.create({
-    data: {
-      monthYear,
-      monthLabel,
-      totalMessMeals: data.totalMessMeals,
-      totalMarketCost: data.totalMarketCost,
-      liveMealRate: data.liveMealRate,
-      memberSnapshots: {
-        create: data.members.map((m: any) => ({
-          memberId: m.member.id,
-          memberName: m.member.user.name ?? "Unknown",
-          roomNo: m.member.roomNo ?? null,
-          totalMeals: m.totalMeals,
-          individualMealCost: m.individualMealCost,
-          adjustedOverheads: m.adjustedOverheads,
-          totalCost: m.totalCost,
-          totalDeposits: m.totalDeposits,
-          due: Math.round(m.due),
-          advance: Math.round(m.advance),
-        })),
+    await prisma.monthlySnapshot.create({
+      data: {
+        monthYear,
+        monthLabel,
+        totalMessMeals: data.totalMessMeals,
+        totalMarketCost: data.totalMarketCost,
+        liveMealRate: data.liveMealRate,
+        memberSnapshots: {
+          create: data.members.map((m: any) => ({
+            memberId: m.member.id,
+            memberName: m.member.user.name ?? "Unknown",
+            roomNo: m.member.roomNo ?? null,
+            totalMeals: m.totalMeals,
+            individualMealCost: m.individualMealCost,
+            adjustedOverheads: m.adjustedOverheads,
+            totalCost: m.totalCost,
+            totalDeposits: m.totalDeposits,
+            due: Math.round(m.due),
+            advance: Math.round(m.advance),
+          })),
+        },
       },
-    },
-  });
+    });
 
-  revalidatePath("/admin");
-  return { success: true };
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err: any) {
+    console.error("Finalize Month Error:", err);
+    return { success: false, error: err.message || "Unknown error occurred" };
+  }
 }
 
 // ─── 15. Get All Finalized Monthly Snapshots ──────────────────────────────────
