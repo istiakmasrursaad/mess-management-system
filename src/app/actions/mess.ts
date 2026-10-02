@@ -782,6 +782,7 @@ export async function getDailyMealsByDate(dateStr: string) {
   const dateObj = new Date(dateStr);
   const startOfDay = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
   const endOfDay = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 23, 59, 59, 999);
+  const targetMonth = dateToMonthYear(dateObj);
 
   const members = await prisma.member.findMany({
     where: {
@@ -800,7 +801,22 @@ export async function getDailyMealsByDate(dateStr: string) {
     },
   });
 
-  return members.map((member) => ({
+  const activeMembers = members.filter((m) => {
+    if (!m.status.startsWith("LEFT_")) return true;
+    
+    const leftMonthStr = m.status.split("_")[1];
+    if (!leftMonthStr) return true;
+
+    const [leftMM, leftYYYY] = leftMonthStr.split("-").map(Number);
+    const [targetMM, targetYYYY] = targetMonth.split("-").map(Number);
+
+    const leftValue = leftYYYY * 100 + leftMM;
+    const targetValue = targetYYYY * 100 + targetMM;
+
+    return targetValue < leftValue;
+  });
+
+  return activeMembers.map((member) => ({
     memberId: member.id,
     name: member.user.name,
     roomNo: member.roomNo,
