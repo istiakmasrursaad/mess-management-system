@@ -386,8 +386,10 @@
   display: flex;
   gap: 0.25rem;
   padding: 0.25rem;
-  background: oklch(0.14 0.018 260);
-  border: 1px solid oklch(1 0 0 / 8%);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 0.875rem;
   overflow-x: auto;
   scroll-behavior: smooth;
@@ -526,13 +528,11 @@
 
 /* Active state for new pill tab triggers (data-[state=active]) */
 .tab-nav [data-state=active] {
-  background: linear-gradient(135deg,
-    oklch(0.55 0.26 278),
-    oklch(0.50 0.22 268)) !important;
+  background: linear-gradient(135deg, #6d28d9, #0ea5e9) !important;
   color: white !important;
   box-shadow:
-    0 4px 14px oklch(0.55 0.26 278 / 40%),
-    0 0 0 1px oklch(1 0 0 / 12%) inset !important;
+    0 4px 14px rgba(109, 40, 217, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset !important;
 }
 
 /* ============================================
@@ -557,8 +557,10 @@
    📦 Section Panel (dark glass card)
    ============================================ */
 .section-panel {
-  background: oklch(0.15 0.018 260);
-  border: 1px solid oklch(1 0 0 / 8%);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 1rem;
   overflow: hidden;
 }
@@ -569,8 +571,8 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid oklch(1 0 0 / 6%);
-  background: oklch(0.17 0.02 260);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* ============================================
@@ -599,21 +601,21 @@
 }
 
 .data-table tbody tr {
-  border-bottom: 1px solid oklch(1 0 0 / 5%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background 0.15s;
 }
 
 .data-table tbody tr:nth-child(even) {
-  background: oklch(0.14 0.016 260);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .data-table tbody tr:hover {
-  background: oklch(0.65 0.25 275 / 7%);
+  background: rgba(109, 40, 217, 0.08);
 }
 
 .data-table tbody td {
   padding: 0.625rem 0.875rem;
-  color: oklch(0.75 0.03 260);
+  color: #cbd5e1;
   vertical-align: middle;
 }
 

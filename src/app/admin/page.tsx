@@ -992,24 +992,25 @@ export default function AdminWorkspace() {
 
   if (!hasSelectedMonth) {
   return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-500" style={{ background: 'oklch(0.08 0.015 260 / 92%)', backdropFilter: 'blur(16px)' }}>
-        <div className="w-full max-w-sm glass-card-elevated rounded-2xl overflow-hidden animate-in zoom-in-95 duration-500">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-500" style={{ background: 'rgba(15, 23, 42, 0.92)', backdropFilter: 'blur(20px)' }}>
+        <div className="w-full max-w-sm rounded-2xl overflow-hidden animate-in zoom-in-95 duration-500"
+          style={{ background: 'linear-gradient(135deg, rgba(109,40,217,0.25) 0%, rgba(14,165,233,0.15) 100%)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(24px)' }}>
           {/* top accent */}
-          <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, oklch(0.65 0.25 275 / 60%), oklch(0.72 0.18 200 / 60%), transparent)' }} />
+          <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(109,40,217,0.8), rgba(14,165,233,0.8), transparent)' }} />
           <div className="p-7 space-y-5">
             <div className="flex flex-col items-center text-center gap-3">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, oklch(0.25 0.12 275), oklch(0.20 0.10 265))', border: '1px solid oklch(1 0 0 / 10%)' }}>
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6d28d9, #0ea5e9)' }}>
                 <Calendar className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gradient">Select Month</h2>
-                <p className="text-sm text-muted-foreground mt-1">Choose the month you want to manage</p>
+                <h2 className="text-xl font-bold text-white">Select Month</h2>
+                <p className="text-sm text-slate-400 mt-1">Choose the month you want to manage</p>
               </div>
             </div>
             <div className="flex gap-2">
               <select
-                className="flex-1 h-11 rounded-xl px-3 text-sm font-semibold focus:outline-none focus:ring-2 appearance-none cursor-pointer"
-                style={{ background: 'oklch(0.18 0.02 260)', border: '1px solid oklch(1 0 0 / 12%)', color: 'oklch(0.93 0.01 260)' }}
+                className="flex-1 h-11 rounded-xl px-3 text-sm font-semibold focus:outline-none appearance-none cursor-pointer"
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'white' }}
                 value={selectedMonth.split('-')[0]}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -1020,7 +1021,7 @@ export default function AdminWorkspace() {
                 {Array.from({ length: 12 }, (_, i) => {
                   const val = String(i + 1).padStart(2, "0");
                   const d = new Date(2000, i, 1);
-                  return <option key={val} value={val} style={{ background: 'oklch(0.18 0.02 260)', color: 'oklch(0.93 0.01 260)' }}>{d.toLocaleString("en-US", { month: "long" })}</option>;
+                  return <option key={val} value={val} style={{ background: '#1e1b4b', color: 'white' }}>{d.toLocaleString("en-US", { month: "long" })}</option>;
                 })}
               </select>
               <input
@@ -1032,11 +1033,12 @@ export default function AdminWorkspace() {
                   setSelectedMonth(`${selectedMonth.split('-')[0]}-${val}`);
                 }}
                 className="w-24 h-11 rounded-xl text-center font-bold text-sm focus:outline-none"
-                style={{ background: 'oklch(0.18 0.02 260)', border: '1px solid oklch(1 0 0 / 12%)', color: 'oklch(0.93 0.01 260)' }}
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'white' }}
               />
             </div>
-            <Button
-              className="w-full h-11 text-sm font-bold btn-glow rounded-xl gap-2"
+            <button
+              className="w-full h-11 text-sm font-bold rounded-xl flex items-center justify-center gap-2 text-white transition-all duration-200 disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg, #6d28d9, #0ea5e9)', boxShadow: '0 4px 16px rgba(109,40,217,0.4)' }}
               onClick={() => {
                 localStorage.setItem("adminSelectedMonth", selectedMonth);
                 setHasSelectedMonth(true);
@@ -1044,14 +1046,11 @@ export default function AdminWorkspace() {
               disabled={loading}
             >
               {loading ? (
-                <>
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  Loading...
-                </>
+                <><RefreshCw className="h-4 w-4 animate-spin" /> Loading...</>
               ) : (
                 "Start Managing →"
               )}
-            </Button>
+            </button>
           </div>
         </div>
       </div>
@@ -1060,96 +1059,125 @@ export default function AdminWorkspace() {
 
   if (loading || !data) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-[70vh] gap-4">
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[70vh] gap-4"
+        style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)" }}>
         <div className="relative">
-          <div className="absolute inset-0 rounded-2xl blur-xl opacity-60" style={{ background: 'linear-gradient(135deg, oklch(0.58 0.26 278), oklch(0.65 0.20 200))' }} />
-          <div className="relative p-4 rounded-2xl animate-float" style={{ background: 'linear-gradient(135deg, oklch(0.25 0.12 275), oklch(0.20 0.10 265))', border: '1px solid oklch(1 0 0 / 12%)' }}>
+          <div className="absolute inset-0 rounded-2xl blur-xl opacity-60" style={{ background: 'linear-gradient(135deg, #6d28d9, #0ea5e9)' }} />
+          <div className="relative p-4 rounded-2xl animate-float" style={{ background: 'linear-gradient(135deg, rgba(109,40,217,0.4), rgba(14,165,233,0.3))', border: '1px solid rgba(255,255,255,0.1)' }}>
             <RefreshCw className="h-7 w-7 animate-spin text-white" />
           </div>
         </div>
-        <p className="text-muted-foreground font-semibold">Loading Mess Calculations…</p>
+        <p className="text-slate-400 font-semibold">Loading Mess Calculations…</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 min-h-screen">
-      <div className="p-4 md:p-6 lg:p-8 space-y-5 max-w-7xl mx-auto w-full">
+    <div className="flex-1 min-h-screen relative overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%)" }}>
 
-        {/* ── Modern Dark Top Bar ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl px-5 py-4"
-          style={{ background: 'oklch(0.14 0.018 260)', border: '1px solid oklch(1 0 0 / 8%)' }}>
+      {/* Ambient glow orbs — matching member page */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
+          style={{ background: "radial-gradient(circle, #6d28d9, transparent 70%)", animation: "float 7s ease-in-out infinite" }} />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full opacity-10 blur-3xl"
+          style={{ background: "radial-gradient(circle, #0ea5e9, transparent 70%)", animation: "float 9s ease-in-out infinite", animationDelay: "3s" }} />
+        <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-3xl"
+          style={{ background: "radial-gradient(circle, #6d28d9, transparent 60%)" }} />
+      </div>
 
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: 'linear-gradient(135deg, oklch(0.55 0.26 278), oklch(0.50 0.22 265))' }}>
-              <ShieldCheck className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />
+      <div className="relative z-10 p-4 md:p-6 lg:p-8 space-y-5 max-w-7xl mx-auto w-full">
+
+        {/* ── Header ── */}
+        <div className="relative overflow-hidden rounded-2xl p-5 md:p-6"
+          style={{
+            background: "linear-gradient(135deg, rgba(109,40,217,0.30) 0%, rgba(14,165,233,0.20) 100%)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            backdropFilter: "blur(20px)"
+          }}>
+
+          {/* inner glow */}
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl pointer-events-none"
+            style={{ background: "radial-gradient(circle, #6d28d9, transparent 70%)" }} />
+
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+            {/* Brand */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: "linear-gradient(135deg, #6d28d9, #0ea5e9)" }}>
+                <ShieldCheck className="h-5 w-5 text-white" strokeWidth={2.5} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <h1 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">Admin Workspace</h1>
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                    style={{ background: "rgba(109,40,217,0.4)", color: "#c4b5fd", border: "1px solid rgba(109,40,217,0.5)" }}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /> Live
+                  </span>
+                </div>
+                <p className="text-slate-400 text-xs font-medium mt-0.5">Mess Accounting Engine</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-base font-bold text-foreground leading-none">Admin Workspace</h1>
-              <p className="text-xs text-muted-foreground mt-0.5">Mess Accounting Engine</p>
-            </div>
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: 'oklch(0.65 0.25 275 / 12%)', color: 'oklch(0.75 0.20 275)', border: '1px solid oklch(0.65 0.25 275 / 20%)' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-              Live
-            </span>
-          </div>
 
-          {/* Month Selector */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl" style={{ background: 'oklch(0.18 0.02 260)', border: '1px solid oklch(1 0 0 / 10%)' }}>
-              <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-              <select
-                value={selectedMonth.split('-')[0]}
-                onChange={(e) => {
-                  const newMonth = `${e.target.value}-${selectedMonth.split('-')[1]}`;
-                  setSelectedMonth(newMonth);
-                  localStorage.setItem("adminSelectedMonth", newMonth);
-                  fetchData(newMonth);
-                }}
-                className="bg-transparent text-sm font-semibold focus:outline-none cursor-pointer text-foreground"
-              >
-                {Array.from({ length: 12 }, (_, i) => {
-                  const val = String(i + 1).padStart(2, "0");
-                  const d = new Date(2000, i, 1);
-                  return <option key={val} value={val} style={{ background: 'oklch(0.18 0.02 260)' }}>{d.toLocaleString("en-US", { month: "short" })}</option>;
-                })}
-              </select>
-              <input
-                type="number" min="2020" max="2100"
-                value={selectedMonth.split('-')[1]}
-                onChange={(e) => {
-                  const newMonth = `${selectedMonth.split('-')[0]}-${e.target.value}`;
-                  setSelectedMonth(newMonth);
-                }}
-                onBlur={(e) => {
-                  if (e.target.value.length === 4) {
+            {/* Month Selector & Controls */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedMonth.split('-')[0]}
+                  onChange={(e) => {
+                    const newMonth = `${e.target.value}-${selectedMonth.split('-')[1]}`;
+                    setSelectedMonth(newMonth);
+                    localStorage.setItem("adminSelectedMonth", newMonth);
+                    fetchData(newMonth);
+                  }}
+                  className="bg-transparent text-sm font-semibold focus:outline-none cursor-pointer text-white"
+                >
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const val = String(i + 1).padStart(2, "0");
+                    const d = new Date(2000, i, 1);
+                    return <option key={val} value={val} style={{ background: '#1e1b4b' }}>{d.toLocaleString("en-US", { month: "short" })}</option>;
+                  })}
+                </select>
+                <input
+                  type="number" min="2020" max="2100"
+                  value={selectedMonth.split('-')[1]}
+                  onChange={(e) => {
                     const newMonth = `${selectedMonth.split('-')[0]}-${e.target.value}`;
-                    localStorage.setItem("adminSelectedMonth", newMonth);
-                    fetchData(newMonth);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && e.currentTarget.value.length === 4) {
-                    const newMonth = `${selectedMonth.split('-')[0]}-${e.currentTarget.value}`;
-                    localStorage.setItem("adminSelectedMonth", newMonth);
-                    fetchData(newMonth);
-                  }
-                }}
-                className="bg-transparent text-sm font-semibold focus:outline-none w-14 text-foreground"
-              />
+                    setSelectedMonth(newMonth);
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value.length === 4) {
+                      const newMonth = `${selectedMonth.split('-')[0]}-${e.target.value}`;
+                      localStorage.setItem("adminSelectedMonth", newMonth);
+                      fetchData(newMonth);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.currentTarget.value.length === 4) {
+                      const newMonth = `${selectedMonth.split('-')[0]}-${e.currentTarget.value}`;
+                      localStorage.setItem("adminSelectedMonth", newMonth);
+                      fetchData(newMonth);
+                    }
+                  }}
+                  className="bg-transparent text-sm font-semibold focus:outline-none w-14 text-white"
+                />
+              </div>
+              <button
+                onClick={() => fetchData()}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 transition-all duration-200 hover:text-white"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline text-xs font-semibold">Refresh</span>
+              </button>
+              <button
+                onClick={async () => { await logoutAction(); window.location.href = "/"; }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+                style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.25)", color: "#fca5a5" }}>
+                <span className="text-xs font-semibold">Sign Out</span>
+              </button>
             </div>
-            <Button onClick={() => fetchData()} size="sm" variant="ghost"
-              className="h-9 px-3 rounded-xl gap-1.5 text-muted-foreground hover:text-foreground hover:bg-white/5">
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline text-xs font-semibold">Refresh</span>
-            </Button>
-            <Button size="sm" variant="ghost"
-              onClick={async () => { await logoutAction(); window.location.href = "/"; }}
-              className="h-9 px-3 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-white/5">
-              Sign Out
-            </Button>
           </div>
         </div>
 
