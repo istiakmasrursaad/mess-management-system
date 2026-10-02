@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Settings2 } from "lucide-react";
+import { Settings2, RotateCcw } from "lucide-react";
 import { saveBillOverrides } from "@/app/actions/mess";
 import { toast } from "react-toastify";
 
@@ -73,7 +73,12 @@ export default function OverheadsTab({ props }: { props: any }) {
               {data.members.map((m: any) => (
                 <tr key={m.member.id}>
                   <td className="font-semibold text-foreground">
-                    {m.member.user.name}
+                    <div>{m.member.user.name}</div>
+                    {(m.isKhalaOverridden || m.isManagerOverridden || m.isGasOverridden || m.isPaperOverridden || m.isCurrentOverridden || m.isFestivalOverridden) && (
+                      <span className="inline-block mt-1 text-[9px] text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded border border-red-400/20">
+                        Overrides Active
+                      </span>
+                    )}
                   </td>
                   <td className="hidden sm:table-cell font-medium">{m.totalMarketsCount}</td>
                   <td className="font-bold">
@@ -153,16 +158,35 @@ export default function OverheadsTab({ props }: { props: any }) {
                       {bill.label}
                       {bill.isOverride && <span className="text-[9px] text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded">Overridden</span>}
                     </Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-xs text-muted-foreground">৳</span>
-                      <Input 
-                        name={bill.name} 
-                        type="number" 
-                        step="0.01" 
-                        defaultValue={bill.isOverride ? bill.raw : ""} 
-                        placeholder={`Global: ${bill.current}`}
-                        className="h-10 pl-7 rounded-xl bg-white/5 border-white/10 focus:border-white/25 text-foreground placeholder:text-muted-foreground/50" 
-                      />
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-3 top-2.5 text-xs text-muted-foreground">৳</span>
+                        <Input 
+                          name={bill.name} 
+                          id={`override-input-${bill.name}`}
+                          type="number" 
+                          step="0.01" 
+                          defaultValue={bill.isOverride ? bill.raw : ""} 
+                          placeholder={`Global: ${bill.current}`}
+                          className="h-10 pl-7 rounded-xl bg-white/5 border-white/10 focus:border-white/25 text-foreground placeholder:text-muted-foreground/50" 
+                        />
+                      </div>
+                      {bill.isOverride && (
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          size="sm"
+                          className="h-10 px-2.5 text-xs text-red-400 border-red-400/20 hover:bg-red-400/10 hover:text-red-300 gap-1.5"
+                          onClick={() => {
+                            const input = document.getElementById(`override-input-${bill.name}`) as HTMLInputElement;
+                            if (input) input.value = "";
+                          }}
+                          title="Revert to global bill amount"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          Revert
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
