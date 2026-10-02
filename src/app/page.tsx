@@ -15,6 +15,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const searchParams = useSearchParams();
   const isUnauth = searchParams.get("reason") === "unauthenticated";
+  const isTimeout = searchParams.get("reason") === "timeout";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +82,13 @@ function LoginForm() {
                 style={{ background: "oklch(0.78 0.18 80 / 10%)", border: "1px solid oklch(0.78 0.18 80 / 20%)", color: "oklch(0.78 0.18 80)" }}>
                 <Lock className="h-4 w-4 shrink-0" />
                 You must be logged in to access that page.
+              </div>
+            )}
+            {isTimeout && (
+              <div className="mb-5 p-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5"
+                style={{ background: "oklch(0.78 0.18 80 / 10%)", border: "1px solid oklch(0.78 0.18 80 / 20%)", color: "oklch(0.78 0.18 80)" }}>
+                <Lock className="h-4 w-4 shrink-0" />
+                Your session has expired due to inactivity. Please log in again.
               </div>
             )}
             {errorMessage && (
