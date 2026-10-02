@@ -64,9 +64,9 @@ export default function OverheadsTab({ props }: { props: any }) {
               <tr>
                 <th>Member</th>
                 <th className="hidden sm:table-cell">Markets</th>
-                <th>Fine</th>
-                <th>Fine Override</th>
-                <th className="text-right">Actions</th>
+                {data.monthConfig.applyDefaultBills && <th>Fine</th>}
+                {data.monthConfig.applyDefaultBills && <th>Fine Override</th>}
+                {data.monthConfig.applyDefaultBills && <th className="text-right">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -81,51 +81,57 @@ export default function OverheadsTab({ props }: { props: any }) {
                     )}
                   </td>
                   <td className="hidden sm:table-cell font-medium">{m.totalMarketsCount}</td>
-                  <td className="font-bold">
-                    <span style={{ color: 'oklch(0.68 0.22 27)' }}>৳ {m.marketFine}</span>
-                    {m.isFineOverridden && <span className="text-xs text-muted-foreground ml-1">(Edited)</span>}
-                  </td>
-                  <td>
-                    <div className="flex items-center gap-2">
-                      <Input type="number" defaultValue={m.marketFine} id={`fine-${m.member.id}`} className="w-20 h-8 text-xs rounded-lg bg-white/5 border-white/10 text-foreground" />
-                      <Button size="sm" variant="outline" disabled={savingFineId === m.member.id} onClick={async () => { 
-                          const input = document.getElementById(`fine-${m.member.id}`) as HTMLInputElement; 
-                          if (input && input.value !== "") { 
-                            const val = parseFloat(input.value); 
-                            if (!isNaN(val)) {
-                              setSavingFineId(m.member.id);
-                              try {
-                                await handleSaveFineOverride(m.member.id, val); 
-                              } finally {
-                                setSavingFineId(null);
-                              }
+                  {data.monthConfig.applyDefaultBills && (
+                    <td className="font-bold">
+                      <span style={{ color: 'oklch(0.68 0.22 27)' }}>৳ {m.marketFine}</span>
+                      {m.isFineOverridden && <span className="text-xs text-muted-foreground ml-1">(Edited)</span>}
+                    </td>
+                  )}
+                  {data.monthConfig.applyDefaultBills && (
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <Input type="number" defaultValue={m.marketFine} id={`fine-${m.member.id}`} className="w-20 h-8 text-xs rounded-lg bg-white/5 border-white/10 text-foreground" />
+                        <Button size="sm" variant="outline" disabled={savingFineId === m.member.id} onClick={async () => { 
+                            const input = document.getElementById(`fine-${m.member.id}`) as HTMLInputElement; 
+                            if (input && input.value !== "") { 
+                              const val = parseFloat(input.value); 
+                              if (!isNaN(val)) {
+                                setSavingFineId(m.member.id);
+                                try {
+                                  await handleSaveFineOverride(m.member.id, val); 
+                                } finally {
+                                  setSavingFineId(null);
+                                }
+                              } 
                             } 
-                          } 
-                        }} className="h-8 px-2.5 text-xs rounded-lg border-white/10 hover:bg-white/5">{savingFineId === m.member.id ? "..." : "Save"}</Button>
-                      {m.isFineOverridden && (
-                        <Button size="sm" variant="ghost" disabled={revertingFineId === m.member.id} onClick={async () => {
-                          setRevertingFineId(m.member.id);
-                          try {
-                            await handleRevertFineOverride(m.member.id);
-                          } finally {
-                            setRevertingFineId(null);
-                          }
-                        }} className="h-8 px-2.5 text-xs rounded-lg" style={{ color: 'oklch(0.68 0.22 27)' }}>{revertingFineId === m.member.id ? "..." : "Revert"}</Button>
-                      )}
-                    </div>
-                  </td>
-                  <td className="text-right">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={() => handleOpenOverrideModal(m)}
-                      className="h-8 px-2.5 text-xs rounded-lg font-semibold gap-1.5"
-                      style={{ border: '1px solid oklch(0.68 0.22 27 / 30%)', color: 'oklch(0.68 0.22 27)', background: 'oklch(0.68 0.22 27 / 10%)' }}
-                    >
-                      <Settings2 className="w-3.5 h-3.5" />
-                      Override Bills
-                    </Button>
-                  </td>
+                          }} className="h-8 px-2.5 text-xs rounded-lg border-white/10 hover:bg-white/5">{savingFineId === m.member.id ? "..." : "Save"}</Button>
+                        {m.isFineOverridden && (
+                          <Button size="sm" variant="ghost" disabled={revertingFineId === m.member.id} onClick={async () => {
+                            setRevertingFineId(m.member.id);
+                            try {
+                              await handleRevertFineOverride(m.member.id);
+                            } finally {
+                              setRevertingFineId(null);
+                            }
+                          }} className="h-8 px-2.5 text-xs rounded-lg" style={{ color: 'oklch(0.68 0.22 27)' }}>{revertingFineId === m.member.id ? "..." : "Revert"}</Button>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                  {data.monthConfig.applyDefaultBills && (
+                    <td className="text-right">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => handleOpenOverrideModal(m)}
+                        className="h-8 px-2.5 text-xs rounded-lg font-semibold gap-1.5"
+                        style={{ border: '1px solid oklch(0.68 0.22 27 / 30%)', color: 'oklch(0.68 0.22 27)', background: 'oklch(0.68 0.22 27 / 10%)' }}
+                      >
+                        <Settings2 className="w-3.5 h-3.5" />
+                        Override Bills
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

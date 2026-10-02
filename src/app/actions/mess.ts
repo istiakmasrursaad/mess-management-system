@@ -126,7 +126,7 @@ async function calculateMonthMetrics(targetMonth: string, settings: any, monthCo
       marketFine = memberBill.marketFine;
       isFineOverridden = true;
     } else {
-      marketFine = totalMarketsCount === 0 ? settings.defaultMarketFine : 0;
+      marketFine = totalMarketsCount === 0 ? (monthConfig.applyDefaultBills ? settings.defaultMarketFine : 0) : 0;
     }
 
     let baseKhala = (memberBill && memberBill.isKhalaOverridden) ? memberBill.baseKhala : (monthConfig.applyDefaultBills ? settings.defaultKhalaBill : 0);
