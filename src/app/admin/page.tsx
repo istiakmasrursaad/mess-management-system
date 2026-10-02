@@ -493,9 +493,10 @@ export default function AdminWorkspace() {
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (window.confirm("Are you sure you want to remove this member? All their data will be deleted.")) {
+    if (window.confirm("Are you sure you want to remove this member? Their records for this and future months will be hidden, but their past records will be preserved.")) {
       const formData = new FormData();
       formData.append("memberId", memberId);
+      formData.append("currentMonth", selectedMonth);
       await removeMember(formData);
       await fetchData(undefined, false, true);
       toast.success("Member removed successfully!");

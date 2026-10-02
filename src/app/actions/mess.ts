@@ -64,6 +64,24 @@ async function calculateMonthMetrics(targetMonth: string, settings: any, monthCo
     },
   });
 
+  // Filter out members who were deleted in this month or earlier
+  const activeMembers = members.filter((m) => {
+    if (!m.status.startsWith("LEFT_")) return true;
+    
+    // Status is like "LEFT_10-2026"
+    const leftMonthStr = m.status.split("_")[1];
+    if (!leftMonthStr) return true;
+
+    const [leftMM, leftYYYY] = leftMonthStr.split("-").map(Number);
+    const [targetMM, targetYYYY] = targetMonth.split("-").map(Number);
+
+    const leftValue = leftYYYY * 100 + leftMM;
+    const targetValue = targetYYYY * 100 + targetMM;
+
+    // If target month is earlier than the left month, they should be included
+    return targetValue < leftValue;
+  });
+
   const markets = await prisma.market.findMany({
     include: { inventoryItems: true },
     where: { monthYear: targetMonth },
@@ -74,7 +92,7 @@ async function calculateMonthMetrics(targetMonth: string, settings: any, monthCo
   let totalMessMeals = 0;
 
   const dateTotalMeals = new Map<string, number>();
-  members.forEach((member) => {
+  activeMembers.forEach((member) => {
     member.dailyMeals.forEach((d) => {
       const dateKey = new Date(d.date).toISOString().split("T")[0];
       const current = dateTotalMeals.get(dateKey) || 0;
@@ -82,7 +100,7 @@ async function calculateMonthMetrics(targetMonth: string, settings: any, monthCo
     });
   });
 
-  const memberCalculations = members.map((member) => {
+  const memberCalculations = activeMembers.map((member) => {
     const totalMeals = member.dailyMeals.reduce((sum, d) => sum + d.totalMeal, 0);
     totalMessMeals += totalMeals;
 
@@ -927,10 +945,21 @@ export async function deleteSpecificBill(formData: FormData) {
 
 export async function removeMember(formData: FormData) {
   const memberId = formData.get("memberId") as string;
+  const currentMonth = formData.get("currentMonth") as string;
 
   const member = await prisma.member.findUnique({ where: { id: memberId } });
   if (member) {
-    await prisma.user.delete({ where: { id: member.userId } });
+    // Soft delete: Mark the member as LEFT for the current month so they don't show up in this month or future months
+    await prisma.member.update({
+      where: { id: memberId },
+      data: { status: `LEFT_${currentMonth || "08-2026"}` }
+    });
+    
+    // Also mark their user account as INACTIVE so they can no longer log in
+    await prisma.user.update({
+      where: { id: member.userId },
+      data: { status: "INACTIVE" }
+    });
   }
 
   revalidatePath("/admin");
