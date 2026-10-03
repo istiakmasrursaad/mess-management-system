@@ -1104,9 +1104,8 @@ export default function AdminWorkspace() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
             {/* Brand */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: "linear-gradient(135deg, #6d28d9, #0ea5e9)" }}>
-                <ShieldCheck className="h-5 w-5 text-white" strokeWidth={2.5} />
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden border border-white/10 bg-white/5 shadow-xl p-0.5">
+                <img src="/icons/icon-192x192.png" alt="Logo" className="w-full h-full object-cover rounded-xl" />
               </div>
               <div>
                 <div className="flex items-center gap-2.5">

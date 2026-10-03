@@ -49,13 +49,8 @@ function LoginForm() {
       {/* Logo area */}
       <div className="text-center mb-10 relative z-10 animate-in fade-in slide-in-from-top-5 duration-700">
         <div className="flex items-center justify-center mb-4">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-2xl blur-xl opacity-60"
-              style={{ background: "linear-gradient(135deg, oklch(0.58 0.26 278), oklch(0.65 0.20 200))" }} />
-            <div className="relative p-4 rounded-2xl border border-white/10"
-              style={{ background: "linear-gradient(135deg, oklch(0.25 0.12 275), oklch(0.20 0.10 265))" }}>
-              <Zap className="h-7 w-7 text-white" strokeWidth={2.5} />
-            </div>
+          <div className="relative rounded-3xl border border-white/10 overflow-hidden shadow-2xl bg-white/5 p-1">
+            <img src="/icons/icon-192x192.png" alt="Mess Management Logo" className="h-16 w-16 object-cover rounded-2xl" />
           </div>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight shimmer-text">

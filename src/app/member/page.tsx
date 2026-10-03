@@ -101,8 +101,8 @@ export default function MemberDashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
             <div>
               <div className="flex items-center gap-2.5 mb-1">
-                <div className="p-2 rounded-xl" style={{ background: "rgba(255,255,255,0.1)" }}>
-                  <Leaf className="h-5 w-5 text-violet-300" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden border border-white/10 bg-white/5 shadow-xl p-0.5">
+                  <img src="/icons/icon-192x192.png" alt="Logo" className="w-full h-full object-cover rounded-lg" />
                 </div>
                 <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                   Member Portal
