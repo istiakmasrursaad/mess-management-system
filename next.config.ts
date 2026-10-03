@@ -27,6 +27,15 @@ const dynamicDevOrigins = localIps.flatMap(ip => [
   ip
 ]);
 
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV !== "production",
+});
+
 const nextConfig: NextConfig = {
   // Dynamically allow current local network IP to access dev server without CORS issues
   allowedDevOrigins: [
@@ -36,7 +45,8 @@ const nextConfig: NextConfig = {
     serverActions: {
       allowedOrigins: ["localhost:3000", ...dynamicDevOrigins]
     }
-  }
+  },
+  turbopack: {}
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

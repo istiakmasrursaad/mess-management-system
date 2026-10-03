@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionTimeoutListener } from "@/components/SessionTimeoutListener";
 import { ToastProvider } from "@/components/ToastProvider";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -13,6 +14,22 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "SoftTech Mess Manager",
   description: "Modern mess management system for hostels and student accommodations.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Mess Manager",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f172a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -26,6 +43,7 @@ export default function RootLayout({
       className={`${inter.variable} h-full antialiased`}
     >
       <body className="min-h-screen flex flex-col bg-background text-foreground page-bg">
+        <InstallPrompt />
         <SessionTimeoutListener />
         <ToastProvider />
         <main className="flex-1 flex flex-col">{children}</main>
