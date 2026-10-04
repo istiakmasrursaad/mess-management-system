@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SessionTimeoutListener } from "@/components/SessionTimeoutListener";
 import { ToastProvider } from "@/components/ToastProvider";
 import { InstallPrompt } from "@/components/InstallPrompt";
 
@@ -44,7 +43,6 @@ export default function RootLayout({
     >
       <body className="min-h-screen flex flex-col bg-background text-foreground page-bg">
         <InstallPrompt />
-        <SessionTimeoutListener />
         <ToastProvider />
         <main className="flex-1 flex flex-col">{children}</main>
         <footer className="w-full py-3 border-t border-white/5 mt-auto shrink-0 bg-[oklch(0.12_0.015_260)]">
