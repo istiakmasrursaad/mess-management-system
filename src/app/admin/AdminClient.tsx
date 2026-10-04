@@ -32,41 +32,22 @@ import {
 import { getSession, getManagersAction, addManagerAction, removeManagerAction, logoutAction } from "@/app/actions/auth";
 import { getDiningCalc } from "@/app/actions/dining-calc";
 import { toast } from "react-toastify";
-import { DiningCalcCard } from "@/components/DiningCalcCard";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Users,
   Utensils,
   ShoppingCart,
   Calculator,
-  DollarSign,
   Receipt,
   Wallet,
   Settings,
   FileSpreadsheet,
   FileText,
-  Printer,
   PlusCircle,
-  AlertTriangle,
-  CheckCircle2,
   RefreshCw,
-  ShieldCheck,
-  Leaf,
   History,
   Calendar,
-  Lock,
-  UserCog,
-  Trash2,
-  Pencil
+  UserCog
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
