@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 
 // ─── Super Admin Hardcoded Credentials (with default fallback) ────────────────
