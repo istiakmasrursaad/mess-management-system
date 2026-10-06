@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PlusCircle, Pencil } from "lucide-react";
+import { UserPlus, FilePen } from "lucide-react";
 
 
 export default function MembersTab({ props }: { props: any }) {
@@ -22,7 +22,7 @@ export default function MembersTab({ props }: { props: any }) {
                 setIsMemberDialogOpen(open);
                 if (!open) setAddMemberForm({ name: "", emailPrefix: "", emailSuffix: "@gmail.com" });
               }}>
-                <Button className="gap-2 btn-glow h-9 text-xs" onClick={() => setIsMemberDialogOpen(true)}><PlusCircle className="w-3.5 h-3.5" /> Add New Member</Button>
+                <Button className="gap-2 btn-glow h-9 text-xs" onClick={() => setIsMemberDialogOpen(true)}><UserPlus className="w-3.5 h-3.5" /> Add New Member</Button>
                 <DialogContent className="rounded-2xl mx-4 sm:mx-auto max-w-md">
                   <DialogHeader>
                     <DialogTitle className="font-bold">Register New Mess Member</DialogTitle>
@@ -121,7 +121,7 @@ export default function MembersTab({ props }: { props: any }) {
                           <div className="flex items-center justify-end gap-2">
                             <Button onClick={() => openEditMemberDialog(m)} variant="outline" size="sm"
                               className="h-7 px-2.5 text-xs rounded-lg font-semibold gap-1 border-indigo-500/40 hover:bg-indigo-500/10 text-indigo-400 hover:text-indigo-300">
-                              <Pencil className="w-3 h-3" /> Edit
+                              <FilePen className="w-3 h-3" /> Edit
                             </Button>
                             <Button onClick={async () => {
                               if (confirm("Are you sure you want to remove this member? All their data will be deleted.")) {

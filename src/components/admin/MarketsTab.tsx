@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PlusCircle } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 
 
 export default function MarketsTab({ props }: { props: any }) {
@@ -21,7 +21,7 @@ export default function MarketsTab({ props }: { props: any }) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <h2 className="text-sm font-bold text-foreground">Market Expenses &amp; Grocery Log</h2>
               <Dialog open={isMarketDialogOpen} onOpenChange={setIsMarketDialogOpen}>
-                <Button className="gap-2 btn-glow h-9 text-xs" onClick={() => setIsMarketDialogOpen(true)}><PlusCircle className="w-3.5 h-3.5" /> Log Market Expense</Button>
+                <Button className="gap-2 btn-glow h-9 text-xs" onClick={() => setIsMarketDialogOpen(true)}><ShoppingBag className="w-3.5 h-3.5" /> Log Market Expense</Button>
                 <DialogContent className="rounded-2xl mx-4 sm:mx-auto max-w-md">
                   <DialogHeader><DialogTitle className="font-bold">Log Grocery Market Entry</DialogTitle><DialogDescription>Record market expenditure.</DialogDescription></DialogHeader>
                   <form onSubmit={async (e) => {

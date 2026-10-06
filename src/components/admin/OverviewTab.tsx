@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Users, Utensils, ShoppingCart, TrendingUp, Wallet, AlertCircle, ChevronUp, AlertTriangle } from "lucide-react";
+import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, ChevronUp, AlertTriangle } from "lucide-react";
 
 export default function OverviewTab({ props }: { props: any }) {
   const { data } = props;
@@ -17,7 +17,7 @@ export default function OverviewTab({ props }: { props: any }) {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Members</span>
             <div className="p-1.5 rounded-lg" style={{ background: "rgba(109,40,217,0.15)" }}>
-              <Users className="w-3.5 h-3.5 text-violet-400" />
+              <UserCheck className="w-3.5 h-3.5 text-violet-400" />
             </div>
           </div>
           <div className="text-3xl font-extrabold text-white">{data.members.length}</div>
@@ -30,7 +30,7 @@ export default function OverviewTab({ props }: { props: any }) {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Meals</span>
             <div className="p-1.5 rounded-lg" style={{ background: "rgba(251,191,36,0.15)" }}>
-              <Utensils className="w-3.5 h-3.5 text-amber-400" />
+              <UtensilsCrossed className="w-3.5 h-3.5 text-amber-400" />
             </div>
           </div>
           <div className="text-3xl font-extrabold text-white">{data.totalMessMeals}</div>
@@ -43,7 +43,7 @@ export default function OverviewTab({ props }: { props: any }) {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Market Expenses</span>
             <div className="p-1.5 rounded-lg" style={{ background: "rgba(14,165,233,0.15)" }}>
-              <ShoppingCart className="w-3.5 h-3.5 text-sky-400" />
+              <Store className="w-3.5 h-3.5 text-sky-400" />
             </div>
           </div>
           <div className="text-3xl font-extrabold text-white">৳ {data.totalMarketCost.toLocaleString()}</div>

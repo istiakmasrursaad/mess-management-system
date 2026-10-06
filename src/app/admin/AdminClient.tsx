@@ -34,20 +34,20 @@ import { getDiningCalc } from "@/app/actions/dining-calc";
 import { toast } from "react-toastify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Users,
-  Utensils,
-  ShoppingCart,
-  Calculator,
-  Receipt,
-  Wallet,
-  Settings,
-  FileSpreadsheet,
-  FileText,
-  PlusCircle,
+  LayoutDashboard,
+  UtensilsCrossed,
+  Store,
+  BadgeDollarSign,
+  ScrollText,
+  Layers,
+  SlidersHorizontal,
+  FilePlus2,
+  Star,
+  ArchiveRestore,
   RefreshCw,
-  History,
   Calendar,
-  UserCog
+  UserCheck,
+  ShieldCheck
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -1181,17 +1181,17 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="tab-nav w-full h-auto p-1 flex justify-start overflow-x-auto flex-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {([
-              { value: 'overview',      icon: <Calculator className="h-3.5 w-3.5" />,     label: 'Overview'       },
-              { value: 'dailymeals',   icon: <Utensils className="h-3.5 w-3.5" />,        label: 'Meals'          },
-              { value: 'settings',     icon: <Settings className="h-3.5 w-3.5" />,         label: 'Rules'          },
-              { value: 'members',      icon: <Users className="h-3.5 w-3.5" />,            label: 'Members'        },
-              { value: 'markets',      icon: <ShoppingCart className="h-3.5 w-3.5" />,     label: 'Markets'        },
-              { value: 'extramarkets', icon: <PlusCircle className="h-3.5 w-3.5" />,       label: 'Extra Duty'     },
-              { value: 'overheads',    icon: <Receipt className="h-3.5 w-3.5" />,          label: 'Bills'          },
-              { value: 'specificbills',icon: <FileText className="h-3.5 w-3.5" />,         label: 'Specific Bills' },
-              { value: 'deposits',     icon: <Wallet className="h-3.5 w-3.5" />,           label: 'Deposits'       },
-              { value: 'ledger',       icon: <FileSpreadsheet className="h-3.5 w-3.5" />,  label: 'Ledger'         },
-              { value: 'history',      icon: <History className="h-3.5 w-3.5" />,          label: 'History'        },
+              { value: 'overview',      icon: <LayoutDashboard className="h-3.5 w-3.5" />,     label: 'Overview'       },
+              { value: 'dailymeals',   icon: <UtensilsCrossed className="h-3.5 w-3.5" />,      label: 'Meals'          },
+              { value: 'settings',     icon: <SlidersHorizontal className="h-3.5 w-3.5" />,    label: 'Rules'          },
+              { value: 'members',      icon: <UserCheck className="h-3.5 w-3.5" />,            label: 'Members'        },
+              { value: 'markets',      icon: <Store className="h-3.5 w-3.5" />,                label: 'Markets'        },
+              { value: 'extramarkets', icon: <Star className="h-3.5 w-3.5" />,                 label: 'Extra Duty'     },
+              { value: 'overheads',    icon: <Layers className="h-3.5 w-3.5" />,               label: 'Bills'          },
+              { value: 'specificbills',icon: <FilePlus2 className="h-3.5 w-3.5" />,            label: 'Specific Bills' },
+              { value: 'deposits',     icon: <BadgeDollarSign className="h-3.5 w-3.5" />,      label: 'Deposits'       },
+              { value: 'ledger',       icon: <ScrollText className="h-3.5 w-3.5" />,           label: 'Ledger'         },
+              { value: 'history',      icon: <ArchiveRestore className="h-3.5 w-3.5" />,       label: 'History'        },
             ] as { value: string; icon: React.ReactNode; label: string }[]).map(tab => (
               <TabsTrigger
                 key={tab.value}
@@ -1208,7 +1208,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
               <TabsTrigger value="manageadmins"
                 className="flex items-center shrink-0 gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 data-[state=active]:text-white"
                 style={{ color: 'oklch(0.70 0.22 27)' }}>
-                <UserCog className="h-3.5 w-3.5" />
+                <ShieldCheck className="h-3.5 w-3.5" />
                 <span>Admins</span>
               </TabsTrigger>
             )}

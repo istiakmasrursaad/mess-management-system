@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DollarSign, CheckCircle2, History, Trash2, Pencil, Plus } from "lucide-react";
+import { BadgeDollarSign, CircleCheckBig, ArchiveRestore, Trash2, FilePen, Plus } from "lucide-react";
 
 
 export default function DepositsTab({ props }: { props: any }) {
@@ -72,7 +72,7 @@ export default function DepositsTab({ props }: { props: any }) {
                                   className="h-6 w-6 p-0 text-muted-foreground hover:text-white hover:bg-white/10 rounded-md"
                                   title="Edit Deposit"
                                 >
-                                  <Pencil className="w-3.5 h-3.5" />
+                                  <FilePen className="w-3.5 h-3.5" />
                                 </Button>
                                 <Button
                                   type="button"
@@ -121,7 +121,7 @@ export default function DepositsTab({ props }: { props: any }) {
         <DialogContent className="sm:max-w-[425px] border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl rounded-2xl">
           <DialogHeader className="flex flex-col items-center justify-center pt-4 pb-2">
             <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: 'linear-gradient(135deg, oklch(0.55 0.26 278 / 20%), oklch(0.50 0.22 265 / 20%))', border: '1px solid oklch(0.55 0.26 278 / 30%)' }}>
-              <DollarSign className="w-6 h-6" style={{ color: 'oklch(0.65 0.25 275)' }} />
+              <BadgeDollarSign className="w-6 h-6" style={{ color: 'oklch(0.65 0.25 275)' }} />
             </div>
             <DialogTitle className="text-xl font-bold text-foreground">Add Deposit</DialogTitle>
             <DialogDescription className="text-center text-muted-foreground text-sm">
@@ -172,7 +172,7 @@ export default function DepositsTab({ props }: { props: any }) {
             </div>
             <div className="flex justify-between items-center gap-3 pt-2">
               <Button variant="ghost" type="button" onClick={() => setIsAddDepositDialogOpen(false)} className="flex-1 h-11 rounded-xl text-muted-foreground hover:text-white">Cancel</Button>
-              <Button type="submit" disabled={isAdding} className="flex-1 h-11 rounded-xl btn-glow font-bold gap-2"><CheckCircle2 className="w-4 h-4" /> {isAdding ? "Saving..." : "Confirm Deposit"}</Button>
+              <Button type="submit" disabled={isAdding} className="flex-1 h-11 rounded-xl btn-glow font-bold gap-2"><CircleCheckBig className="w-4 h-4" /> {isAdding ? "Saving..." : "Confirm Deposit"}</Button>
             </div>
           </form>
         </DialogContent>
@@ -183,7 +183,7 @@ export default function DepositsTab({ props }: { props: any }) {
         <DialogContent className="sm:max-w-[425px] border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl rounded-2xl">
           <DialogHeader className="flex flex-col items-center justify-center pt-4 pb-2">
             <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: 'linear-gradient(135deg, oklch(0.60 0.15 250 / 20%), oklch(0.55 0.15 250 / 20%))', border: '1px solid oklch(0.60 0.15 250 / 30%)' }}>
-              <Pencil className="w-5 h-5 text-indigo-400" />
+              <FilePen className="w-5 h-5 text-indigo-400" />
             </div>
             <DialogTitle className="text-xl font-bold text-foreground">Edit Deposit</DialogTitle>
             <DialogDescription className="text-center text-muted-foreground text-sm">
@@ -226,7 +226,7 @@ export default function DepositsTab({ props }: { props: any }) {
             </div>
             <div className="flex justify-between items-center gap-3 pt-2">
               <Button variant="ghost" type="button" onClick={() => setIsEditDepositDialogOpen(false)} className="flex-1 h-11 rounded-xl text-muted-foreground hover:text-white">Cancel</Button>
-              <Button type="submit" disabled={isEditing} className="flex-1 h-11 rounded-xl btn-glow font-bold gap-2"><CheckCircle2 className="w-4 h-4" /> {isEditing ? "Saving..." : "Save Changes"}</Button>
+              <Button type="submit" disabled={isEditing} className="flex-1 h-11 rounded-xl btn-glow font-bold gap-2"><CircleCheckBig className="w-4 h-4" /> {isEditing ? "Saving..." : "Save Changes"}</Button>
             </div>
           </form>
         </DialogContent>

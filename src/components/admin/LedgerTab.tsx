@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select } from "@/components/ui/select";
-import { FileText, Lock } from "lucide-react";
+import { ScrollText, Lock } from "lucide-react";
 import { DiningCalcCard } from "@/components/DiningCalcCard";
 
 
@@ -28,13 +28,13 @@ export default function LedgerTab({ props }: { props: any }) {
                   </Button>
                   <div className="flex items-center gap-1.5">
                     <Button size="sm" variant="ghost" onClick={exportToPDF} className="h-8 px-2.5 text-xs rounded-lg gap-1 text-muted-foreground hover:text-foreground hover:bg-white/5">
-                      <FileText className="w-3.5 h-3.5" style={{ color: 'oklch(0.68 0.22 27)' }} /> PDF
+                      <ScrollText className="w-3.5 h-3.5" style={{ color: 'oklch(0.68 0.22 27)' }} /> PDF
                     </Button>
                     <Button size="sm" variant="ghost" onClick={exportToWord} className="h-8 px-2.5 text-xs rounded-lg gap-1 text-muted-foreground hover:text-foreground hover:bg-white/5">
-                      <FileText className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.26 278)' }} /> Word
+                      <ScrollText className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.26 278)' }} /> Word
                     </Button>
                     <Button size="sm" variant="ghost" onClick={exportDailyMealsPDF} className="h-8 px-2.5 text-xs rounded-lg gap-1 text-muted-foreground hover:text-foreground hover:bg-white/5">
-                      <FileText className="w-3.5 h-3.5" /> Meals PDF
+                      <ScrollText className="w-3.5 h-3.5" /> Meals PDF
                     </Button>
                   </div>
                 </div>

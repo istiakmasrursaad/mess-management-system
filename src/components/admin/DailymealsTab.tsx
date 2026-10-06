@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Utensils, RefreshCw } from "lucide-react";
+import { UtensilsCrossed, RefreshCw } from "lucide-react";
 
 
 export default function DailymealsTab({ props }: { props: any }) {
@@ -36,7 +36,7 @@ export default function DailymealsTab({ props }: { props: any }) {
                 </div>
               ) : !selectedMealDate ? (
                 <div className="flex flex-col items-center justify-center p-12 text-center border-t border-white/5">
-                  <Utensils className="w-12 h-12 text-white/20 mb-4" />
+                  <UtensilsCrossed className="w-12 h-12 text-white/20 mb-4" />
                   <p className="text-muted-foreground text-sm">Please select a date to view and manage daily meals.</p>
                 </div>
               ) : (
@@ -78,7 +78,7 @@ export default function DailymealsTab({ props }: { props: any }) {
                    </div>
                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border-t" style={{ borderColor: 'oklch(1 0 0 / 7%)' }}>
                      <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold" style={{ background: 'oklch(0.65 0.25 275 / 10%)', border: '1px solid oklch(0.65 0.25 275 / 20%)', color: 'oklch(0.75 0.20 275)' }}>
-                       <Utensils className="w-4 h-4" />
+                       <UtensilsCrossed className="w-4 h-4" />
                        <span>Total Day Meals:</span>
                        <span className="text-base font-extrabold">{Object.values(mealInputValues).reduce((sum: number, v: any) => sum + (Number(v) || 0), 0)}</span>
                      </div>

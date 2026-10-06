@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PlusCircle, UserCog, Trash2 } from "lucide-react";
+import { UserPlus, ShieldCheck, Trash2 } from "lucide-react";
 
 
 export default function ManageadminsTab({ props }: { props: any }) {
@@ -17,7 +17,7 @@ export default function ManageadminsTab({ props }: { props: any }) {
     <>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <UserCog className="w-4 h-4" style={{ color: 'oklch(0.68 0.22 27)' }} />
+                  <ShieldCheck className="w-4 h-4" style={{ color: 'oklch(0.68 0.22 27)' }} />
                   <div>
                     <h2 className="text-sm font-bold text-foreground">Manage Admins &amp; Managers</h2>
                     <p className="text-xs text-muted-foreground">System users who access Admin panel (not counted in meal tracking)</p>
@@ -25,7 +25,7 @@ export default function ManageadminsTab({ props }: { props: any }) {
                 </div>
                 <Button size="sm" className="h-9 px-3 text-xs font-bold gap-1.5 rounded-xl" style={{ background: 'linear-gradient(135deg, oklch(0.55 0.26 27), oklch(0.50 0.23 20))' }}
                   onClick={() => { setManagerError(""); setIsAddManagerOpen(true); }}>
-                  <PlusCircle className="w-3.5 h-3.5" /> Add Manager
+                  <UserPlus className="w-3.5 h-3.5" /> Add Manager
                 </Button>
               </div>
 
