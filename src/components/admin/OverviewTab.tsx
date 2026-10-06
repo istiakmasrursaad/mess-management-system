@@ -6,6 +6,8 @@ import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, Che
 export default function OverviewTab({ props }: { props: any }) {
   const { data } = props;
 
+  const totalCashDepositsWithAdvance = data.members.reduce((sum: number, m: any) => sum + m.totalDeposits + m.previousAdvance, 0);
+
   return (
     <>
       {/* Primary KPI cards */}
@@ -76,7 +78,7 @@ export default function OverviewTab({ props }: { props: any }) {
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Cash Deposits</p>
-            <div className="text-2xl font-extrabold text-emerald-400">৳ {data.grandTotalDeposits.toLocaleString()}</div>
+            <div className="text-2xl font-extrabold text-emerald-400">৳ {totalCashDepositsWithAdvance.toLocaleString()}</div>
           </div>
         </div>
 
@@ -125,6 +127,7 @@ export default function OverviewTab({ props }: { props: any }) {
                 <th>Total Meals</th>
                 <th>Extra Meals</th>
                 <th>Status</th>
+                <th>Total Cost</th>
                 <th title="Deposit + Previous Advance - Previous Due">Avail. Balance</th>
                 <th>Balance</th>
               </tr>
@@ -144,6 +147,7 @@ export default function OverviewTab({ props }: { props: any }) {
                       <span className="badge-emerald">Normal</span>
                     )}
                   </td>
+                  <td className="font-bold text-slate-200">৳{m.totalCost.toFixed(2)}</td>
                   <td className="font-medium text-slate-300">
                     <span style={{ color: (m.totalDeposits + m.previousAdvance - m.previousDue) >= 0 ? '#4ade80' : '#f87171' }}>
                       {(m.totalDeposits + m.previousAdvance - m.previousDue) >= 0 ? `+৳${(m.totalDeposits + m.previousAdvance - m.previousDue).toFixed(2)}` : `-৳${Math.abs(m.totalDeposits + m.previousAdvance - m.previousDue).toFixed(2)}`}
