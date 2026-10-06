@@ -122,7 +122,6 @@ export default function OverviewTab({ props }: { props: any }) {
             <thead>
               <tr>
                 <th>Member Name</th>
-                <th>Room</th>
                 <th>Total Meals</th>
                 <th>Extra Meals</th>
                 <th>Status</th>
@@ -134,7 +133,6 @@ export default function OverviewTab({ props }: { props: any }) {
               {data.members.map((m: any) => (
                 <tr key={m.member.id}>
                   <td className="font-semibold text-white">{m.member.user.name}</td>
-                  <td><span className="badge-indigo">{m.member.roomNo}</span></td>
                   <td className="font-medium text-slate-300">{m.totalMeals}</td>
                   <td className="font-medium text-slate-300">{m.totalExtraMeals}</td>
                   <td>
