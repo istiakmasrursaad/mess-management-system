@@ -44,7 +44,7 @@ export default function LedgerTab({ props }: { props: any }) {
                   <thead><tr>
                     <th>SI</th><th>Name</th><th>Meals</th><th>Meal Cost</th>
                     <th>Khala</th><th>Manager</th><th>Paper</th><th>Current</th><th>Gas</th><th>Fest</th><th>Fine</th>
-                    <th>Total Cost</th><th>Deposit</th><th>Due</th><th>Advance</th>
+                    <th>Total Cost</th><th title="Deposit + Previous Advance - Previous Due">Avail. Balance</th><th>Due</th><th>Advance</th>
                   </tr></thead>
                   <tbody>
                     {data.members.map((m: any, index: number) => (
@@ -61,7 +61,9 @@ export default function LedgerTab({ props }: { props: any }) {
                         <td>৳{m.festival.toFixed(2)}</td>
                         <td>৳{m.marketFine.toFixed(2)}</td>
                         <td className="font-bold text-foreground">৳{m.totalCost.toFixed(2)}</td>
-                        <td className="font-bold" style={{ color: 'oklch(0.70 0.19 162)' }}>৳{m.totalDeposits.toFixed(2)}</td>
+                        <td className="font-bold" style={{ color: (m.totalDeposits + m.previousAdvance - m.previousDue) >= 0 ? 'oklch(0.70 0.19 162)' : 'oklch(0.68 0.22 27)' }}>
+                          {(m.totalDeposits + m.previousAdvance - m.previousDue) >= 0 ? `৳${(m.totalDeposits + m.previousAdvance - m.previousDue).toFixed(2)}` : `-৳${Math.abs(m.totalDeposits + m.previousAdvance - m.previousDue).toFixed(2)}`}
+                        </td>
                         <td className="font-extrabold" style={{ color: m.due > 0 ? 'oklch(0.68 0.22 27)' : 'oklch(0.45 0.02 260)' }}>{m.due > 0 ? `৳${m.due.toFixed(2)}` : "—"}</td>
                         <td className="font-extrabold" style={{ color: m.advance > 0 ? 'oklch(0.70 0.19 162)' : 'oklch(0.45 0.02 260)' }}>{m.advance > 0 ? `৳${m.advance.toFixed(2)}` : "—"}</td>
                       </tr>

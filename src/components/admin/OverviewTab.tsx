@@ -125,7 +125,7 @@ export default function OverviewTab({ props }: { props: any }) {
                 <th>Total Meals</th>
                 <th>Extra Meals</th>
                 <th>Status</th>
-                <th>Deposits</th>
+                <th title="Deposit + Previous Advance - Previous Due">Avail. Balance</th>
                 <th>Balance</th>
               </tr>
             </thead>
@@ -144,7 +144,11 @@ export default function OverviewTab({ props }: { props: any }) {
                       <span className="badge-emerald">Normal</span>
                     )}
                   </td>
-                  <td className="font-medium text-slate-300">৳ {m.totalDeposits}</td>
+                  <td className="font-medium text-slate-300">
+                    <span style={{ color: (m.totalDeposits + m.previousAdvance - m.previousDue) >= 0 ? '#4ade80' : '#f87171' }}>
+                      {(m.totalDeposits + m.previousAdvance - m.previousDue) >= 0 ? `+৳${(m.totalDeposits + m.previousAdvance - m.previousDue).toFixed(2)}` : `-৳${Math.abs(m.totalDeposits + m.previousAdvance - m.previousDue).toFixed(2)}`}
+                    </span>
+                  </td>
                   <td className="font-bold">
                     {m.due > 0 ? (
                       <span className="text-red-400">Due ৳{m.due.toFixed(2)}</span>
