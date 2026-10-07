@@ -128,7 +128,7 @@ export default function OverviewTab({ props }: { props: any }) {
                 <th>Extra Meals</th>
                 <th>Status</th>
                 <th>Total Cost</th>
-                <th title="Deposit + Previous Advance - Previous Due">Avail. Balance</th>
+                <th title="Deposit (Includes previous advance)">Deposit</th>
                 <th>Balance</th>
               </tr>
             </thead>
@@ -149,9 +149,17 @@ export default function OverviewTab({ props }: { props: any }) {
                   </td>
                   <td className="font-bold text-slate-200">৳{m.totalCost.toFixed(2)}</td>
                   <td className="font-medium text-slate-300">
-                    <span style={{ color: (m.totalDeposits + m.previousAdvance - m.previousDue) >= 0 ? '#4ade80' : '#f87171' }}>
-                      {(m.totalDeposits + m.previousAdvance - m.previousDue) >= 0 ? `+৳${(m.totalDeposits + m.previousAdvance - m.previousDue).toFixed(2)}` : `-৳${Math.abs(m.totalDeposits + m.previousAdvance - m.previousDue).toFixed(2)}`}
-                    </span>
+                    {(() => {
+                      const depositVal = m.totalDeposits > 0
+                        ? m.totalDeposits + m.previousAdvance - m.previousDue
+                        : m.previousAdvance;
+                      const color = depositVal >= 0 ? '#4ade80' : '#f87171';
+                      return (
+                        <span style={{ color }}>
+                          {depositVal > 0 ? `+৳${depositVal.toFixed(2)}` : depositVal < 0 ? `-৳${Math.abs(depositVal).toFixed(2)}` : '—'}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="font-bold">
                     {m.due > 0 ? (

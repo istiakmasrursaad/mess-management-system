@@ -677,7 +677,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
         m.festival.toFixed(0),
         m.marketFine > 0 ? m.marketFine.toFixed(0) : "",
         m.totalCost.toFixed(2),
-        m.totalDeposits.toFixed(0),
+        (m.totalDeposits > 0 ? (m.totalDeposits + m.previousAdvance - m.previousDue) : m.previousAdvance).toFixed(0),
         m.due > 0 ? m.due.toFixed(0) : "0",
         m.advance > 0 ? m.advance.toFixed(0) : "0"
       ].map((cellText, ci) => new DocxTableCell({
@@ -890,7 +890,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
         m.festival.toFixed(0),
         m.marketFine > 0 ? m.marketFine.toFixed(0) : "",
         m.totalCost.toFixed(2),
-        m.totalDeposits.toFixed(0),
+        (m.totalDeposits > 0 ? (m.totalDeposits + m.previousAdvance - m.previousDue) : m.previousAdvance).toFixed(0),
         m.due > 0 ? m.due.toFixed(0) : "0",
         m.advance > 0 ? m.advance.toFixed(0) : "0"
       ];
