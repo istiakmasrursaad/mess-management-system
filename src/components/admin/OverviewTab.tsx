@@ -1,12 +1,17 @@
 "use client";
 
 import React from "react";
-import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, ChevronUp, AlertTriangle } from "lucide-react";
+import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, ChevronUp, AlertTriangle, BadgeDollarSign } from "lucide-react";
 
 export default function OverviewTab({ props }: { props: any }) {
   const { data } = props;
 
-  const totalCashDepositsWithAdvance = data.members.reduce((sum: number, m: any) => sum + m.totalDeposits + m.previousAdvance, 0);
+  const totalCashDepositsWithAdvance = (data.members || []).reduce((sum: number, m: any) => sum + (Number(m.totalDeposits) || 0) + (Number(m.previousAdvance) || 0), 0);
+  const totalPendingDues = (data.members || []).reduce((sum: number, m: any) => sum + (Number(m.due) > 0 ? Number(m.due) : 0), 0);
+  const totalMemberExpensesExclKhalaManager = (data.members || []).reduce((sum: number, m: any) => {
+    const expense = (Number(m.totalCost) || 0) - (Number(m.baseKhala) || 0) - (Number(m.baseManager) || 0);
+    return sum + expense;
+  }, 0);
 
   return (
     <>
@@ -79,6 +84,7 @@ export default function OverviewTab({ props }: { props: any }) {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Cash Deposits</p>
             <div className="text-2xl font-extrabold text-emerald-400">৳ {totalCashDepositsWithAdvance.toLocaleString()}</div>
+            <p className="text-xs text-slate-500 mt-0.5">Includes deposits &amp; previous advances</p>
           </div>
         </div>
 
@@ -91,20 +97,22 @@ export default function OverviewTab({ props }: { props: any }) {
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Pending Dues</p>
-            <div className="text-2xl font-extrabold text-red-400">৳ {data.grandTotalDues.toFixed(2)}</div>
+            <div className="text-2xl font-extrabold text-red-400">৳ {totalPendingDues.toFixed(2)}</div>
+            <p className="text-xs text-slate-500 mt-0.5">Sum of all members' dues</p>
           </div>
         </div>
 
-        {/* Total Excess Advances */}
+        {/* Total Member Expenses (Excl. Khala & Manager) */}
         <div className="rounded-2xl p-4 md:p-5 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5"
           style={{ background: "rgba(14,165,233,0.06)", border: "1px solid rgba(14,165,233,0.15)", backdropFilter: "blur(12px)" }}>
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: "rgba(14,165,233,0.2)" }}>
-            <ChevronUp className="w-4.5 h-4.5 text-sky-400" />
+            <BadgeDollarSign className="w-4.5 h-4.5 text-sky-400" />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Excess Advances</p>
-            <div className="text-2xl font-extrabold text-sky-400">৳ {data.grandTotalAdvances.toFixed(2)}</div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Member Expenses</p>
+            <div className="text-2xl font-extrabold text-sky-400">৳ {totalMemberExpensesExclKhalaManager.toFixed(2)}</div>
+            <p className="text-xs text-slate-500 mt-0.5">Sum of expenses (excl. Khala &amp; Manager bill)</p>
           </div>
         </div>
       </div>
