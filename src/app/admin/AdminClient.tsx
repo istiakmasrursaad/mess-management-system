@@ -47,7 +47,9 @@ import {
   RefreshCw,
   Calendar,
   UserCheck,
-  ShieldCheck
+  ShieldCheck,
+  LogOut,
+  Users
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -1082,41 +1084,125 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
 
       <div className="relative z-10 p-4 md:p-6 lg:p-8 space-y-5 max-w-7xl mx-auto w-full">
 
-        {/* ── Header ── */}
-        <div className="relative overflow-hidden rounded-2xl p-5 md:p-6"
+        {/* ── Top Header Bar / Card ── */}
+        <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-5 md:p-6 transition-all duration-300 shadow-2xl"
           style={{
-            background: "linear-gradient(135deg, rgba(109,40,217,0.30) 0%, rgba(14,165,233,0.20) 100%)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            backdropFilter: "blur(20px)"
+            background: "linear-gradient(135deg, rgba(30, 27, 75, 0.78) 0%, rgba(15, 23, 42, 0.90) 50%, rgba(17, 24, 39, 0.85) 100%)",
+            border: "1px solid rgba(255, 255, 255, 0.10)",
+            backdropFilter: "blur(24px)",
+            boxShadow: "0 20px 40px -15px rgba(15, 23, 42, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)"
           }}>
 
-          {/* inner glow */}
-          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl pointer-events-none"
-            style={{ background: "radial-gradient(circle, #6d28d9, transparent 70%)" }} />
+          {/* Top subtle accent gradient beam */}
+          <div className="absolute top-0 left-0 right-0 h-[2px]"
+            style={{ background: "linear-gradient(90deg, transparent 0%, rgba(168, 85, 247, 0.7) 30%, rgba(56, 189, 248, 0.7) 70%, transparent 100%)" }} />
 
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
-            {/* Brand */}
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden border border-white/10 bg-white/5 shadow-xl p-0.5">
-                <img src="/icons/icon-192x192.png" alt="Logo" className="w-full h-full object-cover rounded-xl" />
+          {/* Ambient inner glow orbs */}
+          <div className="absolute -top-12 -left-12 w-48 h-48 rounded-full opacity-20 blur-3xl pointer-events-none"
+            style={{ background: "radial-gradient(circle, #6d28d9, transparent 70%)" }} />
+          <div className="absolute -bottom-12 -right-12 w-48 h-48 rounded-full opacity-20 blur-3xl pointer-events-none"
+            style={{ background: "radial-gradient(circle, #0ea5e9, transparent 70%)" }} />
+
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 md:gap-5 relative z-10">
+
+            {/* Left Column: Brand & Quick Mess Meta */}
+            <div className="flex items-center gap-3.5">
+              <div className="relative shrink-0">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden border border-white/15 bg-white/5 shadow-xl p-1 backdrop-blur-md">
+                  <img src="/icons/icon-192x192.png" alt="Logo" className="w-full h-full object-cover rounded-xl" />
+                </div>
+                {/* Online pulse indicator on the logo */}
+                <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-slate-900"></span>
+                </span>
               </div>
+
               <div>
-                <div className="flex items-center gap-2.5">
-                  <h1 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">Admin Workspace</h1>
-                  <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                    style={{ background: "rgba(109,40,217,0.4)", color: "#c4b5fd", border: "1px solid rgba(109,40,217,0.5)" }}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /> Live
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">Admin Workspace</h1>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                    style={{ background: "rgba(109, 40, 217, 0.35)", color: "#c4b5fd", border: "1px solid rgba(139, 92, 246, 0.4)" }}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
                   </span>
                 </div>
-                <p className="text-slate-400 text-xs font-medium mt-0.5">Mess Accounting Engine</p>
+                <div className="flex items-center gap-3 mt-1 flex-wrap text-xs text-slate-400">
+                  <span className="font-medium text-slate-300">Mess Accounting Engine</span>
+                  <span className="w-1 h-1 rounded-full bg-slate-600 hidden sm:inline-block" />
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-slate-400">
+                    <Users className="w-3.5 h-3.5 text-sky-400" />
+                    <strong className="text-slate-200">{data?.members?.length || membersList?.length || 0}</strong> Members Active
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Month Selector & Controls */}
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            {/* Middle / Center: Manager Profile Card */}
+            <div className="flex items-center gap-3 px-3.5 py-2 rounded-2xl transition-all duration-200 hover:bg-white/[0.08]"
+              style={{
+                background: "linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.25)"
+              }}>
+              {/* Manager Avatar with gradient and initials */}
+              <div className="relative shrink-0">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black text-white shadow-md"
+                  style={{
+                    background: session?.role === "SUPER_ADMIN"
+                      ? "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)"
+                      : "linear-gradient(135deg, #0284c7 0%, #0d9488 100%)",
+                    border: "1px solid rgba(255, 255, 255, 0.25)"
+                  }}
+                >
+                  {session?.name
+                    ? session.name
+                        .split(" ")
+                        .map((w: string) => w[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2)
+                    : "M"}
+                </div>
+                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 border border-slate-900"></span>
+                </span>
+              </div>
+
+              {/* Manager Details */}
+              <div className="flex flex-col min-w-0 pr-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    {session?.role === "SUPER_ADMIN" ? "Super Admin" : "Mess Manager"}
+                  </span>
+                  <span
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+                    style={{
+                      background: session?.role === "SUPER_ADMIN" ? "rgba(139, 92, 246, 0.25)" : "rgba(14, 165, 233, 0.25)",
+                      color: session?.role === "SUPER_ADMIN" ? "#c4b5fd" : "#7dd3fc",
+                      border: `1px solid ${session?.role === "SUPER_ADMIN" ? "rgba(139, 92, 246, 0.4)" : "rgba(14, 165, 233, 0.4)"}`
+                    }}
+                  >
+                    {session?.role === "SUPER_ADMIN" ? <ShieldCheck className="w-2.5 h-2.5" /> : <UserCheck className="w-2.5 h-2.5" />}
+                    {session?.role === "SUPER_ADMIN" ? "Super Admin" : "Manager"}
+                  </span>
+                </div>
+                <span className="text-sm font-extrabold text-white truncate max-w-[150px] sm:max-w-[200px]">
+                  {session?.name || "Mess Manager"}
+                </span>
+              </div>
+            </div>
+
+            {/* Right Column: Month Selector & Controls */}
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
+              {/* Month & Year Picker */}
+              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all duration-200"
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.05)"
+                }}>
+                <Calendar className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                 <select
                   value={selectedMonth.split('-')[0]}
                   onChange={(e) => {
@@ -1126,14 +1212,15 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
                     document.cookie = `adminSelectedMonth=${newMonth}; path=/; max-age=31536000`;
                     fetchData(newMonth);
                   }}
-                  className="bg-transparent text-sm font-semibold focus:outline-none cursor-pointer text-white"
+                  className="bg-transparent text-sm font-semibold focus:outline-none cursor-pointer text-white appearance-none pr-1"
                 >
                   {Array.from({ length: 12 }, (_, i) => {
                     const val = String(i + 1).padStart(2, "0");
                     const d = new Date(2000, i, 1);
-                    return <option key={val} value={val} style={{ background: '#1e1b4b' }}>{d.toLocaleString("en-US", { month: "short" })}</option>;
+                    return <option key={val} value={val} style={{ background: '#1e1b4b', color: '#ffffff' }}>{d.toLocaleString("en-US", { month: "short" })}</option>;
                   })}
                 </select>
+                <span className="text-slate-500 font-bold text-xs select-none">/</span>
                 <input
                   type="number" min="2020" max="2100"
                   value={selectedMonth.split('-')[1]}
@@ -1157,20 +1244,27 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
                       fetchData(newMonth);
                     }
                   }}
-                  className="bg-transparent text-sm font-semibold focus:outline-none w-14 text-white"
+                  className="bg-transparent text-sm font-semibold focus:outline-none w-14 text-white hover:text-sky-300 transition-colors"
                 />
               </div>
+
+              {/* Refresh Button */}
               <button
                 onClick={() => fetchData()}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 transition-all duration-200 hover:text-white"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <RefreshCw className="w-3.5 h-3.5" />
+                title="Refresh dashboard data"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-200 transition-all duration-200 hover:text-white hover:bg-white/[0.1] active:scale-95"
+                style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.12)" }}>
+                <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${loading ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline text-xs font-semibold">Refresh</span>
               </button>
+
+              {/* Sign Out Button */}
               <button
                 onClick={async () => { await logoutAction(); window.location.href = "/"; }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200"
-                style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.25)", color: "#fca5a5" }}>
+                title="Log out of admin session"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-red-500/25 active:scale-95"
+                style={{ background: "rgba(239, 68, 68, 0.14)", border: "1px solid rgba(239, 68, 68, 0.28)", color: "#fca5a5" }}>
+                <LogOut className="w-3.5 h-3.5 text-red-400" />
                 <span className="text-xs font-semibold">Sign Out</span>
               </button>
             </div>

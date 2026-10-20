@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, ChevronUp, AlertTriangle, BadgeDollarSign } from "lucide-react";
+import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, AlertTriangle, BadgeDollarSign } from "lucide-react";
 
 export default function OverviewTab({ props }: { props: any }) {
   const { data } = props;
@@ -104,7 +104,7 @@ export default function OverviewTab({ props }: { props: any }) {
 
         {/* Total Member Expenses (Excl. Khala & Manager) */}
         <div className="rounded-2xl p-4 md:p-5 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5"
-          style={{ background: "rgba(14,165,233,0.06)", border: "1px solid rgba(14,165,233,0.15)", backdropFilter: "blur(12px)" }}>
+          style={{ background: "rgba(14,165,233,0.06)", border: "1px solid rgba(14,165,233,0.18)", backdropFilter: "blur(12px)" }}>
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: "rgba(14,165,233,0.2)" }}>
             <BadgeDollarSign className="w-4.5 h-4.5 text-sky-400" />
@@ -112,7 +112,7 @@ export default function OverviewTab({ props }: { props: any }) {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Member Expenses</p>
             <div className="text-2xl font-extrabold text-sky-400">৳ {totalMemberExpensesExclKhalaManager.toFixed(2)}</div>
-            <p className="text-xs text-slate-500 mt-0.5">Sum of expenses (excl. Khala &amp; Manager bill)</p>
+            <p className="text-xs text-slate-500 mt-0.5">Excl. Khala &amp; Manager bill</p>
           </div>
         </div>
       </div>
