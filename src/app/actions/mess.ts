@@ -21,6 +21,18 @@ function monthYearToLabel(monthYear: string): string {
   return d.toLocaleString("en-US", { month: "long", year: "numeric" });
 }
 
+/** Calculate previous month in "MM-YYYY" format */
+function getPreviousMonthYear(monthYear: string): string {
+  const [month, year] = monthYear.split("-");
+  let m = parseInt(month, 10) - 1;
+  let y = parseInt(year, 10);
+  if (m < 1) {
+    m = 12;
+    y -= 1;
+  }
+  return `${String(m).padStart(2, "0")}-${y}`;
+}
+
 // Helper to get or create MessSettings
 export async function getMessSettings() {
   let settings = await prisma.messSettings.findFirst();
@@ -288,6 +300,17 @@ export async function getMessData(monthYear?: string) {
 
   const monthData = await calculateMonthMetrics(targetMonth, settings, monthConfig);
 
+  // Calculate previous month's extra market duty allowance for each member
+  const prevMonth = getPreviousMonthYear(targetMonth);
+  const prevMarkets = await prisma.market.findMany({
+    where: { monthYear: prevMonth },
+    select: { marketerId: true },
+  });
+  const prevMarketCounts: Record<string, number> = {};
+  prevMarkets.forEach((pm) => {
+    prevMarketCounts[pm.marketerId] = (prevMarketCounts[pm.marketerId] || 0) + 1;
+  });
+
   let grandTotalDeposits = 0;
   let grandTotalDues = 0;
   let grandTotalAdvances = 0;
@@ -301,6 +324,11 @@ export async function getMessData(monthYear?: string) {
     const due = cumulativeBalance > 0 ? Math.round(cumulativeBalance) : 0;
     const advance = cumulativeBalance < 0 ? Math.round(Math.abs(cumulativeBalance)) : 0;
 
+    // Previous month's extra market duty allowance
+    const prevMarketsCount = prevMarketCounts[calc.member.id] || 0;
+    const prevExtraDays = Math.max(0, prevMarketsCount - 1);
+    const prevExtraMarketAllowance = prevExtraDays * settings.extraMarketRate;
+
     grandTotalDeposits += calc.totalDeposits;
     grandTotalDues += due;
     grandTotalAdvances += advance;
@@ -312,6 +340,9 @@ export async function getMessData(monthYear?: string) {
       previousAdvance,
       due,
       advance,
+      prevMarketsCount,
+      prevExtraDays,
+      prevExtraMarketAllowance,
     };
   });
 
@@ -542,7 +573,8 @@ export async function addDeposit(formData: FormData) {
   const amount = parseFloat(formData.get("amount") as string);
   const dateStr = formData.get("date") as string;
   const date = dateStr ? new Date(dateStr) : new Date();
-  const monthYear = formData.get("monthYear") as string || dateToMonthYear(date);
+  const monthYear = (formData.get("monthYear") as string) || dateToMonthYear(date);
+  const note = (formData.get("note") as string) || null;
 
   const adminUser = await prisma.user.findFirst({
     where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } },
@@ -554,6 +586,7 @@ export async function addDeposit(formData: FormData) {
       amount,
       date,
       monthYear,
+      note,
       recordedById: adminUser?.id || memberId,
     },
   });

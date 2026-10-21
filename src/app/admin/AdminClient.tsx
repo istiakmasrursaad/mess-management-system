@@ -29,7 +29,7 @@ import {
   deleteSpecificBill,
   getAdminDashboardInitialData,
 } from "@/app/actions/mess";
-import { getSession, getManagersAction, addManagerAction, removeManagerAction, logoutAction } from "@/app/actions/auth";
+import { getSession, getManagersAction, addManagerAction, updateManagerAction, removeManagerAction, logoutAction } from "@/app/actions/auth";
 import { getDiningCalc } from "@/app/actions/dining-calc";
 import { toast } from "react-toastify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -89,7 +89,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
   const [session, setSession] = useState<any>(null);
   const [managers, setManagers] = useState<any[]>([]);
   const [isAddManagerOpen, setIsAddManagerOpen] = useState(false);
-  const [managerForm, setManagerForm] = useState({ name: "", email: "", phone: "", password: "", role: "ADMIN" });
+  const [managerForm, setManagerForm] = useState({ name: "", email: "", phone: "", password: "", role: "ADMIN", image: "" });
   const [managerError, setManagerError] = useState("");
   const [availableMonths, setAvailableMonths] = useState<string[]>(["08-2026"]);
 
@@ -394,9 +394,12 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
     formData.append("phone", managerForm.phone);
     formData.append("password", managerForm.password);
     formData.append("role", managerForm.role);
+    if ((managerForm as any).image) {
+      formData.append("image", (managerForm as any).image);
+    }
     const res = await addManagerAction(formData);
     if (res.success) {
-      setManagerForm({ name: "", email: "", phone: "", password: "", role: "ADMIN" });
+      setManagerForm({ name: "", email: "", phone: "", password: "", role: "ADMIN", image: "" } as any);
       setIsAddManagerOpen(false);
       await fetchManagers();
     } else {
@@ -408,6 +411,20 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
     if (!window.confirm(`"${name}" কে Manager থেকে সরিয়ে দেবেন?`)) return;
     await removeManagerAction(userId);
     await fetchManagers();
+  };
+
+  const handleUpdateManager = async (formData: FormData) => {
+    const res = await updateManagerAction(formData);
+    if (res.success) {
+      await fetchManagers();
+      const sess = await getSession();
+      if (sess) setSession(sess);
+      toast.success("Manager profile updated successfully!");
+      return { success: true };
+    } else {
+      toast.error(res.error || "Failed to update manager.");
+      return { success: false, error: res.error };
+    }
   };
 
   // Update selected meal date when the selected month changes
@@ -982,7 +999,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
 
 
   const tabProps = {
-    data, loading, activeTab, setActiveTab, hasSelectedMonth, setHasSelectedMonth, session, setSession, managers, setManagers, isAddManagerOpen, setIsAddManagerOpen, managerForm, setManagerForm, managerError, setManagerError, selectedMonth, setSelectedMonth, availableMonths, setAvailableMonths, snapshots, setSnapshots, isFinalizing, setIsFinalizing, isMemberDialogOpen, setIsMemberDialogOpen, isMarketDialogOpen, setIsMarketDialogOpen, isEditMarketDialogOpen, setIsEditMarketDialogOpen, editingMarket, setEditingMarket, isDepositDialogOpen, setIsDepositDialogOpen, isEditDepositDialogOpen, setIsEditDepositDialogOpen, editingDeposit, setEditingDeposit, editDepositAmount, setEditDepositAmount, editDepositDate, setEditDepositDate, isEditSpecificBillDialogOpen, setIsEditSpecificBillDialogOpen, editingMember, setEditingMember, editingBillId, setEditingBillId, editBillCategory, setEditBillCategory, editBillAmount, setEditBillAmount, isMemberFilterOpen, setIsMemberFilterOpen, exportType, setExportType, selectedExportMembers, setSelectedExportMembers, isEditMemberDialogOpen, setIsEditMemberDialogOpen, editingMemberInfo, setEditingMemberInfo, editMemberForm, setEditMemberForm, editMemberError, setEditMemberError, addMemberForm, setAddMemberForm, settingsForm, setSettingsForm, selectedMealDate, setSelectedMealDate, dailyMealsData, setDailyMealsData, mealInputValues, setMealInputValues, loadingDailyMeals, setLoadingDailyMeals, isSavingMeals, setIsSavingMeals, membersList, setMembersList, draggedIdx, setDraggedIdx, fetchData, fetchAvailableMonths, fetchSnapshots, handleMonthChange, handleDragStart, handleDragOver, handleDragEnd, openEditDeposit, handleUpdateDeposit, handleDeleteDeposit, handleFinalizeMonth, handleDeleteSnapshot, fetchManagers, handleAddManager, handleRemoveManager, fetchDailyMeals, handleMealDateChange, handleSaveAllMeals, handleUpdateSettings, handleRemoveMember, openEditMemberDialog, handleEditMember, handleAddSpecificBill, handleAddMember, handleAddMarket, handleEditMarket, handleEditSpecificBill, handleAddDeposit, handleSaveFineOverride, handleRevertFineOverride, openMemberFilter, toggleExportMember, runExport, exportToPDF, exportToWord, generateWordForData, exportDailyMealsPDF, exportSnapshotToPDF, generatePDFForData, monthYearToLabel
+    data, loading, activeTab, setActiveTab, hasSelectedMonth, setHasSelectedMonth, session, setSession, managers, setManagers, isAddManagerOpen, setIsAddManagerOpen, managerForm, setManagerForm, managerError, setManagerError, selectedMonth, setSelectedMonth, availableMonths, setAvailableMonths, snapshots, setSnapshots, isFinalizing, setIsFinalizing, isMemberDialogOpen, setIsMemberDialogOpen, isMarketDialogOpen, setIsMarketDialogOpen, isEditMarketDialogOpen, setIsEditMarketDialogOpen, editingMarket, setEditingMarket, isDepositDialogOpen, setIsDepositDialogOpen, isEditDepositDialogOpen, setIsEditDepositDialogOpen, editingDeposit, setEditingDeposit, editDepositAmount, setEditDepositAmount, editDepositDate, setEditDepositDate, isEditSpecificBillDialogOpen, setIsEditSpecificBillDialogOpen, editingMember, setEditingMember, editingBillId, setEditingBillId, editBillCategory, setEditBillCategory, editBillAmount, setEditBillAmount, isMemberFilterOpen, setIsMemberFilterOpen, exportType, setExportType, selectedExportMembers, setSelectedExportMembers, isEditMemberDialogOpen, setIsEditMemberDialogOpen, editingMemberInfo, setEditingMemberInfo, editMemberForm, setEditMemberForm, editMemberError, setEditMemberError, addMemberForm, setAddMemberForm, settingsForm, setSettingsForm, selectedMealDate, setSelectedMealDate, dailyMealsData, setDailyMealsData, mealInputValues, setMealInputValues, loadingDailyMeals, setLoadingDailyMeals, isSavingMeals, setIsSavingMeals, membersList, setMembersList, draggedIdx, setDraggedIdx, fetchData, fetchAvailableMonths, fetchSnapshots, handleMonthChange, handleDragStart, handleDragOver, handleDragEnd, openEditDeposit, handleUpdateDeposit, handleDeleteDeposit, handleFinalizeMonth, handleDeleteSnapshot, fetchManagers, handleAddManager, handleUpdateManager, handleRemoveManager, fetchDailyMeals, handleMealDateChange, handleSaveAllMeals, handleUpdateSettings, handleRemoveMember, openEditMemberDialog, handleEditMember, handleAddSpecificBill, handleAddMember, handleAddMarket, handleEditMarket, handleEditSpecificBill, handleAddDeposit, handleSaveFineOverride, handleRevertFineOverride, openMemberFilter, toggleExportMember, runExport, exportToPDF, exportToWord, generateWordForData, exportDailyMealsPDF, exportSnapshotToPDF, generatePDFForData, monthYearToLabel
   };
 
   if (!hasSelectedMonth) {
@@ -1121,10 +1138,6 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
               <div>
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">Admin Workspace</h1>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                    style={{ background: "rgba(109, 40, 217, 0.35)", color: "#c4b5fd", border: "1px solid rgba(139, 92, 246, 0.4)" }}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
-                  </span>
                 </div>
                 <div className="flex items-center gap-3 mt-1 flex-wrap text-xs text-slate-400">
                   <span className="font-medium text-slate-300">Mess Accounting Engine</span>
@@ -1144,10 +1157,10 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
                 border: "1px solid rgba(255, 255, 255, 0.12)",
                 boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.25)"
               }}>
-              {/* Manager Avatar with gradient and initials */}
+              {/* Manager Avatar with gradient and initials or photo */}
               <div className="relative shrink-0">
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black text-white shadow-md"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black text-white shadow-md overflow-hidden"
                   style={{
                     background: session?.role === "SUPER_ADMIN"
                       ? "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)"
@@ -1155,18 +1168,19 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
                     border: "1px solid rgba(255, 255, 255, 0.25)"
                   }}
                 >
-                  {session?.name
-                    ? session.name
-                        .split(" ")
-                        .map((w: string) => w[0])
-                        .join("")
-                        .toUpperCase()
-                        .slice(0, 2)
-                    : "M"}
+                  {session?.image ? (
+                    <img src={session.image} alt={session.name || "Manager"} className="w-full h-full object-cover" />
+                  ) : session?.name ? (
+                    session.name
+                      .split(" ")
+                      .map((w: string) => w[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)
+                  ) : (
+                    "M"
+                  )}
                 </div>
-                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 border border-slate-900"></span>
-                </span>
               </div>
 
               {/* Manager Details */}

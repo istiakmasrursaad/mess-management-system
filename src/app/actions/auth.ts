@@ -95,7 +95,28 @@ export async function getSession() {
     const cookieStore = await cookies();
     const session = cookieStore.get("mess_session");
     if (!session) return null;
-    return JSON.parse(session.value);
+    const parsed = JSON.parse(session.value);
+
+    // Fetch fresh profile data (name, image, role) from DB
+    if (parsed.userId && parsed.userId !== "SUPER_ADMIN") {
+      const u = await prisma.user.findUnique({
+        where: { id: parsed.userId },
+        select: { id: true, name: true, role: true, image: true },
+      });
+      if (u) {
+        return { ...parsed, name: u.name || parsed.name, role: u.role || parsed.role, image: u.image || null };
+      }
+    } else if (parsed.role === "SUPER_ADMIN") {
+      const u = await prisma.user.findFirst({
+        where: { role: "SUPER_ADMIN" },
+        select: { id: true, name: true, role: true, image: true },
+      });
+      if (u) {
+        return { ...parsed, name: u.name || parsed.name, image: u.image || null };
+      }
+    }
+
+    return parsed;
   } catch {
     return null;
   }
@@ -122,6 +143,7 @@ export async function getManagersAction() {
       email: true,
       role: true,
       status: true,
+      image: true,
       member: {
         select: { phone: true },
       },
@@ -137,6 +159,7 @@ export async function addManagerAction(formData: FormData) {
   const phone = (formData.get("phone") as string) || "";
   const password = formData.get("password") as string;
   const role = (formData.get("role") as string) || "ADMIN";
+  const image = (formData.get("image") as string) || null;
 
   if (!name || !email || !password) {
     return { success: false, error: "Name, email, and password are required." };
@@ -158,22 +181,101 @@ export async function addManagerAction(formData: FormData) {
   try {
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
+        name: name.trim(),
+        email: email.trim(),
         passwordHash,
         role: role === "SUPER_ADMIN" ? "SUPER_ADMIN" : "ADMIN",
         status: "ACTIVE",
-        // Managers do NOT get a Member record — so they have no meal tracking
+        image: image && image.trim() ? image.trim() : null,
       },
     });
-
-    // If phone is provided, store it via a Member record tagged with the admin user
-    // But we deliberately do NOT create a Member for managers (meal tracking excluded)
-    // Phone can be stored in a future profile table if needed
 
     return { success: true, manager: user };
   } catch (err: any) {
     return { success: false, error: "Failed to add manager: " + err.message };
+  }
+}
+
+export async function updateManagerAction(formData: FormData) {
+  const id = formData.get("id") as string;
+  const name = (formData.get("name") as string) || "";
+  const email = (formData.get("email") as string) || "";
+  const password = (formData.get("password") as string) || "";
+  const role = (formData.get("role") as string) || "";
+  const image = formData.get("image") as string | null;
+
+  if (!id) {
+    return { success: false, error: "Manager ID is required." };
+  }
+
+  try {
+    const existing = await prisma.user.findUnique({ where: { id } });
+    if (!existing) {
+      return { success: false, error: "Manager not found." };
+    }
+
+    const dataToUpdate: any = {};
+    if (name && name.trim()) {
+      dataToUpdate.name = name.trim();
+    }
+    if (email && email.trim() && email.trim().toLowerCase() !== existing.email?.toLowerCase()) {
+      const emailConflict = await prisma.user.findFirst({
+        where: { email: email.trim().toLowerCase(), NOT: { id } },
+      });
+      if (emailConflict) {
+        return { success: false, error: "This email is already taken by another account." };
+      }
+      dataToUpdate.email = email.trim();
+    }
+    if (password && password.trim().length > 0) {
+      dataToUpdate.passwordHash = await bcrypt.hash(password.trim(), 12);
+    }
+    if (role && ["ADMIN", "SUPER_ADMIN", "MANAGER"].includes(role)) {
+      dataToUpdate.role = role === "MANAGER" ? "ADMIN" : role;
+    }
+    if (image !== null && image !== undefined) {
+      if (image === "__REMOVE__") {
+        dataToUpdate.image = null;
+      } else if (image.trim()) {
+        dataToUpdate.image = image.trim();
+      }
+    }
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: dataToUpdate,
+    });
+
+    // Update active cookie session if editing oneself
+    try {
+      const cookieStore = await cookies();
+      const sessCookie = cookieStore.get("mess_session");
+      if (sessCookie) {
+        const sess = JSON.parse(sessCookie.value);
+        if (sess.userId === id || (sess.role === "SUPER_ADMIN" && updated.role === "SUPER_ADMIN")) {
+          cookieStore.set(
+            "mess_session",
+            JSON.stringify({
+              ...sess,
+              name: updated.name || sess.name,
+              role: updated.role || sess.role,
+              image: updated.image !== undefined ? updated.image : sess.image,
+            }),
+            {
+              httpOnly: true,
+              path: "/",
+              maxAge: 60 * 60 * 24 * 30,
+              sameSite: "lax",
+              secure: process.env.NODE_ENV === "production",
+            }
+          );
+        }
+      }
+    } catch {}
+
+    return { success: true, manager: updated };
+  } catch (err: any) {
+    return { success: false, error: "Failed to update manager: " + err.message };
   }
 }
 

@@ -1,5 +1,5 @@
 "use client";
-import { addDeposit } from "@/app/actions/mess";
+import { addDeposit, deleteDeposit } from "@/app/actions/mess";
 import { toast } from "react-toastify";
 
 import React from "react";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BadgeDollarSign, CircleCheckBig, ArchiveRestore, Trash2, FilePen, Plus } from "lucide-react";
+import { BadgeDollarSign, CircleCheckBig, ArchiveRestore, Trash2, FilePen, Plus, X, RotateCcw, CheckCircle2 } from "lucide-react";
 
 
 export default function DepositsTab({ props }: { props: any }) {
@@ -21,16 +21,111 @@ export default function DepositsTab({ props }: { props: any }) {
   const [addDepositAmount, setAddDepositAmount] = React.useState("");
   const [addDepositDate, setAddDepositDate] = React.useState(new Date().toISOString().split("T")[0]);
 
+  // Track dismissed (removed/faded) extra duty allowances per member for this month
+  const [dismissedMap, setDismissedMap] = React.useState<Record<string, boolean>>({});
+  const [isActionLoading, setIsActionLoading] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const currentMonthYear = data?.monthYear || "current";
+    try {
+      const raw = localStorage.getItem(`dismissed_allowances_${currentMonthYear}`);
+      if (raw) {
+        setDismissedMap(JSON.parse(raw));
+      } else {
+        setDismissedMap({});
+      }
+    } catch {
+      setDismissedMap({});
+    }
+  }, [data?.monthYear]);
+
+  // Dismiss allowance (render abcha / faded)
+  const handleDismissAllowance = (memberId: string) => {
+    const currentMonthYear = data?.monthYear || "current";
+    const updated = { ...dismissedMap, [memberId]: true };
+    setDismissedMap(updated);
+    try {
+      localStorage.setItem(`dismissed_allowances_${currentMonthYear}`, JSON.stringify(updated));
+    } catch {}
+    toast.info("Allowance marked as removed (faded). You can revert anytime.");
+  };
+
+  // Revert dismissed allowance back to active Add/Remove
+  const handleRevertDismiss = (memberId: string) => {
+    const currentMonthYear = data?.monthYear || "current";
+    const updated = { ...dismissedMap };
+    delete updated[memberId];
+    setDismissedMap(updated);
+    try {
+      localStorage.setItem(`dismissed_allowances_${currentMonthYear}`, JSON.stringify(updated));
+    } catch {}
+    toast.success("Allowance restored!");
+  };
+
+  // Add allowance as a cash deposit
+  const handleAddAllowanceDeposit = async (m: any, allowance: number) => {
+    if (!allowance || allowance <= 0) return;
+    setIsActionLoading(m.member.id);
+    try {
+      const fd = new FormData();
+      fd.append("memberId", m.member.id);
+      fd.append("amount", allowance.toString());
+      fd.append("date", new Date().toISOString().split("T")[0]);
+      fd.append("monthYear", data.monthYear);
+      fd.append("note", "Extra Duty Allowance");
+      await addDeposit(fd);
+      await fetchData(undefined, false, true);
+      toast.success(`৳${allowance} Extra Duty Allowance added as deposit for ${m.member.user.name}!`);
+    } catch (err: any) {
+      toast.error("Failed to add deposit: " + err.message);
+    } finally {
+      setIsActionLoading(null);
+    }
+  };
+
+  // Revert added allowance deposit (delete deposit)
+  const handleRevertAllowanceDeposit = async (depositId: string, m: any) => {
+    if (!window.confirm(`${m.member.user.name} এর জন্য যোগ করা Extra Duty Allowance ডিপোজিটটি মুছে ফেলতে চান?`)) return;
+    setIsActionLoading(depositId);
+    try {
+      const fd = new FormData();
+      fd.append("id", depositId);
+      await deleteDeposit(fd);
+      await fetchData(undefined, false, true);
+      toast.info(`Extra Duty Allowance deposit reverted.`);
+    } catch (err: any) {
+      toast.error("Failed to revert deposit: " + err.message);
+    } finally {
+      setIsActionLoading(null);
+    }
+  };
+
   return (
     <>
       <div className="section-panel h-full">
         <div className="section-panel-header"><div><h3 className="text-sm font-bold text-foreground">All Member Deposits</h3><p className="text-xs text-muted-foreground mt-0.5">Summed automatically per member</p></div></div>
         <div className="table-responsive">
           <table className="data-table">
-            <thead><tr><th>Member</th><th>Prev. Due</th><th>Prev. Advance</th><th className="min-w-[200px]">Deposit History & Actions</th><th>Total Deposited</th><th>Balance</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Prev. Due</th>
+                <th>Prev. Advance</th>
+                <th>Prev. Extra Duty</th>
+                <th className="min-w-[200px]">Deposit History & Actions</th>
+                <th>Total Deposited</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
             <tbody>
               {data.members.map((m: any) => {
                 const netDepositBalance = m.totalDeposits + m.previousAdvance - m.previousDue;
+                const allowance = m.prevExtraMarketAllowance || 0;
+                const allowanceDeposit = m.member.deposits?.find((dep: any) =>
+                  dep.note && dep.note.toLowerCase().includes("extra duty")
+                );
+                const isDismissed = Boolean(dismissedMap[m.member.id]);
+
                 return (
                   <tr key={m.member.id}>
                     <td>
@@ -54,14 +149,124 @@ export default function DepositsTab({ props }: { props: any }) {
                     </td>
                     <td>{m.previousDue > 0 ? <span className="font-bold" style={{ color: 'oklch(0.68 0.22 27)' }}>৳{m.previousDue.toFixed(2)}</span> : <span className="text-muted-foreground">—</span>}</td>
                     <td>{m.previousAdvance > 0 ? <span className="font-bold" style={{ color: 'oklch(0.70 0.19 162)' }}>৳{m.previousAdvance.toFixed(2)}</span> : <span className="text-muted-foreground">—</span>}</td>
+
+                    {/* Extra Duty Allowance (Prev. Month) Column */}
+                    <td>
+                      {(() => {
+                        if (allowance <= 0) {
+                          return <span className="text-muted-foreground text-xs">—</span>;
+                        }
+
+                        // 1. If added as deposit
+                        if (allowanceDeposit) {
+                          return (
+                            <div className="flex flex-col gap-1.5 py-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-extrabold text-xs text-emerald-400">
+                                  ৳{allowance}
+                                </span>
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                                  <CheckCircle2 className="w-2.5 h-2.5" /> Added
+                                </span>
+                              </div>
+                              <div>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  disabled={isActionLoading === allowanceDeposit.id}
+                                  onClick={() => handleRevertAllowanceDeposit(allowanceDeposit.id, m)}
+                                  className="h-6 px-2 text-[10px] font-bold rounded-md bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all active:scale-95 flex items-center gap-1"
+                                  title="Revert deposit addition"
+                                >
+                                  <RotateCcw className="w-2.5 h-2.5" />
+                                  {isActionLoading === allowanceDeposit.id ? "..." : "Revert"}
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // 2. If dismissed (faded / abcha)
+                        if (isDismissed) {
+                          return (
+                            <div className="flex flex-col gap-1.5 py-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-xs text-slate-400 opacity-40 line-through">
+                                  ৳{allowance}
+                                </span>
+                                <span className="text-[10px] text-slate-400 opacity-60 italic bg-white/5 px-1.5 py-0.5 rounded border border-white/10">
+                                  Removed
+                                </span>
+                              </div>
+                              <div>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={() => handleRevertDismiss(m.member.id)}
+                                  className="h-6 px-2 text-[10px] font-bold rounded-md bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 transition-all active:scale-95 flex items-center gap-1"
+                                  title="Restore allowance"
+                                >
+                                  <RotateCcw className="w-2.5 h-2.5" />
+                                  Revert
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // 3. Normal / Pending state (Add & Remove buttons)
+                        return (
+                          <div className="flex flex-col gap-1.5 py-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-extrabold text-xs" style={{ color: 'oklch(0.70 0.19 162)' }}>
+                                ৳{allowance}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground font-medium">
+                                ({m.prevExtraDays} extra {m.prevExtraDays === 1 ? "day" : "days"})
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Button
+                                type="button"
+                                size="sm"
+                                disabled={isActionLoading === m.member.id}
+                                onClick={() => handleAddAllowanceDeposit(m, allowance)}
+                                className="h-6 px-2 text-[10px] font-bold rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-1"
+                                title="Add as deposit"
+                              >
+                                <Plus className="w-2.5 h-2.5" />
+                                {isActionLoading === m.member.id ? "Adding..." : "Add"}
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                disabled={isActionLoading === m.member.id}
+                                onClick={() => handleDismissAllowance(m.member.id)}
+                                className="h-6 px-2 text-[10px] font-bold rounded-md bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 hover:text-rose-100 border border-rose-500/40 transition-all hover:scale-105 active:scale-95 flex items-center gap-1 shadow-sm"
+                                title="Mark as removed (fade)"
+                              >
+                                <X className="w-3 h-3 text-rose-400" />
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </td>
+
                     <td>
                       <div className="flex flex-col gap-1.5">
                         {m.member.deposits?.length > 0 ? (
                           m.member.deposits.map((dep: any) => (
                             <div key={dep.id} className="flex items-center justify-between gap-2 p-1.5 rounded-lg border bg-white/5 border-white/10">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="badge-cyan text-[11px]">{new Date(dep.date).toLocaleDateString()}</span>
                                 <span className="font-bold text-xs" style={{ color: 'oklch(0.70 0.19 162)' }}>৳{dep.amount.toLocaleString()}</span>
+                                {dep.note && (
+                                  <span className="text-[10px] text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-medium">
+                                    {dep.note}
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center gap-1">
                                 <Button
