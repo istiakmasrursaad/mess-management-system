@@ -45,12 +45,12 @@ export default function OverviewTab({ props }: { props: any }) {
             <div className="text-xs text-slate-500">Consumed this month</div>
           </div>
 
-          <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium">
+          <div className="pt-2.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-300 font-medium shrink-0">
               <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="whitespace-nowrap">Total Day Count:</span>
+              <span>Total Day Count:</span>
             </div>
-            <span className="text-xs font-extrabold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 whitespace-nowrap">
+            <span className="text-[11px] sm:text-xs font-extrabold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 shrink-0">
               {data.totalDayCount ?? 0} {(data.totalDayCount ?? 0) === 1 ? 'Day' : 'Days'}
             </span>
           </div>

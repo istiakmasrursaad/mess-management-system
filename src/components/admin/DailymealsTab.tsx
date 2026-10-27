@@ -18,18 +18,18 @@ export default function DailymealsTab({ props }: { props: any }) {
   return (
     <>
       <div className="section-panel">
-              <div className="section-panel-header">
+              <div className="section-panel-header flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-bold text-foreground">Daily Meals Management</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Add or override daily meals for all members.</p>
                 </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-400/10 border border-amber-400/20 text-amber-300">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto justify-between sm:justify-end">
+                  <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-400/10 border border-amber-400/20 text-amber-300 shrink-0">
                     <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                     <span>Total Day Count:</span>
                     <span className="font-extrabold">{data?.totalDayCount || 0} {(data?.totalDayCount || 0) === 1 ? 'Day' : 'Days'}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Label htmlFor="mealDate" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">Date:</Label>
                     <Input id="mealDate" type="date" value={selectedMealDate} onChange={handleMealDateChange}
                       min={minDate} max={maxDate}
@@ -83,20 +83,20 @@ export default function DailymealsTab({ props }: { props: any }) {
                        </tbody>
                      </table>
                    </div>
-                   <div className="flex flex-wrap items-center justify-between gap-4 p-4 border-t" style={{ borderColor: 'oklch(1 0 0 / 7%)' }}>
-                     <div className="flex items-center gap-3 flex-wrap">
-                       <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold" style={{ background: 'oklch(0.65 0.25 275 / 10%)', border: '1px solid oklch(0.65 0.25 275 / 20%)', color: 'oklch(0.75 0.20 275)' }}>
-                         <UtensilsCrossed className="w-4 h-4" />
+                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 p-4 border-t" style={{ borderColor: 'oklch(1 0 0 / 7%)' }}>
+                     <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                       <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold" style={{ background: 'oklch(0.65 0.25 275 / 10%)', border: '1px solid oklch(0.65 0.25 275 / 20%)', color: 'oklch(0.75 0.20 275)' }}>
+                         <UtensilsCrossed className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                          <span>Total Day Meals:</span>
-                         <span className="text-base font-extrabold">{Object.values(mealInputValues).reduce((sum: number, v: any) => sum + (Number(v) || 0), 0)}</span>
+                         <span className="text-sm sm:text-base font-extrabold">{Object.values(mealInputValues).reduce((sum: number, v: any) => sum + (Number(v) || 0), 0)}</span>
                        </div>
-                       <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/5 border border-white/10 text-muted-foreground">
-                         <CalendarDays className="w-3.5 h-3.5 text-amber-400" />
+                       <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/5 border border-white/10 text-muted-foreground shrink-0">
+                         <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                          <span>Total Day Count:</span>
                          <span className="font-bold text-foreground">{data?.totalDayCount || 0} {(data?.totalDayCount || 0) === 1 ? 'Day' : 'Days'}</span>
                        </div>
                      </div>
-                     <Button onClick={handleSaveAllMeals} disabled={isSavingMeals} className="btn-glow font-bold h-10 px-6 rounded-xl text-sm cursor-pointer">
+                     <Button onClick={handleSaveAllMeals} disabled={isSavingMeals} className="btn-glow font-bold h-10 px-6 rounded-xl text-sm cursor-pointer w-full sm:w-auto">
                        {isSavingMeals ? "Submitting Day Meals..." : "Submit / Save Day Meals"}
                      </Button>
                    </div>
