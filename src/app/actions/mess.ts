@@ -103,14 +103,18 @@ async function calculateMonthMetrics(targetMonth: string, settings: any, monthCo
   const totalMarketCost = markets.reduce((sum, m) => sum + m.amount, 0);
   let totalMessMeals = 0;
 
+  const submittedDates = new Set<string>();
   const dateTotalMeals = new Map<string, number>();
   activeMembers.forEach((member) => {
     member.dailyMeals.forEach((d) => {
       const dateKey = new Date(d.date).toISOString().split("T")[0];
+      submittedDates.add(dateKey);
       const current = dateTotalMeals.get(dateKey) || 0;
       dateTotalMeals.set(dateKey, current + d.totalMeal);
     });
   });
+
+  const totalDayCount = submittedDates.size;
 
   const memberCalculations = activeMembers.map((member) => {
     const totalMeals = member.dailyMeals.reduce((sum, d) => sum + d.totalMeal, 0);
@@ -233,49 +237,23 @@ async function calculateMonthMetrics(targetMonth: string, settings: any, monthCo
     totalMarketCost,
     totalMessMeals,
     liveMealRate,
+    totalDayCount,
   };
 }
 
-// Helper to calculate cumulative net balance from prior months
+// Helper to calculate prior month's balance (ONLY carried over from the immediate previous month if finalized)
 async function getPriorNetBalances(targetMonth: string, settings: any): Promise<Record<string, number>> {
   const priorBalances: Record<string, number> = {};
+  const immediatePrevMonth = getPreviousMonthYear(targetMonth);
 
-  const [marketMonths, mealMonths, depositMonths, snapshots] = await Promise.all([
-    prisma.market.findMany({ distinct: ["monthYear"], select: { monthYear: true } }),
-    prisma.dailyMeal.findMany({ distinct: ["monthYear"], select: { monthYear: true } }),
-    prisma.deposit.findMany({ distinct: ["monthYear"], select: { monthYear: true } }),
-    prisma.monthlySnapshot.findMany({ include: { memberSnapshots: true } }),
-  ]);
+  const prevSnapshot = await prisma.monthlySnapshot.findUnique({
+    where: { monthYear: immediatePrevMonth },
+    include: { memberSnapshots: true },
+  });
 
-  const allMonths = Array.from(
-    new Set<string>([
-      ...marketMonths.map((m) => m.monthYear),
-      ...mealMonths.map((m) => m.monthYear),
-      ...depositMonths.map((m) => m.monthYear),
-      ...snapshots.map((s) => s.monthYear),
-    ])
-  );
-
-  const compareMY = (a: string, b: string) => {
-    const [am, ay] = a.split("-").map(Number);
-    const [bm, by] = b.split("-").map(Number);
-    if (ay !== by) return ay - by;
-    return am - bm;
-  };
-
-  const priorMonths = allMonths.filter((m) => compareMY(m, targetMonth) < 0).sort(compareMY);
-  if (priorMonths.length === 0) return priorBalances;
-
-  const snapshotMap = new Map(snapshots.map((s) => [s.monthYear, s]));
-
-  // Sequentially set ending balance of each prior month from earliest to latest (ONLY if finalized in history)
-  for (const mYear of priorMonths) {
-    const snap = snapshotMap.get(mYear);
-    if (snap) {
-      // If month mYear was snapshot-finalized, its ending balance is snapshot's due - advance
-      for (const ms of snap.memberSnapshots) {
-        priorBalances[ms.memberId] = ms.due - ms.advance;
-      }
+  if (prevSnapshot) {
+    for (const ms of prevSnapshot.memberSnapshots) {
+      priorBalances[ms.memberId] = ms.due - ms.advance;
     }
   }
 
@@ -354,6 +332,7 @@ export async function getMessData(monthYear?: string) {
     totalMarketCost: monthData.totalMarketCost,
     totalMessMeals: monthData.totalMessMeals,
     liveMealRate: monthData.liveMealRate,
+    totalDayCount: monthData.totalDayCount,
     grandTotalDeposits,
     grandTotalDues,
     grandTotalAdvances,

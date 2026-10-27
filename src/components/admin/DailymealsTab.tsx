@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UtensilsCrossed, RefreshCw } from "lucide-react";
+import { UtensilsCrossed, RefreshCw, CalendarDays } from "lucide-react";
 
 
 export default function DailymealsTab({ props }: { props: any }) {
@@ -23,11 +23,18 @@ export default function DailymealsTab({ props }: { props: any }) {
                   <h3 className="text-sm font-bold text-foreground">Daily Meals Management</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Add or override daily meals for all members.</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="mealDate" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">Date:</Label>
-                  <Input id="mealDate" type="date" value={selectedMealDate} onChange={handleMealDateChange}
-                    min={minDate} max={maxDate}
-                    className="h-9 rounded-xl bg-white/5 border-white/10 text-foreground w-36 text-sm" />
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-400/10 border border-amber-400/20 text-amber-300">
+                    <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>Total Day Count:</span>
+                    <span className="font-extrabold">{data?.totalDayCount || 0} {(data?.totalDayCount || 0) === 1 ? 'Day' : 'Days'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="mealDate" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">Date:</Label>
+                    <Input id="mealDate" type="date" value={selectedMealDate} onChange={handleMealDateChange}
+                      min={minDate} max={maxDate}
+                      className="h-9 rounded-xl bg-white/5 border-white/10 text-foreground w-36 text-sm" />
+                  </div>
                 </div>
               </div>
               {loadingDailyMeals ? (
@@ -77,13 +84,20 @@ export default function DailymealsTab({ props }: { props: any }) {
                      </table>
                    </div>
                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border-t" style={{ borderColor: 'oklch(1 0 0 / 7%)' }}>
-                     <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold" style={{ background: 'oklch(0.65 0.25 275 / 10%)', border: '1px solid oklch(0.65 0.25 275 / 20%)', color: 'oklch(0.75 0.20 275)' }}>
-                       <UtensilsCrossed className="w-4 h-4" />
-                       <span>Total Day Meals:</span>
-                       <span className="text-base font-extrabold">{Object.values(mealInputValues).reduce((sum: number, v: any) => sum + (Number(v) || 0), 0)}</span>
+                     <div className="flex items-center gap-3 flex-wrap">
+                       <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold" style={{ background: 'oklch(0.65 0.25 275 / 10%)', border: '1px solid oklch(0.65 0.25 275 / 20%)', color: 'oklch(0.75 0.20 275)' }}>
+                         <UtensilsCrossed className="w-4 h-4" />
+                         <span>Total Day Meals:</span>
+                         <span className="text-base font-extrabold">{Object.values(mealInputValues).reduce((sum: number, v: any) => sum + (Number(v) || 0), 0)}</span>
+                       </div>
+                       <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/5 border border-white/10 text-muted-foreground">
+                         <CalendarDays className="w-3.5 h-3.5 text-amber-400" />
+                         <span>Total Day Count:</span>
+                         <span className="font-bold text-foreground">{data?.totalDayCount || 0} {(data?.totalDayCount || 0) === 1 ? 'Day' : 'Days'}</span>
+                       </div>
                      </div>
-                     <Button onClick={handleSaveAllMeals} disabled={isSavingMeals} className="btn-glow font-bold h-10 px-6 rounded-xl text-sm">
-                       {isSavingMeals ? "Saving Meals..." : "Save All Meals"}
+                     <Button onClick={handleSaveAllMeals} disabled={isSavingMeals} className="btn-glow font-bold h-10 px-6 rounded-xl text-sm cursor-pointer">
+                       {isSavingMeals ? "Submitting Day Meals..." : "Submit / Save Day Meals"}
                      </Button>
                    </div>
                 </>

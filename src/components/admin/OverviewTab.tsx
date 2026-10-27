@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, AlertTriangle, BadgeDollarSign } from "lucide-react";
+import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, AlertTriangle, BadgeDollarSign, CalendarDays } from "lucide-react";
 
 export default function OverviewTab({ props }: { props: any }) {
   const { data } = props;
@@ -31,17 +31,29 @@ export default function OverviewTab({ props }: { props: any }) {
           <div className="text-xs text-slate-500">Full mess enrollment</div>
         </div>
 
-        {/* Total Meals */}
-        <div className="rounded-2xl p-4 md:p-5 flex flex-col gap-2 transition-all duration-200 hover:-translate-y-0.5"
+        {/* Total Meals & Total Day Count */}
+        <div className="rounded-2xl p-4 md:p-5 flex flex-col justify-between gap-3 transition-all duration-200 hover:-translate-y-0.5"
           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Meals</span>
-            <div className="p-1.5 rounded-lg" style={{ background: "rgba(251,191,36,0.15)" }}>
-              <UtensilsCrossed className="w-3.5 h-3.5 text-amber-400" />
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Meals</span>
+              <div className="p-1.5 rounded-lg" style={{ background: "rgba(251,191,36,0.15)" }}>
+                <UtensilsCrossed className="w-3.5 h-3.5 text-amber-400" />
+              </div>
             </div>
+            <div className="text-3xl font-extrabold text-white mt-1">{data.totalMessMeals}</div>
+            <div className="text-xs text-slate-500">Consumed this month</div>
           </div>
-          <div className="text-3xl font-extrabold text-white">{data.totalMessMeals}</div>
-          <div className="text-xs text-slate-500">Consumed this month</div>
+
+          <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium">
+              <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="whitespace-nowrap">Total Day Count:</span>
+            </div>
+            <span className="text-xs font-extrabold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 whitespace-nowrap">
+              {data.totalDayCount ?? 0} {(data.totalDayCount ?? 0) === 1 ? 'Day' : 'Days'}
+            </span>
+          </div>
         </div>
 
         {/* Market Expenses */}

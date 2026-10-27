@@ -287,6 +287,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
         throw new Error(res.error);
       }
       await fetchSnapshots();
+      await fetchData(undefined, false, true);
       toast.success(`${monthYearToLabel(selectedMonth)} সফলভাবে চূড়ান্ত ও সেভ হয়েছে!`);
     } catch (err: any) {
       console.error(err);
@@ -476,7 +477,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
         toast.error(res.error);
       } else {
         await Promise.all([fetchDailyMeals(selectedMealDate), fetchData(undefined, false, true)]);
-        toast.success("All meals saved successfully!");
+        toast.success("Day meals submitted successfully!");
       }
     } finally {
       setIsSavingMeals(false);
