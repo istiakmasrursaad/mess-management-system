@@ -12,6 +12,7 @@ export default function OverviewTab({ props }: { props: any }) {
     const expense = (Number(m.totalCost) || 0) - (Number(m.baseKhala) || 0) - (Number(m.baseManager) || 0);
     return sum + expense;
   }, 0);
+  const remainingDepositBalance = totalCashDepositsWithAdvance - totalMemberExpensesExclKhalaManager;
 
   return (
     <>
@@ -114,7 +115,7 @@ export default function OverviewTab({ props }: { props: any }) {
           </div>
         </div>
 
-        {/* Total Member Expenses (Excl. Khala & Manager) */}
+        {/* Remaining Balance (Total Deposits - Expenses Excl. Khala & Manager) */}
         <div className="rounded-2xl p-4 md:p-5 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5"
           style={{ background: "rgba(14,165,233,0.06)", border: "1px solid rgba(14,165,233,0.18)", backdropFilter: "blur(12px)" }}>
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -122,9 +123,13 @@ export default function OverviewTab({ props }: { props: any }) {
             <BadgeDollarSign className="w-4.5 h-4.5 text-sky-400" />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Member Expenses</p>
-            <div className="text-2xl font-extrabold text-sky-400">৳ {totalMemberExpensesExclKhalaManager.toFixed(2)}</div>
-            <p className="text-xs text-slate-500 mt-0.5">Excl. Khala &amp; Manager bill</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Remaining Balance</p>
+            <div className="text-2xl font-extrabold text-sky-400">
+              {remainingDepositBalance < 0
+                ? `-৳ ${Math.abs(remainingDepositBalance).toFixed(2)}`
+                : `৳ ${remainingDepositBalance.toFixed(2)}`}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">Total deposits − cost (excl. Khala &amp; Manager bill)</p>
           </div>
         </div>
       </div>
