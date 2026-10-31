@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
-import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, AlertTriangle, BadgeDollarSign, CalendarDays } from "lucide-react";
+import React, { useState } from "react";
+import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, AlertTriangle, BadgeDollarSign, CalendarDays, CalendarCheck2 } from "lucide-react";
+import MealCalendarModal from "./MealCalendarModal";
 
 export default function OverviewTab({ props }: { props: any }) {
   const { data } = props;
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const totalCashDepositsWithAdvance = (data.members || []).reduce((sum: number, m: any) => sum + (Number(m.totalDeposits) || 0) + (Number(m.previousAdvance) || 0), 0);
   const totalPendingDues = (data.members || []).reduce((sum: number, m: any) => sum + (Number(m.due) > 0 ? Number(m.due) : 0), 0);
@@ -46,14 +48,24 @@ export default function OverviewTab({ props }: { props: any }) {
             <div className="text-xs text-slate-500">Consumed this month</div>
           </div>
 
-          <div className="pt-2.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
-            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-300 font-medium shrink-0">
+          <div className="pt-2.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-x-1.5 gap-y-1.5">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-300 font-medium shrink-0">
               <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>Total Day Count:</span>
+              <span>Day Count:</span>
             </div>
-            <span className="text-[11px] sm:text-xs font-extrabold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 shrink-0">
-              {data.totalDayCount ?? 0} {(data.totalDayCount ?? 0) === 1 ? 'Day' : 'Days'}
-            </span>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsCalendarOpen(true)}
+                title="View meal submission calendar"
+                className="group flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-400/15 hover:bg-amber-400/25 text-amber-300 border border-amber-400/30 hover:border-amber-400/50 transition-all duration-150 cursor-pointer shadow-sm active:scale-95"
+              >
+                <span className="text-[10px] sm:text-xs font-extrabold">
+                  {data.totalDayCount ?? 0} {(data.totalDayCount ?? 0) === 1 ? 'Day' : 'Days'}
+                </span>
+                <CalendarCheck2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300 group-hover:scale-110 transition-transform" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -199,6 +211,26 @@ export default function OverviewTab({ props }: { props: any }) {
           </table>
         </div>
       </div>
+
+      {/* Meal Submission Calendar Modal (Soft Blur, No Pitch Blackout) */}
+      <MealCalendarModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        selectedMonth={props.selectedMonth || data?.monthYear}
+        data={data}
+        onSelectDate={(dateStr) => {
+          if (props.setSelectedMealDate) {
+            props.setSelectedMealDate(dateStr);
+          }
+          if (props.fetchDailyMeals) {
+            props.fetchDailyMeals(dateStr);
+          }
+          if (props.setActiveTab) {
+            props.setActiveTab("dailymeals");
+          }
+          setIsCalendarOpen(false);
+        }}
+      />
     </>
   );
 }

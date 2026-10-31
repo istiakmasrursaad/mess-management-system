@@ -238,6 +238,8 @@ async function calculateMonthMetrics(targetMonth: string, settings: any, monthCo
     totalMessMeals,
     liveMealRate,
     totalDayCount,
+    submittedDates: Array.from(submittedDates),
+    dateTotalMeals: Object.fromEntries(dateTotalMeals),
   };
 }
 
@@ -333,6 +335,8 @@ export async function getMessData(monthYear?: string) {
     totalMessMeals: monthData.totalMessMeals,
     liveMealRate: monthData.liveMealRate,
     totalDayCount: monthData.totalDayCount,
+    submittedDates: monthData.submittedDates,
+    dateTotalMeals: monthData.dateTotalMeals,
     grandTotalDeposits,
     grandTotalDues,
     grandTotalAdvances,
