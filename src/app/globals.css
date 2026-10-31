@@ -646,6 +646,135 @@
 }
 
 /* ============================================
+   📅 Day-by-Day Compact Matrix Table (Mobile Optimized)
+   ============================================ */
+.matrix-table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.matrix-table thead th.day-cell,
+.matrix-table tbody td.day-cell,
+.matrix-table tfoot td.day-cell {
+  padding: 0.45rem 0.15rem !important;
+  text-align: center !important;
+  min-width: 25px !important;
+  max-width: 28px !important;
+  width: 26px !important;
+  font-size: 0.75rem !important;
+}
+
+.matrix-table thead th.si-cell,
+.matrix-table tbody td.si-cell,
+.matrix-table tfoot td.si-cell {
+  padding: 0.45rem 0.2rem !important;
+  text-align: center !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 32px !important;
+}
+
+.matrix-table thead th.name-cell,
+.matrix-table tbody td.name-cell,
+.matrix-table tfoot td.name-cell {
+  padding: 0.45rem 0.4rem !important;
+  text-align: left !important;
+  width: 105px !important;
+  min-width: 105px !important;
+  max-width: 120px !important;
+}
+
+@media (min-width: 640px) {
+  .matrix-table thead th.si-cell,
+  .matrix-table tbody td.si-cell,
+  .matrix-table tfoot td.si-cell {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 44px !important;
+    padding: 0.5rem 0.4rem !important;
+  }
+
+  .matrix-table thead th.name-cell,
+  .matrix-table tbody td.name-cell,
+  .matrix-table tfoot td.name-cell {
+    width: 150px !important;
+    min-width: 150px !important;
+    max-width: 180px !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+}
+
+.matrix-table thead th.stat-cell,
+.matrix-table tbody td.stat-cell,
+.matrix-table tfoot td.stat-cell {
+  padding: 0.45rem 0.35rem !important;
+  text-align: center !important;
+  min-width: 48px !important;
+}
+
+/* ============================================
+   🧮 Calculation Ledger Table Optimization
+   ============================================ */
+.calc-table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.calc-table thead th,
+.calc-table tbody td,
+.calc-table tfoot td {
+  padding: 0.5rem 0.4rem !important;
+  font-size: 0.75rem !important;
+  white-space: nowrap !important;
+}
+
+.calc-table thead th.si-cell,
+.calc-table tbody td.si-cell,
+.calc-table tfoot td.si-cell {
+  width: 32px !important;
+  min-width: 32px !important;
+  max-width: 36px !important;
+  text-align: center !important;
+  padding: 0.5rem 0.2rem !important;
+}
+
+.calc-table thead th.name-cell,
+.calc-table tbody td.name-cell,
+.calc-table tfoot td.name-cell {
+  width: 105px !important;
+  min-width: 105px !important;
+  max-width: 120px !important;
+  text-align: left !important;
+  padding: 0.5rem 0.4rem !important;
+}
+
+@media (min-width: 640px) {
+  .calc-table thead th,
+  .calc-table tbody td,
+  .calc-table tfoot td {
+    padding: 0.6rem 0.65rem !important;
+    font-size: 0.8125rem !important;
+  }
+
+  .calc-table thead th.si-cell,
+  .calc-table tbody td.si-cell,
+  .calc-table tfoot td.si-cell {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 44px !important;
+  }
+
+  .calc-table thead th.name-cell,
+  .calc-table tbody td.name-cell,
+  .calc-table tfoot td.name-cell {
+    width: 150px !important;
+    min-width: 150px !important;
+    max-width: 180px !important;
+    padding: 0.6rem 0.75rem !important;
+  }
+}
+
+/* ============================================
    🏷 Badge utility classes
    ============================================ */
 .badge-emerald {

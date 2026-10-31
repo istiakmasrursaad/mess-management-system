@@ -12,7 +12,8 @@ import {
   Sparkles, 
   Search, 
   Receipt,
-  RotateCcw
+  RotateCcw,
+  Pin
 } from "lucide-react";
 import { DiningCalcCard } from "@/components/DiningCalcCard";
 
@@ -48,6 +49,7 @@ export default function LedgerTab({ props }: { props: any }) {
   // View state: null = Initial state with 2 choice cards, "calculation" = Master Audit Table, "dailyMeals" = Day-by-Day Grid
   const [viewMode, setViewMode] = useState<"calculation" | "dailyMeals" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isNameFrozen, setIsNameFrozen] = useState(true);
 
   // Determine days in selected month
   const [monthNum, yearNum] = (selectedMonth || "").split("-").map(Number);
@@ -391,32 +393,59 @@ export default function LedgerTab({ props }: { props: any }) {
                 </span>
                 <span className="text-muted-foreground/30">•</span>
                 <span className="font-medium text-foreground/80">
-                  Total Mess Meals: <strong className="text-primary">{data?.totalMessMeals || 0}</strong>
+                  Total Meals: <strong className="text-primary">{data?.totalMessMeals || 0}</strong>
                 </span>
                 <span className="text-muted-foreground/30">•</span>
                 <span className="font-medium text-foreground/80">
-                  Live Rate: <strong className="text-primary">৳{(data?.liveMealRate || 0).toFixed(2)}</strong>
+                  Rate: <strong className="text-primary">৳{(data?.liveMealRate || 0).toFixed(2)}</strong>
                 </span>
               </div>
-              <div className="relative w-full sm:w-auto">
-                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Filter member by name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-violet-500/50 w-full sm:w-56"
-                />
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setIsNameFrozen(!isNameFrozen)}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border cursor-pointer whitespace-nowrap ${
+                    isNameFrozen
+                      ? "bg-violet-500/15 text-violet-300 border-violet-500/30 hover:bg-violet-500/25"
+                      : "bg-white/5 text-muted-foreground border-white/10 hover:text-foreground hover:bg-white/10"
+                  }`}
+                  title={isNameFrozen ? "Freeze is ON. Click to unfreeze name column for panoramic view" : "Click to freeze Name and SI columns"}
+                >
+                  <Pin className={`w-3.5 h-3.5 ${isNameFrozen ? "rotate-45 text-violet-400" : "text-muted-foreground"}`} />
+                  <span>Freeze: {isNameFrozen ? "ON" : "OFF"}</span>
+                </button>
+                <div className="relative flex-1 sm:w-56">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Filter member..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-violet-500/50 w-full"
+                  />
+                </div>
               </div>
             </div>
 
             <div className="table-responsive max-h-[72vh] overflow-y-auto">
-              <table className="data-table">
+              <table className="data-table calc-table">
                 <thead>
                   <tr>
-                    <th className="sticky top-0 left-0 z-30 bg-[oklch(0.16_0.018_260)] w-11 min-w-[44px] text-center border-r border-b border-white/10 shadow-[2px_2px_4px_rgba(0,0,0,0.3)]">SI</th>
-                    <th className="sticky top-0 left-[44px] z-30 bg-[oklch(0.16_0.018_260)] min-w-[140px] text-left border-r border-b border-white/10 shadow-[2px_2px_4px_rgba(0,0,0,0.3)]">Name</th>
-                    <th className="sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] border-b border-white/10">Meals</th>
+                    <th className={`si-cell ${
+                      isNameFrozen 
+                        ? "sticky top-0 left-0 z-30 shadow-[2px_2px_4px_rgba(0,0,0,0.3)] border-r" 
+                        : "sticky top-0 z-20"
+                    } bg-[oklch(0.16_0.018_260)] text-center border-b border-white/10`}>
+                      SI
+                    </th>
+                    <th className={`name-cell ${
+                      isNameFrozen 
+                        ? "sticky top-0 left-[32px] sm:left-[38px] z-30 shadow-[2px_2px_4px_rgba(0,0,0,0.3)] border-r" 
+                        : "sticky top-0 z-20"
+                    } bg-[oklch(0.16_0.018_260)] text-left border-b border-white/10`}>
+                      Name
+                    </th>
+                    <th className="sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] border-b border-white/10 text-center">Meals</th>
                     <th className="sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] border-b border-white/10">Meal Cost</th>
                     <th className="sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] border-b border-white/10">Khala</th>
                     <th className="sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] border-b border-white/10">Manager</th>
@@ -434,16 +463,23 @@ export default function LedgerTab({ props }: { props: any }) {
                 <tbody>
                   {filteredMembers.map((m: any, index: number) => (
                     <tr key={m.member.id} className="hover:bg-white/[0.03] transition-colors group">
-                      <td className="sticky left-0 z-10 bg-[oklch(0.13_0.016_260)] group-hover:bg-[oklch(0.17_0.022_260)] text-muted-foreground text-center border-r border-white/10 shadow-[2px_0_4px_rgba(0,0,0,0.25)]">{index + 1}</td>
-                      <td className="sticky left-[44px] z-10 bg-[oklch(0.13_0.016_260)] group-hover:bg-[oklch(0.17_0.022_260)] font-semibold text-foreground whitespace-nowrap border-r border-white/10 shadow-[2px_0_4px_rgba(0,0,0,0.25)]">
-                        {m.member.user.name}
-                        {m.member.roomNo && (
-                          <span className="text-[11px] text-muted-foreground ml-1.5 font-normal">
-                            (R{m.member.roomNo})
-                          </span>
-                        )}
+                      <td className={`si-cell ${
+                        isNameFrozen 
+                          ? "sticky left-0 z-10 shadow-[2px_0_4px_rgba(0,0,0,0.25)] border-r" 
+                          : ""
+                      } bg-[oklch(0.13_0.016_260)] group-hover:bg-[oklch(0.17_0.022_260)] text-muted-foreground text-center text-xs border-white/10`}>
+                        {index + 1}
                       </td>
-                      <td className="font-medium">{m.totalMeals}</td>
+                      <td className={`name-cell ${
+                        isNameFrozen 
+                          ? "sticky left-[32px] sm:left-[38px] z-10 shadow-[2px_0_4px_rgba(0,0,0,0.25)] border-r" 
+                          : ""
+                      } bg-[oklch(0.13_0.016_260)] group-hover:bg-[oklch(0.17_0.022_260)] font-semibold text-foreground whitespace-nowrap border-white/10`}>
+                        <div className="truncate" title={m.member.user.name}>
+                          {m.member.user.name}
+                        </div>
+                      </td>
+                      <td className="font-medium text-center">{m.totalMeals}</td>
                       <td>৳{m.individualMealCost.toFixed(2)}</td>
                       <td>৳{m.baseKhala.toFixed(2)}</td>
                       <td>৳{m.baseManager.toFixed(2)}</td>
@@ -476,8 +512,14 @@ export default function LedgerTab({ props }: { props: any }) {
                 {calcTotals && (
                   <tfoot>
                     <tr className="border-t-2 border-white/10 font-bold bg-white/5">
-                      <td colSpan={2} className="sticky left-0 z-10 bg-[oklch(0.15_0.018_260)] text-foreground uppercase tracking-wider text-xs border-r border-white/10 shadow-[2px_0_4px_rgba(0,0,0,0.25)]">Total Summary</td>
-                      <td className="font-extrabold text-foreground">{calcTotals.totalMeals.toFixed(1)}</td>
+                      <td colSpan={2} className={`si-cell name-cell ${
+                        isNameFrozen 
+                          ? "sticky left-0 z-10 shadow-[2px_0_4px_rgba(0,0,0,0.25)] border-r" 
+                          : ""
+                      } bg-[oklch(0.15_0.018_260)] text-foreground uppercase tracking-wider text-xs border-white/10 px-2`}>
+                        Total Summary
+                      </td>
+                      <td className="font-extrabold text-foreground text-center">{calcTotals.totalMeals.toFixed(1)}</td>
                       <td>৳{calcTotals.totalMealCost.toFixed(2)}</td>
                       <td colSpan={7} className="text-xs text-muted-foreground text-center">Shared Overheads</td>
                       <td className="text-foreground font-extrabold">৳{calcTotals.totalMessCost.toFixed(2)}</td>
@@ -518,31 +560,54 @@ export default function LedgerTab({ props }: { props: any }) {
                 </span>
                 <span className="text-muted-foreground/30">•</span>
                 <span className="font-medium text-foreground">
-                  Total Mess Meals: <strong className="text-cyan-400">{data?.totalMessMeals || 0}</strong>
+                  Total Meals: <strong className="text-cyan-400">{data?.totalMessMeals || 0}</strong>
                 </span>
               </div>
-              <div className="relative w-full sm:w-auto">
-                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Filter member by name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-cyan-500/50 w-full sm:w-56"
-                />
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setIsNameFrozen(!isNameFrozen)}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border cursor-pointer whitespace-nowrap ${
+                    isNameFrozen
+                      ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30 hover:bg-cyan-500/25"
+                      : "bg-white/5 text-muted-foreground border-white/10 hover:text-foreground hover:bg-white/10"
+                  }`}
+                  title={isNameFrozen ? "Freeze is ON. Click to unfreeze name column for panoramic view" : "Click to freeze Name and SI columns"}
+                >
+                  <Pin className={`w-3.5 h-3.5 ${isNameFrozen ? "rotate-45 text-cyan-400" : "text-muted-foreground"}`} />
+                  <span>Freeze: {isNameFrozen ? "ON" : "OFF"}</span>
+                </button>
+                <div className="relative flex-1 sm:w-56">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Filter member..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-cyan-500/50 w-full"
+                  />
+                </div>
               </div>
             </div>
 
             <div className="table-responsive max-h-[72vh] overflow-y-auto">
-              <table className="data-table">
+              <table className="data-table matrix-table">
                 <thead>
                   <tr>
                     {/* Frozen Column 1 & Row 1 (Top-Left Intersection) */}
-                    <th className="sticky top-0 left-0 z-30 bg-[oklch(0.16_0.018_260)] w-11 min-w-[44px] text-center border-r border-b border-white/10 shadow-[2px_2px_4px_rgba(0,0,0,0.3)]">
+                    <th className={`si-cell ${
+                      isNameFrozen 
+                        ? "sticky top-0 left-0 z-30 shadow-[2px_2px_4px_rgba(0,0,0,0.3)] border-r" 
+                        : "sticky top-0 z-20"
+                    } bg-[oklch(0.16_0.018_260)] text-center border-b border-white/10`}>
                       SI
                     </th>
                     {/* Frozen Column 2 & Row 1 (Top-Left Intersection) */}
-                    <th className="sticky top-0 left-[44px] z-30 bg-[oklch(0.16_0.018_260)] min-w-[140px] sm:min-w-[160px] text-left border-r border-b border-white/10 shadow-[2px_2px_4px_rgba(0,0,0,0.3)]">
+                    <th className={`name-cell ${
+                      isNameFrozen 
+                        ? "sticky top-0 left-[28px] sm:left-[38px] z-30 shadow-[2px_2px_4px_rgba(0,0,0,0.3)] border-r" 
+                        : "sticky top-0 z-20"
+                    } bg-[oklch(0.16_0.018_260)] text-left border-b border-white/10`}>
                       NAME
                     </th>
                     {/* Frozen Row 1 for Days (1 to N) */}
@@ -551,7 +616,7 @@ export default function LedgerTab({ props }: { props: any }) {
                       return (
                         <th 
                           key={day} 
-                          className={`sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] w-9 min-w-[36px] text-center px-1 py-2 text-xs border-b border-white/10 ${
+                          className={`day-cell sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] border-b border-white/10 ${
                             isTodayCol 
                               ? "bg-cyan-500/20 text-cyan-300 font-extrabold border-b-2 border-cyan-400" 
                               : ""
@@ -563,13 +628,13 @@ export default function LedgerTab({ props }: { props: any }) {
                       );
                     })}
                     {/* Frozen Row 1 for Summary Columns */}
-                    <th className="sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] min-w-[70px] text-center bg-cyan-500/10 text-cyan-400 font-extrabold border-b border-white/10">
+                    <th className="stat-cell sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] bg-cyan-500/10 text-cyan-400 font-extrabold border-b border-white/10">
                       TOTAL
                     </th>
-                    <th className="sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] min-w-[65px] text-center border-b border-white/10">
+                    <th className="stat-cell sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] border-b border-white/10">
                       Ex Meal
                     </th>
-                    <th className="sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] min-w-[75px] text-center border-b border-white/10">
+                    <th className="stat-cell sticky top-0 z-20 bg-[oklch(0.16_0.018_260)] border-b border-white/10">
                       Need x2!
                     </th>
                   </tr>
@@ -587,18 +652,25 @@ export default function LedgerTab({ props }: { props: any }) {
 
                     return (
                       <tr key={m.member.id} className="hover:bg-white/[0.03] transition-colors group">
-                        {/* Sticky SI & Name */}
-                        <td className="sticky left-0 z-10 bg-[oklch(0.13_0.016_260)] group-hover:bg-[oklch(0.17_0.022_260)] text-muted-foreground text-center text-xs border-r border-white/10 shadow-[2px_0_4px_rgba(0,0,0,0.25)]">
+                        {/* SI Column */}
+                        <td className={`si-cell ${
+                          isNameFrozen 
+                            ? "sticky left-0 z-10 shadow-[2px_0_4px_rgba(0,0,0,0.25)] border-r" 
+                            : ""
+                        } bg-[oklch(0.13_0.016_260)] group-hover:bg-[oklch(0.17_0.022_260)] text-muted-foreground text-center text-xs border-white/10`}>
                           {index + 1}
                         </td>
-                        <td className="sticky left-[44px] z-10 bg-[oklch(0.13_0.016_260)] group-hover:bg-[oklch(0.17_0.022_260)] font-semibold text-foreground whitespace-nowrap text-xs border-r border-white/10 shadow-[2px_0_4px_rgba(0,0,0,0.25)]">
-                          {m.member.user.name}
-                          {m.member.roomNo && (
-                            <span className="text-[10px] text-muted-foreground/80 ml-1.5 font-normal">
-                              (R{m.member.roomNo})
-                            </span>
-                          )}
+                        {/* Name Column */}
+                        <td className={`name-cell ${
+                          isNameFrozen 
+                            ? "sticky left-[28px] sm:left-[38px] z-10 shadow-[2px_0_4px_rgba(0,0,0,0.25)] border-r" 
+                            : ""
+                        } bg-[oklch(0.13_0.016_260)] group-hover:bg-[oklch(0.17_0.022_260)] text-foreground text-xs border-white/10`}>
+                          <div className="font-semibold truncate" title={m.member.user.name}>
+                            {m.member.user.name}
+                          </div>
                         </td>
+                        {/* Day Cells */}
                         {daysArray.map((day) => {
                           const mealVal = mealsByDay[day];
                           const hasMeal = mealVal !== undefined && mealVal > 0;
@@ -607,7 +679,7 @@ export default function LedgerTab({ props }: { props: any }) {
                           return (
                             <td 
                               key={day} 
-                              className={`text-center text-xs px-1 py-1.5 ${
+                              className={`day-cell ${
                                 isTodayCol ? "bg-cyan-500/10 font-bold text-cyan-300" : ""
                               } ${hasMeal ? "text-foreground font-medium" : "text-muted-foreground/30"}`}
                             >
@@ -615,15 +687,16 @@ export default function LedgerTab({ props }: { props: any }) {
                             </td>
                           );
                         })}
-                        <td className="font-extrabold text-foreground text-center text-xs bg-white/[0.02]">
+                        {/* Summary Cells */}
+                        <td className="stat-cell font-extrabold text-foreground text-center text-xs bg-white/[0.02]">
                           {m.totalMeals}
                         </td>
-                        <td className="text-center text-xs text-muted-foreground font-medium">
+                        <td className="stat-cell text-center text-xs text-muted-foreground font-medium">
                           {m.totalExtraMeals || 0}
                         </td>
-                        <td className="text-center text-xs whitespace-nowrap">
+                        <td className="stat-cell text-center text-xs whitespace-nowrap">
                           {m.isNeedX2 ? (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                            <span className="inline-flex items-center px-1 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
                               YES
                             </span>
                           ) : (
@@ -638,8 +711,12 @@ export default function LedgerTab({ props }: { props: any }) {
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-white/10 font-bold bg-white/5">
-                    <td colSpan={2} className="sticky left-0 z-10 bg-[oklch(0.15_0.018_260)] text-foreground text-xs uppercase tracking-wider font-extrabold border-r border-white/10 shadow-[2px_0_4px_rgba(0,0,0,0.25)]">
-                      Daily Total Meals
+                    <td colSpan={2} className={`si-cell name-cell ${
+                      isNameFrozen 
+                        ? "sticky left-0 z-10 shadow-[2px_0_4px_rgba(0,0,0,0.25)] border-r" 
+                        : ""
+                    } bg-[oklch(0.15_0.018_260)] text-foreground text-xs uppercase tracking-wider font-extrabold border-white/10 px-2`}>
+                      Daily Total
                     </td>
                     {daysArray.map((day) => {
                       const isTodayCol = isCurrentMonth && day === todayDate;
@@ -647,7 +724,7 @@ export default function LedgerTab({ props }: { props: any }) {
                       return (
                         <td 
                           key={day} 
-                          className={`text-center text-xs px-1 py-2 font-bold ${
+                          className={`day-cell font-bold ${
                             isTodayCol ? "bg-cyan-500/15 text-cyan-300" : "text-foreground"
                           }`}
                         >
@@ -655,15 +732,15 @@ export default function LedgerTab({ props }: { props: any }) {
                         </td>
                       );
                     })}
-                    <td className="text-center text-xs font-black text-cyan-400 bg-cyan-500/10">
+                    <td className="stat-cell text-center text-xs font-black text-cyan-400 bg-cyan-500/10">
                       {data?.totalMessMeals || 
                         filteredMembers.reduce((s: number, m: any) => s + (Number(m.totalMeals) || 0), 0)
                       }
                     </td>
-                    <td className="text-center text-xs font-bold text-muted-foreground">
+                    <td className="stat-cell text-center text-xs font-bold text-muted-foreground">
                       {filteredMembers.reduce((s: number, m: any) => s + (Number(m.totalExtraMeals) || 0), 0)}
                     </td>
-                    <td className="text-center text-xs text-muted-foreground">
+                    <td className="stat-cell text-center text-xs text-muted-foreground">
                       {filteredMembers.filter((m: any) => m.isNeedX2).length} x2
                     </td>
                   </tr>

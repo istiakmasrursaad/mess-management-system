@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, AlertTriangle, BadgeDollarSign, CalendarDays, CalendarCheck2 } from "lucide-react";
+import { UserCheck, UtensilsCrossed, Store, TrendingUp, Wallet, AlertCircle, AlertTriangle, BadgeDollarSign, CalendarDays, ChevronRight } from "lucide-react";
 import MealCalendarModal from "./MealCalendarModal";
 
 export default function OverviewTab({ props }: { props: any }) {
@@ -48,24 +48,24 @@ export default function OverviewTab({ props }: { props: any }) {
             <div className="text-xs text-slate-500">Consumed this month</div>
           </div>
 
-          <div className="pt-2.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-x-1.5 gap-y-1.5">
-            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-300 font-medium shrink-0">
-              <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>Day Count:</span>
-            </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsCalendarOpen(true)}
-                title="View meal submission calendar"
-                className="group flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-400/15 hover:bg-amber-400/25 text-amber-300 border border-amber-400/30 hover:border-amber-400/50 transition-all duration-150 cursor-pointer shadow-sm active:scale-95"
-              >
-                <span className="text-[10px] sm:text-xs font-extrabold">
+          <div className="pt-2 border-t border-white/10">
+            <button
+              type="button"
+              onClick={() => setIsCalendarOpen(true)}
+              title="Click to view days breakdown"
+              className="group w-full flex items-center justify-between px-2 sm:px-2.5 py-1.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 active:scale-95 border border-amber-400/30 hover:border-amber-400/60 text-amber-300 transition-all cursor-pointer shadow-sm"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-medium text-slate-300 truncate">Day Count</span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0 ml-1">
+                <span className="text-xs font-extrabold text-amber-300">
                   {data.totalDayCount ?? 0} {(data.totalDayCount ?? 0) === 1 ? 'Day' : 'Days'}
                 </span>
-                <CalendarCheck2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300 group-hover:scale-110 transition-transform" />
-              </button>
-            </div>
+                <ChevronRight className="w-3.5 h-3.5 text-amber-400/80 group-hover:text-amber-300 group-hover:translate-x-0.5 transition-all shrink-0" />
+              </div>
+            </button>
           </div>
         </div>
 

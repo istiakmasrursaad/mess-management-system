@@ -14,6 +14,7 @@ import {
   XCircle,
   AlertTriangle,
   ArrowRight,
+  ArrowUpRight,
   Calendar
 } from "lucide-react";
 import MealCalendarModal from "./MealCalendarModal";
@@ -165,15 +166,15 @@ export default function DailymealsTab({ props }: { props: any }) {
             <button
               type="button"
               onClick={() => setIsCalendarOpen(true)}
-              title="View month submission overview"
-              className="group flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/20 hover:border-amber-400/40 text-amber-300 transition-all cursor-pointer shrink-0 active:scale-95"
+              title="Click to view days breakdown"
+              className="group flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 hover:border-amber-400/60 text-amber-300 transition-all cursor-pointer shrink-0 active:scale-95 shadow-sm"
             >
-              <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>Total Day Count:</span>
-              <span className="font-extrabold">
+              <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0 group-hover:scale-110 transition-transform" />
+              <span>Day Count:</span>
+              <span className="font-extrabold text-amber-200">
                 {data?.totalDayCount || 0} {(data?.totalDayCount || 0) === 1 ? "Day" : "Days"}
               </span>
-              <CalendarCheck2 className="w-3.5 h-3.5 text-amber-300 group-hover:scale-110 transition-transform ml-0.5" />
+              <ChevronRight className="w-3.5 h-3.5 text-amber-400/80 group-hover:text-amber-200 group-hover:translate-x-0.5 transition-all" />
             </button>
 
             {/* Smart Date Choose Button (Clicking opens calendar with all submission statuses) */}
@@ -633,13 +634,11 @@ export default function DailymealsTab({ props }: { props: any }) {
                 <button
                   type="button"
                   onClick={() => setIsCalendarOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground cursor-pointer transition-colors shrink-0"
+                  className="group flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/25 hover:border-amber-400/40 text-amber-300 cursor-pointer transition-colors shrink-0 active:scale-95"
                 >
-                  <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>Total Day Count:</span>
-                  <span className="font-bold text-foreground">
-                    {data?.totalDayCount || 0} {(data?.totalDayCount || 0) === 1 ? "Day" : "Days"}
-                  </span>
+                  <CalendarDays className="w-3.5 h-3.5 text-amber-400 shrink-0 group-hover:scale-110 transition-transform" />
+                  <span>Day Count: <strong className="font-extrabold text-amber-200">{data?.totalDayCount || 0} {(data?.totalDayCount || 0) === 1 ? "Day" : "Days"}</strong></span>
+                  <ChevronRight className="w-3.5 h-3.5 text-amber-400/80 group-hover:text-amber-200 group-hover:translate-x-0.5 transition-all" />
                 </button>
               </div>
 
