@@ -7,7 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BadgeDollarSign, CircleCheckBig, ArchiveRestore, Trash2, FilePen, Plus, X, RotateCcw, CheckCircle2 } from "lucide-react";
+import { BadgeDollarSign, CircleCheckBig, ArchiveRestore, Trash2, FilePen, Plus, X, RotateCcw, CheckCircle2, FileDown } from "lucide-react";
+import { generateDepositReceiptPDF, getDepositReceiptPdfFile, getDepositReceiptFormattedData } from "@/lib/depositReceipt";
+
+function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 00-3.48-8.413z"/>
+    </svg>
+  );
+}
 
 
 export default function DepositsTab({ props }: { props: any }) {
@@ -24,6 +33,35 @@ export default function DepositsTab({ props }: { props: any }) {
   // Track dismissed (removed/faded) extra duty allowances per member for this month
   const [dismissedMap, setDismissedMap] = React.useState<Record<string, boolean>>({});
   const [isActionLoading, setIsActionLoading] = React.useState<string | null>(null);
+  const [generatingReceiptId, setGeneratingReceiptId] = React.useState<string | null>(null);
+  const [previewMember, setPreviewMember] = React.useState<any | null>(null);
+  const [readyPdfFile, setReadyPdfFile] = React.useState<File | null>(null);
+  const [isPreparingFile, setIsPreparingFile] = React.useState(false);
+  const [isSharing, setIsSharing] = React.useState(false);
+
+  // Pre-generate PDF File in memory as soon as preview opens to preserve user gesture for navigator.share
+  React.useEffect(() => {
+    if (!previewMember) {
+      setReadyPdfFile(null);
+      return;
+    }
+    let isMounted = true;
+    setIsPreparingFile(true);
+    getDepositReceiptPdfFile(previewMember, data?.monthYear)
+      .then((file) => {
+        if (isMounted) {
+          setReadyPdfFile(file);
+          setIsPreparingFile(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to pre-generate PDF file", err);
+        if (isMounted) setIsPreparingFile(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [previewMember, data?.monthYear]);
 
   React.useEffect(() => {
     const currentMonthYear = data?.monthYear || "current";
@@ -115,6 +153,7 @@ export default function DepositsTab({ props }: { props: any }) {
                 <th className="min-w-[200px]">Deposit History & Actions</th>
                 <th>Total Deposited</th>
                 <th>Balance</th>
+                <th className="text-center">Receipt</th>
               </tr>
             </thead>
             <tbody>
@@ -313,6 +352,43 @@ export default function DepositsTab({ props }: { props: any }) {
                         <div><span style={{ color: 'oklch(0.68 0.22 27)' }}>৳{Math.abs(netDepositBalance).toFixed(2)}</span><p className="text-[10px] text-muted-foreground">Due</p></div>
                       )}
                     </td>
+                    <td className="text-center">
+                      <div className="flex items-center gap-1.5 justify-center">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={generatingReceiptId === m.member.id}
+                          onClick={async () => {
+                            setGeneratingReceiptId(m.member.id);
+                            try {
+                              await generateDepositReceiptPDF(m, data?.monthYear);
+                              toast.success(`Receipt downloaded for ${m.member.user.name}`);
+                            } catch (err: any) {
+                              toast.error("Failed to generate PDF: " + err.message);
+                            } finally {
+                              setGeneratingReceiptId(null);
+                            }
+                          }}
+                          className="h-7 px-2 text-xs font-semibold rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 hover:text-sky-200 border border-sky-500/30 transition-all hover:scale-105 active:scale-95 gap-1 shadow-sm"
+                          title={`Download Receipt for ${m.member.user.name}`}
+                        >
+                          <FileDown className="w-3.5 h-3.5 text-sky-400" />
+                          {generatingReceiptId === m.member.id ? "PDF..." : "PDF"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setPreviewMember(m)}
+                          className="h-7 px-2 text-xs font-semibold rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 transition-all hover:scale-105 active:scale-95 gap-1 shadow-sm"
+                          title={`WhatsApp-এ শেয়ার করার পূর্বে প্রিভিউ দেখুন (${m.member.user.name})`}
+                        >
+                          <WhatsAppIcon className="w-3.5 h-3.5" />
+                          WhatsApp
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -434,6 +510,228 @@ export default function DepositsTab({ props }: { props: any }) {
               <Button type="submit" disabled={isEditing} className="flex-1 h-11 rounded-xl btn-glow font-bold gap-2"><CircleCheckBig className="w-4 h-4" /> {isEditing ? "Saving..." : "Save Changes"}</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipt Preview & WhatsApp Share Dialog */}
+      <Dialog open={Boolean(previewMember)} onOpenChange={(open) => !open && setPreviewMember(null)}>
+        <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[92vh] flex flex-col p-4 sm:p-5 border-white/15 bg-background/95 backdrop-blur-2xl shadow-2xl rounded-2xl overflow-hidden">
+          <DialogHeader className="shrink-0 pb-2.5 border-b border-white/10">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <WhatsAppIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-base font-bold text-foreground">
+                  Deposit Receipt Preview
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Review the receipt details below before sharing or downloading.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {previewMember && (() => {
+            const receiptPreview = getDepositReceiptFormattedData(previewMember, data?.monthYear);
+            return (
+              <>
+                <div className="flex-1 overflow-y-auto py-3 pr-1">
+                  {typeof window !== "undefined" && !window.isSecureContext && (
+                    <div className="mb-3 p-2.5 rounded-xl text-xs bg-amber-500/10 text-amber-300 border border-amber-500/25 flex items-start gap-2">
+                      <span className="text-sm">💡</span>
+                      <div>
+                        <span className="font-semibold">Local Wi-Fi Notice:</span> Mobile browsers restrict native file sharing over plain HTTP. To enable native gallery-style file share, run <code className="px-1.5 py-0.5 rounded bg-black/40 text-amber-200 font-mono font-bold">npm run dev:https</code> or download the PDF and attach it to WhatsApp.
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Slip Card (White background, black border, Times New Roman, faint watermark) */}
+                  <div
+                    className="relative bg-white text-black p-4 sm:p-5 rounded-lg border-2 border-black/80 shadow-md select-none text-[12px] leading-tight"
+                    style={{ fontFamily: "'Times New Roman', Times, serif" }}
+                  >
+                    {/* Center Watermark Logo */}
+                    <div
+                      className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.11]"
+                      aria-hidden="true"
+                    >
+                      <img
+                        src="/icons/icon-192x192.png"
+                        alt="Watermark"
+                        className="w-32 h-32 sm:w-40 sm:h-40 object-contain"
+                      />
+                    </div>
+
+                    <div className="relative z-10 space-y-2">
+                      {/* Header */}
+                      <div className="text-center space-y-0.5">
+                        <h4 className="text-[13px] font-bold tracking-tight">MOSJID-E-NUR COMPLEX</h4>
+                        <p className="text-[13px] font-bold">Mess (2nd Floor & Parts of 1st and 3rd Floors)</p>
+                        <p className="text-[12px]">Terokhadia, Cantonment Road, Rajshahi.</p>
+                      </div>
+
+                      {/* Month */}
+                      <div className="text-right text-[12px] font-normal pt-1">
+                        Month: {receiptPreview.currentMonthLabel}
+                      </div>
+
+                      {/* Member Name */}
+                      <div className="text-[12px] font-normal">
+                        Name: <span className="font-semibold">{receiptPreview.memberName}</span>
+                      </div>
+
+                      {/* Due & Advance */}
+                      <div className="flex justify-between text-[12px]">
+                        <span>Due({receiptPreview.prevMonthLabel}):</span>
+                        <span>{receiptPreview.due > 0 ? receiptPreview.due : 0} tk</span>
+                      </div>
+                      <div className="flex justify-between text-[12px]">
+                        <span>Advance({receiptPreview.prevMonthLabel}):</span>
+                        <span>{receiptPreview.advance > 0 ? receiptPreview.advance : 0} tk</span>
+                      </div>
+
+                      {/* Deposit Details */}
+                      <div className="pt-1">
+                        <div className="text-[12px]">Deposit Details:</div>
+                        <div className="pl-2 space-y-0.5 pt-0.5">
+                          {receiptPreview.deposits.length === 0 ? (
+                            <div className="flex justify-between text-[12px]">
+                              <span>1. Date: --</span>
+                              <span>0 tk</span>
+                            </div>
+                          ) : (
+                            receiptPreview.deposits.map((dep, idx) => (
+                              <div key={dep.id || idx} className="flex justify-between text-[12px]">
+                                <span>{idx + 1}. Date:{dep.dateStr}</span>
+                                <span>{dep.amount} tk</span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Total Balance */}
+                      <div className="flex justify-between text-[12px] pt-1 border-t border-black/20 font-semibold">
+                        <span>Total Balance:</span>
+                        <span>{receiptPreview.totalBalance} tk</span>
+                      </div>
+
+                      {/* In Words */}
+                      <div className="text-[12px]">
+                        <span className="font-semibold">In Words:</span> {receiptPreview.inWords}
+                      </div>
+
+                      {/* Footer Notice */}
+                      <div className="text-center italic text-[11px] pt-2 text-black/80">
+                        This is a system-generated receipt and does not require a signature
+                      </div>
+
+                      {/* Year @ softTech */}
+                      <div className="text-center text-[12px]">
+                        {receiptPreview.presentYear}@softTech
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fixed Bottom Action Buttons - ALWAYS VISIBLE */}
+                <div className="shrink-0 pt-3 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5 bg-background/95">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPreviewMember(null)}
+                    className="h-9 px-4 text-xs font-semibold rounded-xl bg-white/10 hover:bg-white/20 text-white border-white/20 transition-colors"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={async () => {
+                      if (!previewMember) return;
+                      try {
+                        await generateDepositReceiptPDF(previewMember, data?.monthYear);
+                        toast.success("Receipt downloaded successfully!");
+                      } catch (e: any) {
+                        toast.error("Download failed: " + e.message);
+                      }
+                    }}
+                    className="h-9 px-4 text-xs font-semibold rounded-xl bg-sky-600 hover:bg-sky-500 text-white shadow-md transition-all active:scale-95 gap-1.5"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    Download PDF
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={isSharing || isPreparingFile}
+                    onClick={async () => {
+                      if (!previewMember) return;
+                      setIsSharing(true);
+                      try {
+                        let fileToShare = readyPdfFile;
+                        if (!fileToShare) {
+                          fileToShare = await getDepositReceiptPdfFile(previewMember, data?.monthYear);
+                        }
+
+                        // Check if Web Share API with files is supported
+                        const canShareFiles =
+                          typeof navigator !== "undefined" &&
+                          Boolean(navigator.share) &&
+                          (typeof navigator.canShare === "function" ? navigator.canShare({ files: [fileToShare] }) : true);
+
+                        if (canShareFiles) {
+                          try {
+                            // Pass ONLY files and title (no text) to ensure Android WhatsApp handles as document attachment
+                            await navigator.share({
+                              files: [fileToShare],
+                              title: fileToShare.name,
+                            });
+                            toast.success("Receipt shared successfully!");
+                            setPreviewMember(null);
+                            return;
+                          } catch (err: any) {
+                            if (err.name === "AbortError") {
+                              return; // User dismissed share sheet
+                            }
+                            console.warn("navigator.share failed, using direct launch fallback", err);
+                          }
+                        }
+
+                        // Fallback: If Web Share with files is not available (e.g. non-HTTPS testing or desktop)
+                        // Do NOT auto-download to avoid duplicate download prompts!
+                        const phone = previewMember.member?.user?.phone ? previewMember.member.user.phone.replace(/[^0-9]/g, "") : "";
+                        const waText = encodeURIComponent(`Assalamu Alaikum ${receiptPreview.memberName}, here is your Mess Deposit Receipt for ${receiptPreview.currentMonthLabel}. Total Balance: ${receiptPreview.totalBalance} tk.`);
+
+                        const isMobile = typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                        if (isMobile) {
+                          toast.info("Opening WhatsApp. You can also download the PDF using the Download button.", { autoClose: 3500 });
+                          const mobileWaUrl = phone ? `whatsapp://send?phone=${phone}&text=${waText}` : `whatsapp://send?text=${waText}`;
+                          window.location.href = mobileWaUrl;
+                        } else {
+                          const desktopWaUrl = phone ? `https://web.whatsapp.com/send?phone=${phone}&text=${waText}` : `https://web.whatsapp.com`;
+                          window.open(desktopWaUrl, "_blank");
+                        }
+                        setPreviewMember(null);
+                      } catch (err: any) {
+                        if (err.name !== "AbortError") {
+                          toast.error("Share failed: " + err.message);
+                        }
+                      } finally {
+                        setIsSharing(false);
+                      }
+                    }}
+                    className="h-9 px-4 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition-all hover:scale-[1.02] active:scale-95 gap-1.5"
+                  >
+                    <WhatsAppIcon className="w-4 h-4" />
+                    {isSharing ? "Sharing..." : isPreparingFile ? "Preparing PDF..." : "Share to WhatsApp"}
+                  </Button>
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </>
