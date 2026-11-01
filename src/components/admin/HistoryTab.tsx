@@ -45,11 +45,11 @@ export default function HistoryTab({ props }: { props: any }) {
                               <p className="font-bold text-sm" style={{ color: 'oklch(0.70 0.19 162)' }}>৳ {snap.totalMarketCost.toLocaleString()}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button size="sm" onClick={() => exportSnapshotToPDF(snap)} className="btn-glow h-8 px-3 text-xs rounded-lg gap-1.5">
-                                <ClipboardList className="w-3.5 h-3.5" /> PDF
+                              <Button size="sm" onClick={() => exportSnapshotToPDF(snap)} className="btn-glow h-8 px-3 text-xs rounded-lg gap-1.5" title="Export Archived Calculation to PDF">
+                                <ClipboardList className="w-3.5 h-3.5" /> Calculation PDF
                               </Button>
-                              <Button size="sm" variant="ghost" onClick={async () => { const dd = await getDiningCalc(snap.monthYear); const snapData = { totalMessMeals: snap.totalMessMeals, totalMarketCost: snap.totalMarketCost, liveMealRate: snap.liveMealRate, members: snap.memberSnapshots.map((ms: any) => ({ member: { user: { name: ms.memberName }, roomNo: '' }, totalMeals: ms.totalMeals, individualMealCost: ms.individualMealCost, baseKhala: 0, M_X2: 1, baseManager: 0, paper: 0, current: 0, baseGas: 0, festival: 0, marketFine: 0, adjustedOverheads: ms.adjustedOverheads, totalCost: ms.totalCost, totalDeposits: ms.totalDeposits, due: ms.due, advance: ms.advance })) }; generateWordForData(snapData, snap.monthLabel, true, dd); }} className="h-8 px-2.5 text-xs rounded-lg gap-1 text-muted-foreground hover:text-foreground hover:bg-white/5">
-                                <ClipboardList className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.26 278)' }} /> Word
+                              <Button size="sm" variant="ghost" onClick={async () => { const dd = await getDiningCalc(snap.monthYear); const snapData = { totalMessMeals: snap.totalMessMeals, totalMarketCost: snap.totalMarketCost, liveMealRate: snap.liveMealRate, members: snap.memberSnapshots.map((ms: any) => ({ member: { user: { name: ms.memberName }, roomNo: '' }, totalMeals: ms.totalMeals, individualMealCost: ms.individualMealCost, baseKhala: 0, M_X2: 1, baseManager: 0, paper: 0, current: 0, baseGas: 0, festival: 0, marketFine: 0, adjustedOverheads: ms.adjustedOverheads, totalCost: ms.totalCost, totalDeposits: ms.totalDeposits, due: ms.due, advance: ms.advance })) }; generateWordForData(snapData, snap.monthLabel, true, dd); }} className="h-8 px-2.5 text-xs rounded-lg gap-1 text-muted-foreground hover:text-foreground hover:bg-white/5" title="Export Archived Calculation to Word">
+                                <ClipboardList className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.26 278)' }} /> Calculation Word
                               </Button>
                               <Button size="sm" variant="destructive" onClick={() => handleDeleteSnapshot(snap.id, snap.monthLabel)} className="h-8 px-2.5 text-xs rounded-lg gap-1">
                                 <Trash2 className="w-3.5 h-3.5" /> Delete

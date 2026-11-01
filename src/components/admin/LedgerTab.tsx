@@ -239,22 +239,25 @@ export default function LedgerTab({ props }: { props: any }) {
                 variant="ghost" 
                 onClick={exportToPDF} 
                 className="h-8 px-2 sm:px-2.5 text-xs rounded-lg gap-1 text-muted-foreground hover:text-foreground hover:bg-white/5"
+                title="Export Total Calculation to PDF"
               >
-                <ScrollText className="w-3.5 h-3.5" style={{ color: 'oklch(0.68 0.22 27)' }} /> PDF
+                <ScrollText className="w-3.5 h-3.5" style={{ color: 'oklch(0.68 0.22 27)' }} /> Calculation PDF
               </Button>
               <Button 
                 size="sm" 
                 variant="ghost" 
                 onClick={exportToWord} 
                 className="h-8 px-2 sm:px-2.5 text-xs rounded-lg gap-1 text-muted-foreground hover:text-foreground hover:bg-white/5"
+                title="Export Total Calculation to Word"
               >
-                <ScrollText className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.26 278)' }} /> Word
+                <ScrollText className="w-3.5 h-3.5" style={{ color: 'oklch(0.55 0.26 278)' }} /> Calculation Word
               </Button>
               <Button 
                 size="sm" 
                 variant="ghost" 
                 onClick={exportDailyMealsPDF} 
                 className="h-8 px-2 sm:px-2.5 text-xs rounded-lg gap-1 text-muted-foreground hover:text-foreground hover:bg-white/5"
+                title="Export Day-by-Day Meals Matrix to PDF"
               >
                 <ScrollText className="w-3.5 h-3.5 text-cyan-400" /> Meals PDF
               </Button>
@@ -757,7 +760,7 @@ export default function LedgerTab({ props }: { props: any }) {
           <DialogHeader>
             <DialogTitle className="text-foreground">Choose Members to Export</DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              Checked members will be included in the {exportType === 'pdf' ? 'PDF' : 'Word'} file.
+              Checked members will be included in the {exportType === 'pdf' ? 'Calculation PDF' : 'Calculation Word'} file.
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-72 overflow-y-auto space-y-1 py-2">
@@ -796,7 +799,7 @@ export default function LedgerTab({ props }: { props: any }) {
                 Cancel
               </Button>
               <Button size="sm" className="btn-glow font-bold" onClick={runExport} disabled={selectedExportMembers.size === 0}>
-                Export {exportType === 'pdf' ? 'PDF' : 'Word'}
+                Export {exportType === 'pdf' ? 'Calculation PDF' : 'Calculation Word'}
               </Button>
             </div>
           </div>

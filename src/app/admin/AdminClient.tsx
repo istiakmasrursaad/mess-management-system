@@ -677,7 +677,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
         "Paper Bill", "Current Bill", "Gas Bill", "Fest Meal", "Market Fine",
         "Total Cost", "Total Deposit", "Due", "Advanced"
       ].map(text => new DocxTableCell({
-        children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 22, font: "Times New Roman" })], alignment: AlignmentType.CENTER })],
+        children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 24, font: "Times New Roman" })], alignment: AlignmentType.CENTER })],
         borders: { top: { style: BorderStyle.SINGLE, size: 4 }, bottom: { style: BorderStyle.SINGLE, size: 4 }, left: { style: BorderStyle.SINGLE, size: 4 }, right: { style: BorderStyle.SINGLE, size: 4 } },
         shading: { fill: "FFFFFF" }
       }))
@@ -701,7 +701,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
         m.due > 0 ? m.due.toFixed(0) : "0",
         m.advance > 0 ? m.advance.toFixed(0) : "0"
       ].map((cellText, ci) => new DocxTableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: String(cellText), bold: [0,1,2,11,12,13,14].includes(ci), size: 22, font: "Times New Roman" })], alignment: [0,2,3,4,5,6,7,8,9,10,11,12,13,14].includes(ci) ? AlignmentType.CENTER : AlignmentType.LEFT })],
+        children: [new Paragraph({ children: [new TextRun({ text: String(cellText), bold: [0,1,2,11,12,13,14].includes(ci), size: 24, font: "Times New Roman" })], alignment: [0,2,3,4,5,6,7,8,9,10,11,12,13,14].includes(ci) ? AlignmentType.CENTER : AlignmentType.LEFT })],
         borders: { top: { style: BorderStyle.SINGLE, size: 2 }, bottom: { style: BorderStyle.SINGLE, size: 2 }, left: { style: BorderStyle.SINGLE, size: 2 }, right: { style: BorderStyle.SINGLE, size: 2 } }
       }))
     }));
@@ -716,10 +716,12 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
       const totalDeposit = diningData.depositAmount + diningData.previousRemaining;
       const remaining = totalDeposit - diningData.totalCost;
       diningParagraphs.push(
-        new Paragraph({ children: [new TextRun({ text: "Dining Charge:", bold: true, size: 24, font: "Times New Roman" })], spacing: { before: 200 } }),
-        new Paragraph({ children: [new TextRun({ text: `Total deposit (Up to ${label}): ${totalDeposit} tk`, size: 22, font: "Times New Roman" })] }),
-        new Paragraph({ children: [new TextRun({ text: `Total cost: ${diningData.totalCost} tk`, size: 22, font: "Times New Roman" })] }),
-        new Paragraph({ children: [new TextRun({ text: `Remaining amount: ${remaining} tk`, bold: true, size: 22, font: "Times New Roman" })] })
+        new Paragraph({
+          children: [
+            new TextRun({ text: `Dining Fund — Total Deposit: ${totalDeposit} tk   |   Total Cost: ${diningData.totalCost} tk   |   Remaining Balance: ${remaining} tk`, bold: true, size: 24, font: "Times New Roman" })
+          ],
+          spacing: { before: 60, after: 100 }
+        })
       );
     }
 
@@ -729,9 +731,9 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
         children: [
           new Paragraph({ children: [new TextRun({ text: "MOSJID-E-NUR_COMPLEX (MESS)", bold: true, size: 28, font: "Times New Roman" })], alignment: AlignmentType.CENTER, heading: HeadingLevel.HEADING_1 }),
           new Paragraph({ children: [new TextRun({ text: "Terokhadiya, Cantonment Road, Rajshahi.", size: 22, font: "Times New Roman" })], alignment: AlignmentType.CENTER }),
-          new Paragraph({ children: [new TextRun({ text: `Month: ${label}   |   Total Cost: ${exportData.totalMarketCost}   |   Total Meal: ${exportData.totalMessMeals}   |   Meal Rate: ${exportData.liveMealRate?.toFixed(2)}`, bold: true, size: 22, font: "Times New Roman" })], spacing: { before: 100, after: 100 } }),
-          mainTable,
-          ...diningParagraphs
+          new Paragraph({ children: [new TextRun({ text: `Month: ${label}   |   Total Cost: ${exportData.totalMarketCost} tk   |   Total Meal: ${exportData.totalMessMeals}   |   Meal Rate: ${exportData.liveMealRate?.toFixed(2)} tk`, bold: true, size: 22, font: "Times New Roman" })], spacing: { before: 100, after: diningData ? 60 : 120 } }),
+          ...diningParagraphs,
+          mainTable
         ]
       }]
     });
@@ -854,20 +856,63 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
 
   const generatePDFForData = (exportData: any, label: string, isSnapshot = false, diningData?: any) => {
     const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
+
+    // Header Title
     doc.setFont("times", "bold");
     doc.setFontSize(15);
-    doc.text("MOSJID-E-NUR_COMPLEX (MESS)", 148.5, 12, { align: "center" });
+    doc.text("MOSJID-E-NUR COMPLEX (MESS)", 148.5, 9.5, { align: "center" });
 
-    doc.setFontSize(11);
+    doc.setFontSize(10.5);
     doc.setFont("times", "normal");
-    doc.text("Terokhadiya, Cantonment Road, Rajshahi.", 148.5, 17, { align: "center" });
+    doc.text("Terokhadiya, Cantonment Road, Rajshahi.", 148.5, 14.5, { align: "center" });
 
+    // Executive Dual KPI Dashboard Cards
+    const cardY = 17.5;
+    const cardH = 13.5;
+
+    // Left Card: Mess Accounting & Meals
+    doc.setDrawColor(200, 200, 200);
+    doc.setFillColor(248, 249, 250);
+    doc.rect(8, cardY, 138, cardH, "FD");
+
+    doc.setFontSize(12);
+
+    const drawLabeledValue = (labelTxt: string, valTxt: string, xPos: number, yPos: number) => {
+      doc.setFont("times", "normal");
+      doc.text(labelTxt, xPos, yPos);
+      const offset = doc.getTextWidth(labelTxt) + 1.5;
+      doc.setFont("times", "bold");
+      doc.text(valTxt, xPos + offset, yPos);
+    };
+
+    // Left Card: Title and values
     doc.setFont("times", "bold");
-    doc.setFontSize(11);
-    doc.text(`Month: ${label}`, 8, 25);
-    doc.text(`Total Cost: ${exportData.totalMarketCost}`, 80, 25);
-    doc.text(`Total Meal: ${exportData.totalMessMeals}`, 160, 25);
-    doc.text(`Meal Rate: ${exportData.liveMealRate.toFixed(2)}`, 235, 25);
+    doc.text("MEAL & MARKET:", 11, cardY + 5.5);
+    drawLabeledValue("Total Meals: ", String(exportData.totalMessMeals || 0), 54, cardY + 5.5);
+    drawLabeledValue("Meal Rate: ", `${(exportData.liveMealRate || 0).toFixed(2)} tk`, 96, cardY + 5.5);
+
+    drawLabeledValue("Month: ", label, 11, cardY + 10.5);
+    drawLabeledValue("Total Market: ", `${Number(exportData.totalMarketCost || 0).toLocaleString()} tk`, 54, cardY + 10.5);
+
+    // Right Card: Dining Fund Overview
+    doc.setDrawColor(200, 200, 200);
+    doc.setFillColor(248, 249, 250);
+    doc.rect(151, cardY, 138, cardH, "FD");
+
+    if (diningData) {
+      const totalDeposit = (diningData.depositAmount || 0) + (diningData.previousRemaining || 0);
+      const remaining = totalDeposit - (diningData.totalCost || 0);
+
+      doc.setFont("times", "bold");
+      doc.text("DINING FUND:", 154, cardY + 5.5);
+      drawLabeledValue("Total Deposit: ", `${totalDeposit.toLocaleString()} tk`, 190, cardY + 5.5);
+      drawLabeledValue("Total Cost: ", `${(diningData.totalCost || 0).toLocaleString()} tk`, 238, cardY + 5.5);
+
+      drawLabeledValue("Remaining Balance: ", `${remaining.toLocaleString()} tk`, 154, cardY + 10.5);
+    } else {
+      doc.setFont("times", "italic");
+      doc.text("DINING FUND: No dining charge records for this month", 154, cardY + 8);
+    }
 
     const tableColumn = [
       "SI\nNo", "Name", "Total\nMeal", "Meal\nCost",
@@ -919,14 +964,14 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
-      startY: 28,
-      margin: { left: 8, right: 8, top: 20, bottom: 8 },
+      startY: 34,
+      margin: { left: 8, right: 8, top: 15, bottom: 18 },
       showHead: 'everyPage',
       theme: 'grid',
       styles: {
         font: "times",
-        fontSize: 10.5,
-        cellPadding: { top: 0.8, bottom: 0.8, left: 1, right: 1 },
+        fontSize: 12,
+        cellPadding: { top: 0.8, bottom: 0.8, left: 0.8, right: 0.8 },
         minCellHeight: 0,
         textColor: [0, 0, 0],
         lineColor: [0, 0, 0],
@@ -939,8 +984,8 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
         textColor: [0, 0, 0],
         fontStyle: "bold",
         halign: "center",
-        fontSize: 10.5,
-        cellPadding: { top: 1, bottom: 1, left: 1, right: 1 }
+        fontSize: 12,
+        cellPadding: { top: 1, bottom: 1, left: 0.8, right: 0.8 }
       },
       columnStyles: {
         0: { halign: 'left' },
@@ -969,30 +1014,12 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
       }
     });
 
-    if (diningData) {
-      const finalY = (doc as any).lastAutoTable.finalY || 100;
-      const startX = 105; // Left-aligned block positioned centrally on page
-      doc.setFont("times", "bold");
-      doc.setFontSize(11.5);
-      doc.text("Dining Charge:", startX, finalY + 6);
-
-      doc.setFontSize(10.5);
-      doc.setFont("times", "normal");
-      const totalDeposit = diningData.depositAmount + diningData.previousRemaining;
-      doc.text(`Total deposit (Up to ${label}): ${totalDeposit} tk`, startX, finalY + 11);
-      doc.text(`Total cost: ${diningData.totalCost} tk`, startX, finalY + 16);
-
-      const remaining = totalDeposit - diningData.totalCost;
-      doc.setFont("times", "bold");
-      doc.text(`Remaining amount: ${remaining} tk`, startX, finalY + 21);
-    }
-
     const pageCount = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.setFont("times", "normal");
-      doc.text("© 2026 ALL RIGHTS RESERVED by SoftTech", 148.5, 202, { align: "center" });
+      doc.text("© 2026 ALL RIGHTS RESERVED by SoftTech", 148.5, 203, { align: "center" });
     }
 
     doc.save(`Mess_Ledger_${label.replace(/\s+/g, "_")}.pdf`);
