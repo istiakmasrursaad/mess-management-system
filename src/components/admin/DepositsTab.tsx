@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BadgeDollarSign, CircleCheckBig, ArchiveRestore, Trash2, FilePen, Plus, X, RotateCcw, CheckCircle2, FileDown } from "lucide-react";
 import { generateDepositReceiptPDF, getDepositReceiptPdfFile, getDepositReceiptFormattedData } from "@/lib/depositReceipt";
+import MonthCalendarPicker from "@/components/admin/MonthCalendarPicker";
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -20,15 +21,35 @@ function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 
 export default function DepositsTab({ props }: { props: any }) {
-  const { data, isEditDepositDialogOpen, setIsEditDepositDialogOpen, editingDeposit, editDepositAmount, setEditDepositAmount, editDepositDate, setEditDepositDate, fetchData, openEditDeposit, handleUpdateDeposit, handleDeleteDeposit } = props;
+  const { data, isEditDepositDialogOpen, setIsEditDepositDialogOpen, editingDeposit, editDepositAmount, setEditDepositAmount, editDepositDate, setEditDepositDate, fetchData, openEditDeposit, handleUpdateDeposit, handleDeleteDeposit, selectedMonth } = props;
   const [isAdding, setIsAdding] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
 
+  const activeMonthYear = selectedMonth || data?.monthYear || "";
+
+  // Restrict calendar picker strictly to the active/selected month
+  const { minDate, maxDate } = React.useMemo(() => {
+    if (!activeMonthYear || !activeMonthYear.includes("-")) {
+      return { minDate: undefined, maxDate: undefined };
+    }
+    const [mStr, yStr] = activeMonthYear.split("-");
+    const monthNum = parseInt(mStr, 10);
+    const yearNum = parseInt(yStr, 10);
+    if (isNaN(monthNum) || isNaN(yearNum)) {
+      return { minDate: undefined, maxDate: undefined };
+    }
+    const paddedMonth = String(monthNum).padStart(2, "0");
+    const minDate = `${yearNum}-${paddedMonth}-01`;
+    const lastDay = new Date(yearNum, monthNum, 0).getDate();
+    const maxDate = `${yearNum}-${paddedMonth}-${String(lastDay).padStart(2, "0")}`;
+    return { minDate, maxDate };
+  }, [activeMonthYear]);
+
   const [isAddDepositDialogOpen, setIsAddDepositDialogOpen] = React.useState(false);
   const [addingMember, setAddingMember] = React.useState<{id: string, name: string} | null>(null);
   const [addDepositAmount, setAddDepositAmount] = React.useState("");
-  const [addDepositDate, setAddDepositDate] = React.useState(new Date().toISOString().split("T")[0]);
+  const [addDepositDate, setAddDepositDate] = React.useState("");
 
   // Track dismissed (removed/faded) extra duty allowances per member for this month
   const [dismissedMap, setDismissedMap] = React.useState<Record<string, boolean>>({});
@@ -108,8 +129,12 @@ export default function DepositsTab({ props }: { props: any }) {
       const fd = new FormData();
       fd.append("memberId", m.member.id);
       fd.append("amount", allowance.toString());
-      fd.append("date", new Date().toISOString().split("T")[0]);
-      fd.append("monthYear", data.monthYear);
+      const todayStr = new Date().toISOString().split("T")[0];
+      const allowanceDate = (minDate && maxDate && (todayStr < minDate || todayStr > maxDate))
+        ? minDate
+        : todayStr;
+      fd.append("date", allowanceDate);
+      fd.append("monthYear", activeMonthYear || data?.monthYear);
       fd.append("note", "Extra Duty Allowance");
       await addDeposit(fd);
       await fetchData(undefined, false, true);
@@ -176,7 +201,7 @@ export default function DepositsTab({ props }: { props: any }) {
                           onClick={() => {
                             setAddingMember({ id: m.member.id, name: m.member.user.name });
                             setAddDepositAmount("");
-                            setAddDepositDate(new Date().toISOString().split("T")[0]);
+                            setAddDepositDate("");
                             setIsAddDepositDialogOpen(true);
                           }}
                           className="h-7 w-7 p-0 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 transition-all hover:scale-105"
@@ -399,24 +424,35 @@ export default function DepositsTab({ props }: { props: any }) {
 
       {/* Add Deposit Dialog */}
       <Dialog open={isAddDepositDialogOpen} onOpenChange={setIsAddDepositDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl rounded-2xl">
-          <DialogHeader className="flex flex-col items-center justify-center pt-4 pb-2">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: 'linear-gradient(135deg, oklch(0.55 0.26 278 / 20%), oklch(0.50 0.22 265 / 20%))', border: '1px solid oklch(0.55 0.26 278 / 30%)' }}>
-              <BadgeDollarSign className="w-6 h-6" style={{ color: 'oklch(0.65 0.25 275)' }} />
+        <DialogContent className="w-[95vw] sm:w-full sm:max-w-[425px] max-h-[90dvh] overflow-y-auto overscroll-contain p-3.5 sm:p-5 border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl rounded-2xl">
+          <DialogHeader className="flex flex-col items-center justify-center pt-2 pb-1 sm:pt-4 sm:pb-2">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 sm:mb-3" style={{ background: 'linear-gradient(135deg, oklch(0.55 0.26 278 / 20%), oklch(0.50 0.22 265 / 20%))', border: '1px solid oklch(0.55 0.26 278 / 30%)' }}>
+              <BadgeDollarSign className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: 'oklch(0.65 0.25 275)' }} />
             </div>
-            <DialogTitle className="text-xl font-bold text-foreground">Add Deposit</DialogTitle>
-            <DialogDescription className="text-center text-muted-foreground text-sm">
+            <DialogTitle className="text-lg sm:text-xl font-bold text-foreground">Add Deposit</DialogTitle>
+            <DialogDescription className="text-center text-muted-foreground text-xs sm:text-sm">
               Record a new cash deposit for <span className="font-bold text-white bg-white/5 px-2 py-0.5 rounded-md mx-1">{addingMember?.name}</span>
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={async (e) => {
             e.preventDefault();
+            if (!addDepositDate) {
+              toast.error("Please select a deposit date!");
+              return;
+            }
+            if ((minDate && addDepositDate < minDate) || (maxDate && addDepositDate > maxDate)) {
+              toast.error(`Deposit date must be within the active month (${activeMonthYear})`);
+              return;
+            }
             setIsAdding(true);
             try {
               const fd = new FormData();
               fd.append("memberId", addingMember?.id || "");
               fd.append("amount", addDepositAmount);
               fd.append("date", addDepositDate);
+              if (activeMonthYear) {
+                fd.append("monthYear", activeMonthYear);
+              }
               await addDeposit(fd);
               await fetchData(undefined, false, true);
               toast.success("Deposit added successfully!");
@@ -424,7 +460,7 @@ export default function DepositsTab({ props }: { props: any }) {
             } finally {
               setIsAdding(false);
             }
-          }} className="space-y-5 px-2 pb-2">
+          }} className="space-y-3.5 sm:space-y-4 px-0.5 pb-1">
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Deposit Amount</Label>
               <div className="relative">
@@ -437,23 +473,23 @@ export default function DepositsTab({ props }: { props: any }) {
                   onChange={(e) => setAddDepositAmount(e.target.value)}
                   placeholder="3000"
                   required
-                  className="h-11 pl-9 rounded-xl bg-white/5 border-white/10 text-foreground text-lg font-bold placeholder:text-muted-foreground/50 transition-colors focus:bg-white/10"
+                  className="h-10 sm:h-11 pl-9 rounded-xl bg-white/5 border-white/10 text-foreground text-base sm:text-lg font-bold placeholder:text-muted-foreground/50 transition-colors focus:bg-white/10"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Deposit Date</Label>
-              <Input
-                type="date"
+              <MonthCalendarPicker
                 value={addDepositDate}
-                onChange={(e) => setAddDepositDate(e.target.value)}
+                onChange={setAddDepositDate}
+                selectedMonth={activeMonthYear}
+                accentColor="indigo"
                 required
-                className="h-11 rounded-xl bg-white/5 border-white/10 text-foreground font-medium"
               />
             </div>
-            <div className="flex justify-between items-center gap-3 pt-2">
-              <Button variant="ghost" type="button" onClick={() => setIsAddDepositDialogOpen(false)} className="flex-1 h-11 rounded-xl text-muted-foreground hover:text-white">Cancel</Button>
-              <Button type="submit" disabled={isAdding} className="flex-1 h-11 rounded-xl btn-glow font-bold gap-2"><CircleCheckBig className="w-4 h-4" /> {isAdding ? "Saving..." : "Confirm Deposit"}</Button>
+            <div className="flex justify-between items-center gap-2.5 pt-2">
+              <Button variant="ghost" type="button" onClick={() => setIsAddDepositDialogOpen(false)} className="flex-1 h-10 sm:h-11 rounded-xl text-muted-foreground hover:text-white touch-manipulation">Cancel</Button>
+              <Button type="submit" disabled={isAdding} className="flex-1 h-10 sm:h-11 rounded-xl btn-glow font-bold gap-1.5 sm:gap-2 touch-manipulation"><CircleCheckBig className="w-4 h-4" /> {isAdding ? "Saving..." : "Confirm Deposit"}</Button>
             </div>
           </form>
         </DialogContent>
@@ -461,25 +497,29 @@ export default function DepositsTab({ props }: { props: any }) {
 
       {/* Edit Deposit Dialog */}
       <Dialog open={isEditDepositDialogOpen} onOpenChange={setIsEditDepositDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl rounded-2xl">
-          <DialogHeader className="flex flex-col items-center justify-center pt-4 pb-2">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: 'linear-gradient(135deg, oklch(0.60 0.15 250 / 20%), oklch(0.55 0.15 250 / 20%))', border: '1px solid oklch(0.60 0.15 250 / 30%)' }}>
+        <DialogContent className="w-[95vw] sm:w-full sm:max-w-[425px] max-h-[90dvh] overflow-y-auto overscroll-contain p-3.5 sm:p-5 border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl rounded-2xl">
+          <DialogHeader className="flex flex-col items-center justify-center pt-2 pb-1 sm:pt-4 sm:pb-2">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 sm:mb-3" style={{ background: 'linear-gradient(135deg, oklch(0.60 0.15 250 / 20%), oklch(0.55 0.15 250 / 20%))', border: '1px solid oklch(0.60 0.15 250 / 30%)' }}>
               <FilePen className="w-5 h-5 text-indigo-400" />
             </div>
-            <DialogTitle className="text-xl font-bold text-foreground">Edit Deposit</DialogTitle>
-            <DialogDescription className="text-center text-muted-foreground text-sm">
+            <DialogTitle className="text-lg sm:text-xl font-bold text-foreground">Edit Deposit</DialogTitle>
+            <DialogDescription className="text-center text-muted-foreground text-xs sm:text-sm">
               Update deposit for <span className="font-bold text-white bg-white/5 px-2 py-0.5 rounded-md mx-1">{editingDeposit?.memberName || "Member"}</span>
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={async (e) => {
             e.preventDefault();
+            if ((minDate && editDepositDate < minDate) || (maxDate && editDepositDate > maxDate)) {
+              toast.error(`Deposit date must be within the active month (${activeMonthYear})`);
+              return;
+            }
             setIsEditing(true);
             try {
               await handleUpdateDeposit(e);
             } finally {
               setIsEditing(false);
             }
-          }} className="space-y-5 px-2 pb-2">
+          }} className="space-y-3.5 sm:space-y-4 px-0.5 pb-1">
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Deposit Amount</Label>
               <div className="relative">
@@ -491,23 +531,23 @@ export default function DepositsTab({ props }: { props: any }) {
                   value={editDepositAmount}
                   onChange={(e) => setEditDepositAmount(e.target.value)}
                   required
-                  className="h-11 pl-9 rounded-xl bg-white/5 border-white/10 text-foreground text-lg font-bold placeholder:text-muted-foreground/50 transition-colors focus:bg-white/10"
+                  className="h-10 sm:h-11 pl-9 rounded-xl bg-white/5 border-white/10 text-foreground text-base sm:text-lg font-bold placeholder:text-muted-foreground/50 transition-colors focus:bg-white/10"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Deposit Date</Label>
-              <Input
-                type="date"
+              <MonthCalendarPicker
                 value={editDepositDate}
-                onChange={(e) => setEditDepositDate(e.target.value)}
+                onChange={setEditDepositDate}
+                selectedMonth={activeMonthYear}
+                accentColor="indigo"
                 required
-                className="h-11 rounded-xl bg-white/5 border-white/10 text-foreground font-medium"
               />
             </div>
-            <div className="flex justify-between items-center gap-3 pt-2">
-              <Button variant="ghost" type="button" onClick={() => setIsEditDepositDialogOpen(false)} className="flex-1 h-11 rounded-xl text-muted-foreground hover:text-white">Cancel</Button>
-              <Button type="submit" disabled={isEditing} className="flex-1 h-11 rounded-xl btn-glow font-bold gap-2"><CircleCheckBig className="w-4 h-4" /> {isEditing ? "Saving..." : "Save Changes"}</Button>
+            <div className="flex justify-between items-center gap-2.5 pt-2">
+              <Button variant="ghost" type="button" onClick={() => setIsEditDepositDialogOpen(false)} className="flex-1 h-10 sm:h-11 rounded-xl text-muted-foreground hover:text-white touch-manipulation">Cancel</Button>
+              <Button type="submit" disabled={isEditing} className="flex-1 h-10 sm:h-11 rounded-xl btn-glow font-bold gap-1.5 sm:gap-2 touch-manipulation"><CircleCheckBig className="w-4 h-4" /> {isEditing ? "Saving..." : "Save Changes"}</Button>
             </div>
           </form>
         </DialogContent>

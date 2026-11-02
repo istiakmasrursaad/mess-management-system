@@ -262,6 +262,9 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
     formData.append("id", editingDeposit.id);
     formData.append("amount", editDepositAmount);
     formData.append("date", editDepositDate);
+    if (selectedMonth) {
+      formData.append("monthYear", selectedMonth);
+    }
     await updateDeposit(formData);
     setIsEditDepositDialogOpen(false);
     setEditingDeposit(null);
@@ -572,6 +575,9 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
   const handleAddMarket = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    if (selectedMonth) {
+      formData.append("monthYear", selectedMonth);
+    }
     const res = await addMarketEntry(formData);
     if (res?.error) {
       toast.error(res.error);

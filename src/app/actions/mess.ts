@@ -491,7 +491,7 @@ export async function addMarketEntry(formData: FormData) {
   const itemsJson = formData.get("itemsJson") as string;
 
   const items = itemsJson ? JSON.parse(itemsJson) : [];
-  const monthYear = dateToMonthYear(new Date(dateStr));
+  const monthYear = (formData.get("monthYear") as string) || dateToMonthYear(new Date(dateStr));
   const dateObj = new Date(dateStr);
 
   const existingMarket = await prisma.market.findFirst({
@@ -583,6 +583,7 @@ export async function updateDeposit(formData: FormData) {
   const id = formData.get("id") as string;
   const amount = parseFloat(formData.get("amount") as string);
   const dateStr = formData.get("date") as string;
+  const monthYear = (formData.get("monthYear") as string) || null;
 
   const updateData: any = {};
   if (!isNaN(amount)) {
@@ -591,7 +592,7 @@ export async function updateDeposit(formData: FormData) {
   if (dateStr) {
     const date = new Date(dateStr);
     updateData.date = date;
-    updateData.monthYear = dateToMonthYear(date);
+    updateData.monthYear = monthYear || dateToMonthYear(date);
   }
 
   await prisma.deposit.update({
