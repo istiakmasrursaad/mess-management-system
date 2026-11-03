@@ -863,62 +863,71 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
   const generatePDFForData = (exportData: any, label: string, isSnapshot = false, diningData?: any) => {
     const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
 
-    // Header Title
-    doc.setFont("times", "bold");
-    doc.setFontSize(15);
-    doc.text("MOSJID-E-NUR COMPLEX (MESS)", 148.5, 9.5, { align: "center" });
+    const renderHeader = () => {
+      // Header Title
+      doc.setFont("times", "bold");
+      doc.setFontSize(15);
+      doc.setTextColor(0, 0, 0);
+      doc.text("MOSJID-E-NUR COMPLEX (MESS)", 148.5, 9.5, { align: "center" });
 
-    doc.setFontSize(10.5);
-    doc.setFont("times", "normal");
-    doc.text("Terokhadiya, Cantonment Road, Rajshahi.", 148.5, 14.5, { align: "center" });
-
-    // Executive Dual KPI Dashboard Cards
-    const cardY = 17.5;
-    const cardH = 13.5;
-
-    // Left Card: Mess Accounting & Meals
-    doc.setDrawColor(200, 200, 200);
-    doc.setFillColor(248, 249, 250);
-    doc.rect(8, cardY, 138, cardH, "FD");
-
-    doc.setFontSize(12);
-
-    const drawLabeledValue = (labelTxt: string, valTxt: string, xPos: number, yPos: number) => {
+      doc.setFontSize(10.5);
       doc.setFont("times", "normal");
-      doc.text(labelTxt, xPos, yPos);
-      const offset = doc.getTextWidth(labelTxt) + 1.5;
+      doc.setTextColor(0, 0, 0);
+      doc.text("Terokhadiya, Cantonment Road, Rajshahi.", 148.5, 14.5, { align: "center" });
+
+      // Executive Dual KPI Dashboard Cards
+      const cardY = 17.5;
+      const cardH = 13.5;
+
+      // Left Card: Mess Accounting & Meals
+      doc.setDrawColor(200, 200, 200);
+      doc.setFillColor(248, 249, 250);
+      doc.rect(8, cardY, 138, cardH, "FD");
+
+      doc.setFontSize(12);
+
+      const drawLabeledValue = (labelTxt: string, valTxt: string, xPos: number, yPos: number) => {
+        doc.setFont("times", "normal");
+        doc.setTextColor(0, 0, 0);
+        doc.text(labelTxt, xPos, yPos);
+        const offset = doc.getTextWidth(labelTxt) + 1.5;
+        doc.setFont("times", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text(valTxt, xPos + offset, yPos);
+      };
+
+      // Left Card: Title and values
       doc.setFont("times", "bold");
-      doc.text(valTxt, xPos + offset, yPos);
+      doc.setTextColor(0, 0, 0);
+      doc.text("MEAL & MARKET:", 11, cardY + 5.5);
+      drawLabeledValue("Total Meals: ", String(exportData.totalMessMeals || 0), 54, cardY + 5.5);
+      drawLabeledValue("Meal Rate: ", `${(exportData.liveMealRate || 0).toFixed(2)} tk`, 96, cardY + 5.5);
+
+      drawLabeledValue("Month: ", label, 11, cardY + 10.5);
+      drawLabeledValue("Total Market: ", `${Number(exportData.totalMarketCost || 0).toLocaleString()} tk`, 54, cardY + 10.5);
+
+      // Right Card: Dining Fund Overview
+      doc.setDrawColor(200, 200, 200);
+      doc.setFillColor(248, 249, 250);
+      doc.rect(151, cardY, 138, cardH, "FD");
+
+      if (diningData) {
+        const totalDeposit = (diningData.depositAmount || 0) + (diningData.previousRemaining || 0);
+        const remaining = totalDeposit - (diningData.totalCost || 0);
+
+        doc.setFont("times", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text("DINING FUND:", 154, cardY + 5.5);
+        drawLabeledValue("Total Deposit: ", `${totalDeposit.toLocaleString()} tk`, 190, cardY + 5.5);
+        drawLabeledValue("Total Cost: ", `${(diningData.totalCost || 0).toLocaleString()} tk`, 238, cardY + 5.5);
+
+        drawLabeledValue("Remaining Balance: ", `${remaining.toLocaleString()} tk`, 154, cardY + 10.5);
+      } else {
+        doc.setFont("times", "italic");
+        doc.setTextColor(0, 0, 0);
+        doc.text("DINING FUND: No dining charge records for this month", 154, cardY + 8);
+      }
     };
-
-    // Left Card: Title and values
-    doc.setFont("times", "bold");
-    doc.text("MEAL & MARKET:", 11, cardY + 5.5);
-    drawLabeledValue("Total Meals: ", String(exportData.totalMessMeals || 0), 54, cardY + 5.5);
-    drawLabeledValue("Meal Rate: ", `${(exportData.liveMealRate || 0).toFixed(2)} tk`, 96, cardY + 5.5);
-
-    drawLabeledValue("Month: ", label, 11, cardY + 10.5);
-    drawLabeledValue("Total Market: ", `${Number(exportData.totalMarketCost || 0).toLocaleString()} tk`, 54, cardY + 10.5);
-
-    // Right Card: Dining Fund Overview
-    doc.setDrawColor(200, 200, 200);
-    doc.setFillColor(248, 249, 250);
-    doc.rect(151, cardY, 138, cardH, "FD");
-
-    if (diningData) {
-      const totalDeposit = (diningData.depositAmount || 0) + (diningData.previousRemaining || 0);
-      const remaining = totalDeposit - (diningData.totalCost || 0);
-
-      doc.setFont("times", "bold");
-      doc.text("DINING FUND:", 154, cardY + 5.5);
-      drawLabeledValue("Total Deposit: ", `${totalDeposit.toLocaleString()} tk`, 190, cardY + 5.5);
-      drawLabeledValue("Total Cost: ", `${(diningData.totalCost || 0).toLocaleString()} tk`, 238, cardY + 5.5);
-
-      drawLabeledValue("Remaining Balance: ", `${remaining.toLocaleString()} tk`, 154, cardY + 10.5);
-    } else {
-      doc.setFont("times", "italic");
-      doc.text("DINING FUND: No dining charge records for this month", 154, cardY + 8);
-    }
 
     const tableColumn = [
       "SI\nNo", "Name", "Total\nMeal", "Meal\nCost",
@@ -971,7 +980,7 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
       head: [tableColumn],
       body: tableRows,
       startY: 34,
-      margin: { left: 8, right: 8, top: 15, bottom: 18 },
+      margin: { left: 8, right: 8, top: 34, bottom: 18 },
       showHead: 'everyPage',
       theme: 'grid',
       styles: {
@@ -1023,8 +1032,10 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
     const pageCount = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
+      renderHeader();
       doc.setFontSize(8);
       doc.setFont("times", "normal");
+      doc.setTextColor(0, 0, 0);
       doc.text("© 2026 ALL RIGHTS RESERVED by SoftTech", 148.5, 203, { align: "center" });
     }
 
