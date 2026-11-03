@@ -5,12 +5,14 @@ import AdminClient from "./AdminClient";
 export default async function AdminPage() {
   const cookieStore = await cookies();
   const savedMonthCookie = cookieStore.get("adminSelectedMonth");
+  const savedTabCookie = cookieStore.get("adminActiveTab");
   
   const d = new Date();
   const defaultMonthYear = `${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
   
   const monthToLoad = savedMonthCookie?.value || defaultMonthYear;
   const hasSelectedMonth = !!savedMonthCookie;
+  const initialTab = savedTabCookie?.value || "overview";
 
   // Pre-fetch the data on the server!
   const initialData = await getAdminDashboardInitialData(monthToLoad, "");
@@ -20,6 +22,7 @@ export default async function AdminPage() {
       initialServerData={initialData} 
       initialMonth={monthToLoad} 
       initialHasSelectedMonth={hasSelectedMonth} 
+      initialTab={initialTab}
     />
   );
 }

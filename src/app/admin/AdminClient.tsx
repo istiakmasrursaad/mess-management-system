@@ -77,10 +77,84 @@ function monthYearToLabel(monthYear: string): string {
   return d.toLocaleString("en-US", { month: "long", year: "numeric" });
 }
 
-export default function AdminWorkspace({ initialServerData, initialMonth, initialHasSelectedMonth }: { initialServerData: any, initialMonth: string, initialHasSelectedMonth: boolean }) {
+const VALID_ADMIN_TABS = [
+  'overview',
+  'dailymeals',
+  'settings',
+  'members',
+  'markets',
+  'extramarkets',
+  'overheads',
+  'specificbills',
+  'deposits',
+  'ledger',
+  'history',
+  'manageadmins'
+];
+
+export default function AdminWorkspace({ 
+  initialServerData, 
+  initialMonth, 
+  initialHasSelectedMonth,
+  initialTab = "overview"
+}: { 
+  initialServerData: any, 
+  initialMonth: string, 
+  initialHasSelectedMonth: boolean,
+  initialTab?: string 
+}) {
   const [data, setData] = useState<any>(initialServerData?.data || null);
   const [loading, setLoading] = useState(!initialServerData);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeTab, setActiveTabState] = useState<string>(() => {
+    if (initialTab && VALID_ADMIN_TABS.includes(initialTab)) {
+      return initialTab;
+    }
+    return "overview";
+  });
+
+  // Update tab with localStorage, Cookie, and URL Hash sync
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("adminActiveTab", tab);
+      document.cookie = `adminActiveTab=${tab}; path=/; max-age=31536000; SameSite=Lax`;
+      window.history.replaceState(null, "", `#${tab}`);
+    }
+  };
+
+  // Load and restore persisted tab on initial mount (in case hash in URL takes precedence)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash.replace("#", "");
+    if (hash && VALID_ADMIN_TABS.includes(hash)) {
+      if (hash !== activeTab) {
+        setActiveTab(hash);
+      }
+      return;
+    }
+    const saved = localStorage.getItem("adminActiveTab");
+    if (saved && VALID_ADMIN_TABS.includes(saved)) {
+      if (saved !== activeTab) {
+        setActiveTab(saved);
+      }
+    } else if (activeTab) {
+      document.cookie = `adminActiveTab=${activeTab}; path=/; max-age=31536000; SameSite=Lax`;
+      window.history.replaceState(null, "", `#${activeTab}`);
+    }
+  }, []);
+
+  // Sync on browser back/forward buttons
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash && VALID_ADMIN_TABS.includes(hash)) {
+        setActiveTabState(hash);
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   const [selectedMonth, setSelectedMonth] = useState<string>(initialMonth);
   const [hasSelectedMonth, setHasSelectedMonth] = useState(initialHasSelectedMonth);
@@ -171,29 +245,34 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
 
   const fetchData = async (month?: string, dismissPopup = false, silent = false) => {
     if (!silent) setLoading(true);
-    const res = await getMessData(month || selectedMonth);
-    setData(res);
-    if (res.settings) {
-      setSettingsForm({
-        defaultDailyMealThreshold: res.settings.defaultDailyMealThreshold,
-        needX2MealLimit: res.settings.needX2MealLimit,
-        defaultMarketFine: res.settings.defaultMarketFine,
-        extraMarketRate: res.settings.extraMarketRate,
-        mealCutoffTime: res.settings.mealCutoffTime,
-        defaultKhalaBill: res.settings.defaultKhalaBill,
-        defaultManagerBill: res.settings.defaultManagerBill,
-        defaultGasBill: res.settings.defaultGasBill,
-        defaultPaperBill: res.settings.defaultPaperBill,
-        defaultCurrentBill: res.settings.defaultCurrentBill,
-        defaultFestivalBill: res.settings.defaultFestivalBill,
-        applyDefaultBills: res.monthConfig.applyDefaultBills,
-      });
-      // Only dismiss the popup if explicitly requested (i.e. user clicked "Start Managing")
-      if (dismissPopup) {
-        setHasSelectedMonth(true);
+    else setIsRefreshing(true);
+    try {
+      const res = await getMessData(month || selectedMonth);
+      setData(res);
+      if (res.settings) {
+        setSettingsForm({
+          defaultDailyMealThreshold: res.settings.defaultDailyMealThreshold,
+          needX2MealLimit: res.settings.needX2MealLimit,
+          defaultMarketFine: res.settings.defaultMarketFine,
+          extraMarketRate: res.settings.extraMarketRate,
+          mealCutoffTime: res.settings.mealCutoffTime,
+          defaultKhalaBill: res.settings.defaultKhalaBill,
+          defaultManagerBill: res.settings.defaultManagerBill,
+          defaultGasBill: res.settings.defaultGasBill,
+          defaultPaperBill: res.settings.defaultPaperBill,
+          defaultCurrentBill: res.settings.defaultCurrentBill,
+          defaultFestivalBill: res.settings.defaultFestivalBill,
+          applyDefaultBills: res.monthConfig.applyDefaultBills,
+        });
+        // Only dismiss the popup if explicitly requested (i.e. user clicked "Start Managing")
+        if (dismissPopup) {
+          setHasSelectedMonth(true);
+        }
       }
+    } finally {
+      if (!silent) setLoading(false);
+      else setIsRefreshing(false);
     }
-    if (!silent) setLoading(false);
   };
 
   const fetchAvailableMonths = async () => {
@@ -1309,12 +1388,20 @@ export default function AdminWorkspace({ initialServerData, initialMonth, initia
 
               {/* Refresh Button */}
               <button
-                onClick={() => fetchData()}
+                onClick={async () => {
+                  try {
+                    await fetchData(undefined, false, true);
+                    toast.success("Dashboard data refreshed!");
+                  } catch (e: any) {
+                    toast.error("Failed to refresh: " + e.message);
+                  }
+                }}
+                disabled={isRefreshing}
                 title="Refresh dashboard data"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-200 transition-all duration-200 hover:text-white hover:bg-white/[0.1] active:scale-95"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-200 transition-all duration-200 hover:text-white hover:bg-white/[0.1] active:scale-95 disabled:opacity-60 cursor-pointer"
                 style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.12)" }}>
-                <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${loading ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline text-xs font-semibold">Refresh</span>
+                <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline text-xs font-semibold">{isRefreshing ? "Refreshing..." : "Refresh"}</span>
               </button>
 
               {/* Sign Out Button */}
