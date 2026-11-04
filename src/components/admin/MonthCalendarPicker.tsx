@@ -11,6 +11,7 @@ interface MonthCalendarPickerProps {
   required?: boolean;
   label?: string;
   accentColor?: "indigo" | "emerald" | "amber";
+  autoCloseOnSelect?: boolean;
 }
 
 export default function MonthCalendarPicker({
@@ -20,9 +21,17 @@ export default function MonthCalendarPicker({
   name,
   required = false,
   accentColor = "indigo",
+  autoCloseOnSelect = true,
 }: MonthCalendarPickerProps) {
-  // If no date is initially selected, keep the calendar expanded so user sees it right away
-  const [isOpen, setIsOpen] = useState(true);
+  // If a date is already selected, start collapsed (wrapped); if no date is selected, start expanded so user can pick immediately
+  const [isOpen, setIsOpen] = useState(!value);
+
+  // If value is cleared (e.g. form reset or reopened), expand so user can select
+  React.useEffect(() => {
+    if (!value) {
+      setIsOpen(true);
+    }
+  }, [value]);
 
   // Parse Month and Year from selectedMonth (e.g. "10-2026")
   const { monthNum, year, monthLabel, daysInMonth, firstDayOfWeek, todayStr, isTodayInMonth } = useMemo(() => {
@@ -128,7 +137,8 @@ export default function MonthCalendarPicker({
       {/* Selected Date Summary & Toggle Bar */}
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen((prev) => !prev)}
+        title={isOpen ? "Click to collapse calendar" : "Click to expand / change date"}
         className={`w-full p-2.5 sm:p-3 rounded-xl border transition-all duration-150 cursor-pointer flex items-center justify-between gap-2 select-none active:scale-[0.99] touch-manipulation text-left ${
           value
             ? "bg-white/[0.06] border-white/20 hover:border-white/30"
@@ -152,6 +162,11 @@ export default function MonthCalendarPicker({
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-0.5 shrink-0">
                   <Check className="w-2.5 h-2.5" /> Selected
                 </span>
+                {!isOpen && (
+                  <span className="text-[10px] font-medium text-slate-400 hover:text-white transition-colors ml-1 hidden sm:inline">
+                    (Click to change)
+                  </span>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -198,6 +213,9 @@ export default function MonthCalendarPicker({
                 onClick={(e) => {
                   e.stopPropagation();
                   onChange(todayStr);
+                  if (autoCloseOnSelect) {
+                    setIsOpen(false);
+                  }
                 }}
                 title="Quick select today's date"
                 className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-400/15 hover:bg-amber-400/25 text-amber-300 border border-amber-400/30 transition-all active:scale-95 cursor-pointer flex items-center gap-1 shrink-0 touch-manipulation"
@@ -240,7 +258,12 @@ export default function MonthCalendarPicker({
                 <button
                   key={d.dateStr}
                   type="button"
-                  onClick={() => onChange(d.dateStr)}
+                  onClick={() => {
+                    onChange(d.dateStr);
+                    if (autoCloseOnSelect) {
+                      setIsOpen(false);
+                    }
+                  }}
                   title={`Select ${d.dateStr}${d.isToday ? " (Today)" : ""}`}
                   className={`group relative text-center h-9 sm:h-10 rounded-lg border transition-all duration-100 cursor-pointer flex flex-col items-center justify-center select-none active:scale-90 touch-manipulation ${
                     d.isSelected
