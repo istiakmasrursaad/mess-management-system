@@ -56,6 +56,10 @@ export default function SpecificbillsTab({ props }: { props: any }) {
     return (data?.members || []).filter((m: any) => selectedMemberIds.has(m.member.id));
   }, [data?.members, selectedMemberIds]);
 
+  const totalSelectedUnits = React.useMemo(() => {
+    return selectedMembersList.reduce((sum: number, m: any) => sum + getCount(m.member.id), 0);
+  }, [selectedMembersList, memberCounts]);
+
   const parsedAmount = parseFloat(amount) || 0;
   const totalCalculated = React.useMemo(() => {
     return selectedMembersList.reduce((sum: number, m: any) => {
@@ -65,7 +69,7 @@ export default function SpecificbillsTab({ props }: { props: any }) {
   }, [selectedMembersList, parsedAmount, memberCounts]);
 
   const handleOpenConfirm = () => {
-    if (selectedMemberIds.size === 0) {
+    if (selectedMemberIds.size === 0 || totalSelectedUnits === 0) {
       toast.warning("Please select at least one member!");
       return;
     }
@@ -137,7 +141,7 @@ export default function SpecificbillsTab({ props }: { props: any }) {
                     </Label>
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
-                        {selectedMemberIds.size} Selected
+                        {totalSelectedUnits} Total {selectedMemberIds.size > 0 ? `(${selectedMemberIds.size} ${selectedMemberIds.size === 1 ? "Member" : "Members"})` : ""}
                       </span>
                       <button
                         type="button"
@@ -215,7 +219,10 @@ export default function SpecificbillsTab({ props }: { props: any }) {
                             <button
                               type="button"
                               className="h-6 w-6 rounded-md flex items-center justify-center bg-white/10 hover:bg-white/20 active:scale-90 text-white border border-white/20 transition-all cursor-pointer shadow-sm"
-                              onClick={() => setMemberCounts(p => ({ ...p, [m.member.id]: getCount(m.member.id) + 1 }))}
+                              onClick={() => {
+                                setMemberCounts(p => ({ ...p, [m.member.id]: getCount(m.member.id) + 1 }));
+                                setSelectedMemberIds(prev => new Set(prev).add(m.member.id));
+                              }}
                               title="Increase multiplier"
                             >
                               <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
@@ -264,10 +271,12 @@ export default function SpecificbillsTab({ props }: { props: any }) {
 
                 {/* Live Selection Summary */}
                 <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs">
-                  <span className="text-muted-foreground font-medium">Selected Members:</span>
+                  <span className="text-muted-foreground font-medium">Total Selected:</span>
                   <span className="font-bold text-primary flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5" />
-                    {selectedMemberIds.size} {selectedMemberIds.size === 1 ? "Member" : "Members"}
+                    <span className="text-sm font-extrabold">{totalSelectedUnits} Total</span>
+                    <span className="text-[11px] text-muted-foreground font-semibold">
+                      ({selectedMemberIds.size} {selectedMemberIds.size === 1 ? "Member" : "Members"})
+                    </span>
                   </span>
                 </div>
 
@@ -279,8 +288,8 @@ export default function SpecificbillsTab({ props }: { props: any }) {
                   className="w-full h-10 font-bold btn-glow text-sm gap-1.5 cursor-pointer"
                 >
                   <Users className="w-4 h-4" />
-                  {selectedMemberIds.size > 0
-                    ? `Review & Add Bill (${selectedMemberIds.size} Selected)`
+                  {totalSelectedUnits > 0
+                    ? `Review & Add Bill (${totalSelectedUnits} Total Selected)`
                     : "Add Bill to Selected Members"}
                 </Button>
               </form>
@@ -337,10 +346,12 @@ export default function SpecificbillsTab({ props }: { props: any }) {
             {/* Quick Summary Cards */}
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-0.5">
-                <div className="text-muted-foreground text-[11px]">Selected Members</div>
+                <div className="text-muted-foreground text-[11px]">Total Selected (Items)</div>
                 <div className="text-sm font-bold text-primary flex items-center gap-1.5">
-                  <Users className="w-4 h-4" />
-                  {selectedMemberIds.size} {selectedMemberIds.size === 1 ? "Member" : "Members"}
+                  <span className="font-extrabold">{totalSelectedUnits} Total</span>
+                  <span className="text-[11px] text-muted-foreground font-normal">
+                    ({selectedMemberIds.size} {selectedMemberIds.size === 1 ? "Member" : "Members"})
+                  </span>
                 </div>
               </div>
               <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-0.5">
@@ -362,7 +373,7 @@ export default function SpecificbillsTab({ props }: { props: any }) {
             {/* Selected Members List */}
             <div className="space-y-1.5">
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex justify-between">
-                <span>Selected Member List ({selectedMemberIds.size})</span>
+                <span>Selected Breakdown ({totalSelectedUnits} Items across {selectedMemberIds.size} Members)</span>
                 <span>Amount</span>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/5 divide-y divide-white/5 max-h-52 overflow-y-auto">
@@ -411,7 +422,7 @@ export default function SpecificbillsTab({ props }: { props: any }) {
               className="h-9 px-4 text-xs font-bold rounded-xl btn-glow gap-1.5"
             >
               <CheckCircle2 className="w-4 h-4" />
-              {isSubmitting ? "Adding..." : `Confirm & Add (${selectedMemberIds.size})`}
+              {isSubmitting ? "Adding..." : `Confirm & Add (${totalSelectedUnits} Total)`}
             </Button>
           </div>
         </DialogContent>
